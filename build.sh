@@ -121,6 +121,23 @@ css = "\n\n".join(Path(path).read_text(encoding="utf-8").strip() for path in sys
 js = Path(sys.argv[5]).read_text(encoding="utf-8").strip()
 text = left.read_text(encoding="utf-8")
 text = text.replace("<strong>MemoCraft</strong>", "<strong>MemoNetwork</strong>")
+old_brand = '''print "<div class='memo-brand'>\\n";
+print "<div class='memo-brand-icon'>M</div>\\n";
+print "<div class='memo-brand-copy'>\\n";
+print "<strong>MemoNetwork</strong>\\n";
+print "<span>Server Management</span>\\n";
+print "</div>\\n";
+print "</div>\\n";'''
+new_brand = '''print "<a class='memo-brand' href='/right.cgi' target='right' title='Terug naar dashboard' aria-label='Terug naar dashboard' style='text-decoration:none;color:inherit'>\\n";
+print "<div class='memo-brand-icon'>M</div>\\n";
+print "<div class='memo-brand-copy'>\\n";
+print "<strong>MemoNetwork</strong>\\n";
+print "<span>Server Management</span>\\n";
+print "</div>\\n";
+print "</a>\\n";'''
+if old_brand not in text:
+    raise SystemExit("FOUT: MemoNetwork-logoblok in left.cgi niet gevonden")
+text = text.replace(old_brand, new_brand, 1)
 start = "<!-- MEMOCRAFT-SIDEBAR-STYLE-START -->"
 end = "<!-- MEMOCRAFT-SIDEBAR-STYLE-END -->"
 block = (
