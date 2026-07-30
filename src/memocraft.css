@@ -300,4 +300,68 @@ body:has(.leftmenu) {
     color: #111827 !important;
 }
 
+/* MemoNetwork lower dashboard panels */
+body:not(:has(.leftmenu)) details:not(.memo-original-system) {
+    margin: 0 0 12px !important;
+    border: 1px solid #2b3b52 !important;
+    border-radius: 14px !important;
+    background: linear-gradient(145deg, #151f2d, #111923) !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, .18) !important;
+    overflow: hidden !important;
+}
+
+body:not(:has(.leftmenu)) details:not(.memo-original-system) > summary {
+    min-height: 56px !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 12px 52px 12px 58px !important;
+    background: linear-gradient(90deg, #1c2a3d, #192536) !important;
+    color: #f1f5f9 !important;
+    font-size: 14px !important;
+    font-weight: 750 !important;
+    letter-spacing: .01em !important;
+}
+
+body:not(:has(.leftmenu)) details:not(.memo-original-system) > summary::before {
+    content: "▦" !important;
+    position: absolute !important;
+    left: 15px !important;
+    top: 50% !important;
+    width: 30px !important;
+    height: 30px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transform: translateY(-50%) !important;
+    border-radius: 9px !important;
+    background: rgba(59, 130, 246, .15) !important;
+    color: #93c5fd !important;
+    font-size: 15px !important;
+}
+
+body:not(:has(.leftmenu)) details:not(.memo-original-system)[open] > summary {
+    background: linear-gradient(90deg, #22334a, #1d2b3e) !important;
+    border-bottom: 1px solid #34465f !important;
+}
+
+body:not(:has(.leftmenu)) details:not(.memo-original-system)[open] > :not(summary) {
+    box-sizing: border-box !important;
+    width: 100% !important;
+}
+
+body:not(:has(.leftmenu)) details:not(.memo-original-system) table {
+    width: 100% !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+}
+
+body:not(:has(.leftmenu)) details:not(.memo-original-system) td,
+body:not(:has(.leftmenu)) details:not(.memo-original-system) th {
+    padding: 10px 14px !important;
+}
+
+body:not(:has(.leftmenu)) details:not(.memo-original-system):hover {
+    border-color: #405877 !important;
+}
+
 /* MEMOCRAFT-CUSTOM-END */
