@@ -371,6 +371,26 @@ table[bgcolor] th {
   vertical-align: middle !important;
 }
 
+details table tbody td br,
+.ui_table tbody td br,
+table.sortable tbody td br,
+table.dataTable tbody td br {
+  display: block !important;
+  content: "" !important;
+  margin-top: 4px !important;
+}
+
+details table tbody td,
+.ui_table tbody td {
+  word-break: normal !important;
+  overflow-wrap: anywhere;
+}
+
+details table tbody td:not(:last-child),
+.ui_table tbody td:not(:last-child) {
+  padding-right: 22px !important;
+}
+
 details table tbody tr:hover,
 .ui_table tbody tr:hover,
 table.sortable tbody tr:hover,
