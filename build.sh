@@ -8,6 +8,7 @@ OUTPUT="$DIST_DIR/memocraft-theme.wbt.gz"
 LISTING="$DIST_DIR/package-files.txt"
 SOURCE_CSS="$ROOT_DIR/src/memocraft.css"
 FORMS_TABLES_CSS="$ROOT_DIR/src/forms-tables-20.css"
+CORE_UI_CSS="$ROOT_DIR/src/core-ui-50.css"
 LOGIN_CSS="$ROOT_DIR/src/login.css"
 LOGIN_JS="$ROOT_DIR/src/login-marker.js"
 SIDEBAR_CSS="$ROOT_DIR/src/sidebar.css"
@@ -32,6 +33,7 @@ for required in \
   "$THEME_DIR/theme.info" \
   "$SOURCE_CSS" \
   "$FORMS_TABLES_CSS" \
+  "$CORE_UI_CSS" \
   "$LOGIN_CSS" \
   "$LOGIN_JS" \
   "$SIDEBAR_CSS" \
@@ -50,7 +52,7 @@ done
 
 grep -q '^desc=' "$THEME_DIR/theme.info" || fail "theme.info bevat geen desc="
 
-python3 - "$TARGET_CSS" "$SOURCE_CSS" "$FORMS_TABLES_CSS" <<'PY'
+python3 - "$TARGET_CSS" "$SOURCE_CSS" "$FORMS_TABLES_CSS" "$CORE_UI_CSS" <<'PY'
 from pathlib import Path
 import sys
 
