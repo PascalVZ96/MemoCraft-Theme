@@ -1,0 +1,34 @@
+name: Build Webmin theme
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build theme package
+        run: bash build.sh
+
+      - name: Verify package contents
+        run: |
+          tar -tzf dist/memocraft-theme.wbt.gz | head -40
+          tar -tzf dist/memocraft-theme.wbt.gz | grep -q '^memocraft-theme/theme.info$'
+          tar -tzf dist/memocraft-theme.wbt.gz | grep -q '^memocraft-theme/theme.pl$'
+          tar -tzf dist/memocraft-theme.wbt.gz | grep -q '^memocraft-theme/index.cgi$'
+
+      - name: Upload Webmin theme package
+        uses: actions/upload-artifact@v4
+        with:
+          name: memocraft-theme
+          path: dist/memocraft-theme.wbt.gz
+          if-no-files-found: error
