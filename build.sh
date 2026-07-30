@@ -8,7 +8,9 @@ OUTPUT="$DIST_DIR/memocraft-theme.wbt.gz"
 LISTING="$DIST_DIR/package-files.txt"
 SOURCE_CSS="$ROOT_DIR/src/memocraft.css"
 SIDEBAR_CSS="$ROOT_DIR/src/sidebar.css"
+SIDEBAR_EXTRA_CSS="$ROOT_DIR/src/sidebar-31.css"
 DASHBOARD_CSS="$ROOT_DIR/src/dashboard-inline.css"
+DASHBOARD_EXTRA_CSS="$ROOT_DIR/src/dashboard-cards-20.css"
 DASHBOARD_HTML="$ROOT_DIR/src/dashboard-inline.html"
 TARGET_CSS="$THEME_DIR/unauthenticated/gray-theme.css"
 LEFT_CGI="$THEME_DIR/left.cgi"
@@ -24,7 +26,9 @@ for required in \
   "$THEME_DIR/theme.info" \
   "$SOURCE_CSS" \
   "$SIDEBAR_CSS" \
+  "$SIDEBAR_EXTRA_CSS" \
   "$DASHBOARD_CSS" \
+  "$DASHBOARD_EXTRA_CSS" \
   "$DASHBOARD_HTML" \
   "$TARGET_CSS" \
   "$LEFT_CGI" \
@@ -47,13 +51,16 @@ css = css[:min(positions)].rstrip() + "\n\n" if positions else css.rstrip() + "\
 target.write_text(css + source.read_text(encoding="utf-8").strip() + "\n", encoding="utf-8")
 PY
 
-python3 - "$LEFT_CGI" "$SIDEBAR_CSS" <<'PY'
+python3 - "$LEFT_CGI" "$SIDEBAR_CSS" "$SIDEBAR_EXTRA_CSS" <<'PY'
 from pathlib import Path
 import re
 import sys
 
 left = Path(sys.argv[1])
-css = Path(sys.argv[2]).read_text(encoding="utf-8").strip()
+css = "\n\n".join(
+    Path(path).read_text(encoding="utf-8").strip()
+    for path in sys.argv[2:]
+)
 text = left.read_text(encoding="utf-8")
 text = text.replace("<strong>MemoCraft</strong>", "<strong>MemoNetwork</strong>")
 
@@ -79,14 +86,17 @@ else:
 left.write_text(text, encoding="utf-8")
 PY
 
-python3 - "$RIGHT_CGI" "$DASHBOARD_CSS" "$DASHBOARD_HTML" <<'PY'
+python3 - "$RIGHT_CGI" "$DASHBOARD_CSS" "$DASHBOARD_EXTRA_CSS" "$DASHBOARD_HTML" <<'PY'
 from pathlib import Path
 import re
 import sys
 
 right = Path(sys.argv[1])
-css = Path(sys.argv[2]).read_text(encoding="utf-8").strip()
-html = Path(sys.argv[3]).read_text(encoding="utf-8").strip()
+css = "\n\n".join(
+    Path(path).read_text(encoding="utf-8").strip()
+    for path in sys.argv[2:4]
+)
+html = Path(sys.argv[4]).read_text(encoding="utf-8").strip()
 text = right.read_text(encoding="utf-8")
 
 start = "<!-- MEMOCRAFT-DASHBOARD-STYLE-START -->"
