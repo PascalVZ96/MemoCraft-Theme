@@ -16,3 +16,4 @@ applet_light_bg=ffffff
 noindex=1
 inframe=1
 framed=1
+headhtml=<link rel='stylesheet' type='text/css' href='/unauthenticated/memonetwork-login.css?v=3'>
