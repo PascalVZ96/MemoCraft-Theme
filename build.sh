@@ -54,6 +54,7 @@ left = Path(sys.argv[1])
 css = Path(sys.argv[2]).read_text(encoding="utf-8").strip()
 text = left.read_text(encoding="utf-8")
 text = text.replace("<strong>MemoCraft</strong>", "<strong>MemoNetwork</strong>")
+
 start = "<!-- MEMOCRAFT-SIDEBAR-STYLE-START -->"
 end = "<!-- MEMOCRAFT-SIDEBAR-STYLE-END -->"
 block = (
@@ -84,6 +85,7 @@ import sys
 right = Path(sys.argv[1])
 css = Path(sys.argv[2]).read_text(encoding="utf-8").strip()
 text = right.read_text(encoding="utf-8")
+
 start = "<!-- MEMOCRAFT-DASHBOARD-STYLE-START -->"
 end = "<!-- MEMOCRAFT-DASHBOARD-STYLE-END -->"
 html = r'''<div class="memo-dashboard-head">
@@ -91,21 +93,22 @@ html = r'''<div class="memo-dashboard-head">
   <div class="memo-dashboard-badge">Webmin 2.653</div>
 </div>
 <div class="memo-stat-grid" id="memo-stat-grid">
-  <div class="memo-stat-card">
-    <div class="memo-stat-top"><span class="memo-stat-icon">◫</span><span class="memo-stat-label">CPU</span></div>
-    <strong class="memo-stat-value" id="memo-cpu">--</strong><small class="memo-stat-hint">Actuele belasting</small>
-  </div>
-  <div class="memo-stat-card">
-    <div class="memo-stat-top"><span class="memo-stat-icon">◈</span><span class="memo-stat-label">Geheugen</span></div>
-    <strong class="memo-stat-value" id="memo-ram">--</strong><small class="memo-stat-hint" id="memo-ram-hint">Gebruikt geheugen</small>
-  </div>
-  <div class="memo-stat-card">
-    <div class="memo-stat-top"><span class="memo-stat-icon">▰</span><span class="memo-stat-label">Opslag</span></div>
-    <strong class="memo-stat-value" id="memo-disk">--</strong><small class="memo-stat-hint" id="memo-disk-hint">Lokale schijfruimte</small>
-  </div>
-  <div class="memo-stat-card">
-    <div class="memo-stat-top"><span class="memo-stat-icon">◷</span><span class="memo-stat-label">Uptime</span></div>
-    <strong class="memo-stat-value" id="memo-uptime">--</strong><small class="memo-stat-hint">Server online</small>
+  <div class="memo-stat-card"><div class="memo-stat-top"><span class="memo-stat-icon">◫</span><span class="memo-stat-label">CPU</span></div><strong class="memo-stat-value" id="memo-cpu">--</strong><small class="memo-stat-hint">Actuele belasting</small></div>
+  <div class="memo-stat-card"><div class="memo-stat-top"><span class="memo-stat-icon">◇</span><span class="memo-stat-label">Geheugen</span></div><strong class="memo-stat-value" id="memo-ram">--</strong><small class="memo-stat-hint" id="memo-ram-total">Totaal geheugen</small></div>
+  <div class="memo-stat-card"><div class="memo-stat-top"><span class="memo-stat-icon">▰</span><span class="memo-stat-label">Opslag</span></div><strong class="memo-stat-value" id="memo-disk">--</strong><small class="memo-stat-hint" id="memo-disk-total">Totale opslag</small></div>
+  <div class="memo-stat-card"><div class="memo-stat-top"><span class="memo-stat-icon">◷</span><span class="memo-stat-label">Uptime</span></div><strong class="memo-stat-value" id="memo-uptime">--</strong><small class="memo-stat-hint">Server online</small></div>
+</div>
+<div class="memo-system-panel" id="memo-system-panel">
+  <div class="memo-system-heading"><h2>Systeemoverzicht</h2><span>Live uit Webmin</span></div>
+  <div class="memo-info-grid">
+    <div class="memo-info-card"><span class="memo-info-label">Hostnaam</span><strong class="memo-info-value" id="memo-hostname">--</strong></div>
+    <div class="memo-info-card"><span class="memo-info-label">Besturingssysteem</span><strong class="memo-info-value" id="memo-os">--</strong></div>
+    <div class="memo-info-card"><span class="memo-info-label">Processor</span><strong class="memo-info-value" id="memo-processor">--</strong></div>
+    <div class="memo-info-card"><span class="memo-info-label">Kernel</span><strong class="memo-info-value" id="memo-kernel">--</strong></div>
+    <div class="memo-info-card"><span class="memo-info-label">Temperatuur</span><strong class="memo-info-value" id="memo-temp">--</strong></div>
+    <div class="memo-info-card"><span class="memo-info-label">Processen</span><strong class="memo-info-value" id="memo-processes">--</strong></div>
+    <div class="memo-info-card"><span class="memo-info-label">Systeemtijd</span><strong class="memo-info-value" id="memo-time">--</strong></div>
+    <div class="memo-info-card is-ok"><span class="memo-info-label">Pakketten</span><strong class="memo-info-value" id="memo-packages">--</strong></div>
   </div>
 </div>
 <script>
@@ -129,32 +132,57 @@ html = r'''<div class="memo-dashboard-head">
     var node = document.getElementById(id);
     if (node) node.textContent = value || fallback;
   }
-  function usedAndTotal(value) {
-    var matches = value.match(/([\d.,]+\s*(?:GiB|MiB|TiB|GB|MB|TB))/gi) || [];
-    return { used: matches[0] || value, total: matches[matches.length - 1] || '' };
+  function firstAmount(value) {
+    var match = clean(value).match(/[0-9.,]+\s*(?:GiB|MiB|TiB|GB|MB|TB)/i);
+    return match ? match[0] : clean(value);
   }
-  function shortUptime(value) {
-    var match = value.match(/(\d+\s*(?:days?|dagen?))/i);
-    if (match) return match[1].replace(/days?/i, 'dagen');
-    return value;
+  function totalAmount(value) {
+    var matches = clean(value).match(/[0-9.,]+\s*(?:GiB|MiB|TiB|GB|MB|TB)/ig);
+    return matches && matches.length ? matches[matches.length - 1] : '';
   }
-  function updateCards() {
+  function hideOriginalSystem() {
+    var summaries = Array.prototype.slice.call(document.querySelectorAll('summary'));
+    for (var i = 0; i < summaries.length; i++) {
+      var title = clean(summaries[i].textContent).toLowerCase();
+      if (title.indexOf('system information') !== -1 || title.indexOf('systeeminformatie') !== -1) {
+        var details = summaries[i].closest('details');
+        if (details) details.classList.add('memo-original-system');
+      }
+    }
+  }
+  function updateDashboard() {
     var cpu = findValue(['cpu usage', 'cpu-gebruik']);
-    var ram = usedAndTotal(findValue(['real memory', 'werkelijk geheugen']));
-    var disk = usedAndTotal(findValue(['local disk space', 'lokale schijfruimte']));
+    var ram = findValue(['real memory', 'werkelijk geheugen']);
+    var disk = findValue(['local disk space', 'lokale schijfruimte']);
     var uptime = findValue(['system uptime', 'systeem uptime']);
     var cpuPercent = cpu.match(/\d+%/);
+    var uptimeDays = uptime.match(/\d+\s*(?:days?|dagen?)/i);
+
     set('memo-cpu', cpuPercent ? cpuPercent[0] : cpu, 'Onbekend');
-    set('memo-ram', ram.used, 'Onbekend');
-    set('memo-ram-hint', ram.total ? ram.total + ' totaal' : 'Gebruikt geheugen', 'Gebruikt geheugen');
-    set('memo-disk', disk.used, 'Onbekend');
-    set('memo-disk-hint', disk.total ? disk.total + ' totaal' : 'Lokale schijfruimte', 'Lokale schijfruimte');
-    set('memo-uptime', shortUptime(uptime), 'Onbekend');
+    set('memo-ram', firstAmount(ram), 'Onbekend');
+    set('memo-ram-total', totalAmount(ram) ? totalAmount(ram) + ' totaal' : 'Totaal geheugen');
+    set('memo-disk', firstAmount(disk), 'Onbekend');
+    set('memo-disk-total', totalAmount(disk) ? totalAmount(disk) + ' totaal' : 'Totale opslag');
+    set('memo-uptime', uptimeDays ? uptimeDays[0].replace(/days?/i, 'dagen') : uptime, 'Onbekend');
+
+    set('memo-hostname', findValue(['system hostname', 'systeemhostnaam']), 'Onbekend');
+    set('memo-os', findValue(['operating system', 'besturingssysteem']), 'Onbekend');
+    set('memo-processor', findValue(['processor information', 'processorinformatie']), 'Onbekend');
+    set('memo-kernel', findValue(['kernel and cpu', 'kernel en cpu']), 'Onbekend');
+    set('memo-temp', findValue(['drive temperatures', 'schijftemperaturen']), 'Onbekend');
+    set('memo-processes', findValue(['running processes', 'actieve processen']), 'Onbekend');
+    set('memo-time', findValue(['time on system', 'tijd op systeem']), 'Onbekend');
+    set('memo-packages', findValue(['package updates', 'pakketupdates']), 'Onbekend');
+    hideOriginalSystem();
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', updateCards);
-  else updateCards();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', updateDashboard);
+  } else {
+    updateDashboard();
+  }
 })();
 </script>'''
+
 block = (
     "print <<'MEMOCRAFT_DASHBOARD_STYLE';\n"
     + start + "\n<style>\n" + css + "\n</style>\n"
@@ -177,12 +205,18 @@ PY
 
 rm -rf "$DIST_DIR"
 mkdir -p "$DIST_DIR"
+
 tar --create --gzip --file "$OUTPUT" --directory "$ROOT_DIR" \
   --owner=0 --group=0 --numeric-owner memocraft-theme
+
 gzip -t "$OUTPUT"
 tar -tzf "$OUTPUT" > "$LISTING"
 grep -Fxq 'memocraft-theme/theme.info' "$LISTING" || fail "Pakket mist theme.info"
-if grep -Eq '(^|/)\.\.?(/|$)' "$LISTING"; then fail "Pakket bevat een ongeldig pad"; fi
+
+if grep -Eq '(^|/)\.\.?(/|$)' "$LISTING"; then
+  fail "Pakket bevat een ongeldig pad"
+fi
+
 echo "Gereed: $OUTPUT"
 echo "Aantal bestanden: $(wc -l < "$LISTING")"
 echo "Eerste 30 onderdelen:"
