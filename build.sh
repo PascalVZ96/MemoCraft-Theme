@@ -88,7 +88,65 @@ text = right.read_text(encoding="utf-8")
 
 start = "<!-- MEMOCRAFT-DASHBOARD-STYLE-START -->"
 end = "<!-- MEMOCRAFT-DASHBOARD-STYLE-END -->"
-html = r'''<div class="memo-dashboard-head">
+html = r'''<style>
+.memo-reboot-alert {
+  display: none;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  margin: 0 0 16px;
+  padding: 18px 20px;
+  border: 1px solid #7c4a12;
+  border-left: 4px solid #f59e0b;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #241a0d 0%, #171c25 70%);
+  box-shadow: 0 12px 28px rgba(0,0,0,.22);
+}
+.memo-reboot-alert.is-visible { display: grid; }
+.memo-reboot-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(245,158,11,.14);
+  color: #fbbf24 !important;
+  font-size: 22px;
+}
+.memo-reboot-copy h2 {
+  margin: 0 0 5px;
+  color: #fff7ed !important;
+  font-size: 16px;
+}
+.memo-reboot-copy p {
+  margin: 0;
+  color: #fdba74 !important;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.memo-reboot-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.memo-reboot-actions input { margin: 0 !important; }
+.memo-reboot-actions input[value="Reboot Now"] {
+  background: #ea580c !important;
+  border-color: #fb923c !important;
+}
+.memo-reboot-actions input[value="Hide Alert"] {
+  background: #273449 !important;
+  border-color: #475569 !important;
+}
+.memo-original-reboot { display: none !important; }
+@media (max-width: 760px) {
+  .memo-reboot-alert { grid-template-columns: 42px minmax(0,1fr); }
+  .memo-reboot-actions { grid-column: 1 / -1; padding-left: 58px; }
+}
+</style>
+<div class="memo-dashboard-head">
   <div><h1 class="memo-dashboard-title">MemoNetwork Dashboard</h1><p class="memo-dashboard-subtitle">Serverstatus en systeeminformatie</p></div>
   <div class="memo-dashboard-badge">Webmin 2.653</div>
 </div>
@@ -110,6 +168,11 @@ html = r'''<div class="memo-dashboard-head">
     <div class="memo-info-card"><span class="memo-info-label">Systeemtijd</span><strong class="memo-info-value" id="memo-time">--</strong></div>
     <div class="memo-info-card is-ok"><span class="memo-info-label">Pakketten</span><strong class="memo-info-value" id="memo-packages">--</strong></div>
   </div>
+</div>
+<div class="memo-reboot-alert" id="memo-reboot-alert">
+  <div class="memo-reboot-icon">!</div>
+  <div class="memo-reboot-copy"><h2>Herstart vereist</h2><p>Er zijn systeemupdates geïnstalleerd. Herstart de server om alle wijzigingen volledig toe te passen.</p></div>
+  <div class="memo-reboot-actions" id="memo-reboot-actions"></div>
 </div>
 <script>
 (function () {
@@ -142,13 +205,31 @@ html = r'''<div class="memo-dashboard-head">
   }
   function hideOriginalSystem() {
     var summaries = Array.prototype.slice.call(document.querySelectorAll('summary'));
-    for (var i = 0; i < summaries.length; i++) {
-      var title = clean(summaries[i].textContent).toLowerCase();
+    summaries.forEach(function (summary) {
+      var title = clean(summary.textContent).toLowerCase();
       if (title.indexOf('system information') !== -1 || title.indexOf('systeeminformatie') !== -1) {
-        var details = summaries[i].closest('details');
+        var details = summary.closest('details');
         if (details) details.classList.add('memo-original-system');
       }
+    });
+  }
+  function replaceRebootNotice() {
+    var reboot = document.querySelector('input[value="Reboot Now"]');
+    var hide = document.querySelector('input[value="Hide Alert"]');
+    var alert = document.getElementById('memo-reboot-alert');
+    var actions = document.getElementById('memo-reboot-actions');
+    if (!reboot || !hide || !alert || !actions) return;
+
+    var source = reboot.closest('table') || reboot.closest('form') || reboot.parentElement;
+    var original = source;
+    while (original && original.parentElement && original.parentElement !== document.body) {
+      original = original.parentElement;
     }
+
+    actions.appendChild(reboot);
+    actions.appendChild(hide);
+    alert.classList.add('is-visible');
+    if (original && original !== alert) original.classList.add('memo-original-reboot');
   }
   function updateDashboard() {
     var cpu = findValue(['cpu usage', 'cpu-gebruik']);
@@ -164,7 +245,6 @@ html = r'''<div class="memo-dashboard-head">
     set('memo-disk', firstAmount(disk), 'Onbekend');
     set('memo-disk-total', totalAmount(disk) ? totalAmount(disk) + ' totaal' : 'Totale opslag');
     set('memo-uptime', uptimeDays ? uptimeDays[0].replace(/days?/i, 'dagen') : uptime, 'Onbekend');
-
     set('memo-hostname', findValue(['system hostname', 'systeemhostnaam']), 'Onbekend');
     set('memo-os', findValue(['operating system', 'besturingssysteem']), 'Onbekend');
     set('memo-processor', findValue(['processor information', 'processorinformatie']), 'Onbekend');
@@ -174,12 +254,10 @@ html = r'''<div class="memo-dashboard-head">
     set('memo-time', findValue(['time on system', 'tijd op systeem']), 'Onbekend');
     set('memo-packages', findValue(['package updates', 'pakketupdates']), 'Onbekend');
     hideOriginalSystem();
+    replaceRebootNotice();
   }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', updateDashboard);
-  } else {
-    updateDashboard();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', updateDashboard);
+  else updateDashboard();
 })();
 </script>'''
 
