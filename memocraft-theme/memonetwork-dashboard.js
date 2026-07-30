@@ -1,6 +1,8 @@
 (function () {
   'use strict';
 
+  var refreshBusy = false;
+
   function injectStyles() {
     if (document.getElementById('memo-live-meter-styles')) return;
     var style = document.createElement('style');
@@ -12,7 +14,10 @@
       '.memo-meter-cpu span{background:linear-gradient(90deg,#38bdf8,#3b82f6);box-shadow:0 0 12px rgba(56,189,248,.4);}',
       '.memo-meter-ram span{background:linear-gradient(90deg,#8b5cf6,#c084fc);box-shadow:0 0 12px rgba(139,92,246,.38);}',
       '.memo-meter-disk span{background:linear-gradient(90deg,#22c55e,#2dd4bf);box-shadow:0 0 12px rgba(34,197,94,.35);}',
-      '.memo-online-dot{display:inline-block;width:8px;height:8px;margin-right:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.12),0 0 10px rgba(34,197,94,.65);vertical-align:middle;}',
+      '.memo-online-dot,.memo-live-dot{display:inline-block;width:8px;height:8px;margin-right:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.12),0 0 10px rgba(34,197,94,.65);vertical-align:middle;}',
+      '.memo-live-dot{width:7px;height:7px;margin-right:6px;animation:memoPulse 1.8s ease-in-out infinite;}',
+      '.memo-live-label{display:inline-flex;align-items:center;margin-left:10px;color:#86efac!important;font-size:11px;font-weight:700;}',
+      '@keyframes memoPulse{0%,100%{opacity:.45}50%{opacity:1}}',
       '.memo-stat-card:nth-child(4){border-color:rgba(34,197,94,.28)!important;}',
       '.memo-stat-card:nth-child(4) .memo-stat-hint{color:#86efac!important;}',
       '@media(max-width:760px){.memo-meter{left:16px;right:16px;}}'
@@ -86,29 +91,33 @@
     hint.prepend(dot);
   }
 
+  function ensureLiveLabel() {
+    var heading = document.querySelector('.memo-system-heading span');
+    if (!heading || heading.querySelector('.memo-live-label')) return;
+    var live = document.createElement('span');
+    live.className = 'memo-live-label';
+    live.innerHTML = '<span class="memo-live-dot"></span>Live · 3 sec';
+    heading.appendChild(live);
+  }
+
   function updateMeters() {
     var cards = document.querySelectorAll('.memo-stat-card');
     if (cards.length < 4) return;
-
     var cpuText = clean(document.getElementById('memo-cpu') && document.getElementById('memo-cpu').textContent);
     var cpuMatch = cpuText.match(/([0-9]+)%/);
     var cpuValue = cpuMatch ? Number(cpuMatch[1]) : 0;
     ensureMeter(cards[0], 'cpu').style.width = cpuValue + '%';
-
     var ramUsed = toBytes(document.getElementById('memo-ram') && document.getElementById('memo-ram').textContent);
     var ramTotal = toBytes(document.getElementById('memo-ram-total') && document.getElementById('memo-ram-total').textContent);
     ensureMeter(cards[1], 'ram').style.width = percent(ramUsed, ramTotal) + '%';
-
     var diskUsed = toBytes(document.getElementById('memo-disk') && document.getElementById('memo-disk').textContent);
     var diskTotal = toBytes(document.getElementById('memo-disk-total') && document.getElementById('memo-disk-total').textContent);
     ensureMeter(cards[2], 'disk').style.width = percent(diskUsed, diskTotal) + '%';
-
     ensureStatus(cards[3]);
   }
 
   function hideOriginalSystem() {
-    var summaries = Array.prototype.slice.call(document.querySelectorAll('summary'));
-    summaries.forEach(function (summary) {
+    Array.prototype.slice.call(document.querySelectorAll('summary')).forEach(function (summary) {
       var title = clean(summary.textContent).toLowerCase();
       if (title.indexOf('system information') !== -1 || title.indexOf('systeeminformatie') !== -1) {
         var details = summary.closest('details');
@@ -123,13 +132,9 @@
     var alert = document.getElementById('memo-reboot-alert');
     var actions = document.getElementById('memo-reboot-actions');
     if (!reboot || !hide || !alert || !actions || actions.contains(reboot)) return;
-
     var source = reboot.closest('table') || reboot.closest('form') || reboot.parentElement;
     var original = source;
-    while (original && original.parentElement && original.parentElement !== document.body) {
-      original = original.parentElement;
-    }
-
+    while (original && original.parentElement && original.parentElement !== document.body) original = original.parentElement;
     actions.appendChild(reboot);
     actions.appendChild(hide);
     alert.classList.add('is-visible');
@@ -143,7 +148,6 @@
     var uptime = findValue(root, ['system uptime', 'systeem uptime']);
     var cpuPercent = cpu.match(/\d+%/);
     var uptimeDays = uptime.match(/\d+\s*(?:days?|dagen?)/i);
-
     setText('memo-cpu', cpuPercent ? cpuPercent[0] : cpu);
     setText('memo-ram', firstAmount(ram));
     setText('memo-ram-total', totalAmount(ram) ? totalAmount(ram) + ' totaal' : 'Totaal geheugen');
@@ -162,19 +166,21 @@
   }
 
   function refreshStats() {
+    if (refreshBusy || document.hidden) return;
+    refreshBusy = true;
     fetch(window.location.href, { credentials: 'same-origin', cache: 'no-store' })
       .then(function (response) { return response.text(); })
       .then(function (html) {
         var parsed = new DOMParser().parseFromString(html, 'text/html');
         applyValues(parsed);
       })
-      .catch(function () {
-        // Laat de laatst bekende waarden staan als verversen tijdelijk mislukt.
-      });
+      .catch(function () {})
+      .then(function () { refreshBusy = false; });
   }
 
   function start() {
     injectStyles();
+    ensureLiveLabel();
     applyValues(document);
     hideOriginalSystem();
     replaceRebootNotice();
@@ -182,8 +188,9 @@
       applyValues(document);
       hideOriginalSystem();
       replaceRebootNotice();
-    }, 150);
-    window.setInterval(refreshStats, 15000);
+      refreshStats();
+    }, 500);
+    window.setInterval(refreshStats, 3000);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
