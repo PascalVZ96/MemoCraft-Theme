@@ -8,6 +8,7 @@ OUTPUT="$DIST_DIR/memocraft-theme.wbt.gz"
 LISTING="$DIST_DIR/package-files.txt"
 SOURCE_CSS="$ROOT_DIR/src/memocraft.css"
 LOGIN_CSS="$ROOT_DIR/src/login.css"
+LOGIN_JS="$ROOT_DIR/src/login-marker.js"
 SIDEBAR_CSS="$ROOT_DIR/src/sidebar.css"
 SIDEBAR_EXTRA_CSS="$ROOT_DIR/src/sidebar-31.css"
 SIDEBAR_PHASE_CSS="$ROOT_DIR/src/sidebar-32.css"
@@ -16,6 +17,7 @@ DASHBOARD_CSS="$ROOT_DIR/src/dashboard-inline.css"
 DASHBOARD_EXTRA_CSS="$ROOT_DIR/src/dashboard-cards-20.css"
 DASHBOARD_HTML="$ROOT_DIR/src/dashboard-inline.html"
 TARGET_CSS="$THEME_DIR/unauthenticated/gray-theme.css"
+THEME_PL="$THEME_DIR/theme.pl"
 LEFT_CGI="$THEME_DIR/left.cgi"
 RIGHT_CGI="$THEME_DIR/right.cgi"
 
@@ -29,6 +31,7 @@ for required in \
   "$THEME_DIR/theme.info" \
   "$SOURCE_CSS" \
   "$LOGIN_CSS" \
+  "$LOGIN_JS" \
   "$SIDEBAR_CSS" \
   "$SIDEBAR_EXTRA_CSS" \
   "$SIDEBAR_PHASE_CSS" \
@@ -37,6 +40,7 @@ for required in \
   "$DASHBOARD_EXTRA_CSS" \
   "$DASHBOARD_HTML" \
   "$TARGET_CSS" \
+  "$THEME_PL" \
   "$LEFT_CGI" \
   "$RIGHT_CGI"; do
   [[ -e "$required" ]] || fail "Ontbreekt: $required"
@@ -44,7 +48,6 @@ done
 
 grep -q '^desc=' "$THEME_DIR/theme.info" || fail "theme.info bevat geen desc="
 
-# Algemene MemoNetwork-stijl in de hoofdstylesheet plaatsen.
 python3 - "$TARGET_CSS" "$SOURCE_CSS" <<'PY'
 from pathlib import Path
 import sys
@@ -58,8 +61,6 @@ css = css[:min(positions)].rstrip() + "\n\n" if positions else css.rstrip() + "\
 target.write_text(css + source.read_text(encoding="utf-8").strip() + "\n", encoding="utf-8")
 PY
 
-# Webmin kan voor de loginpagina verschillende unauthenticated stylesheets laden.
-# Voeg de loginstijl daarom idempotent toe aan iedere CSS-file in die map.
 python3 - "$THEME_DIR/unauthenticated" "$LOGIN_CSS" <<'PY'
 from pathlib import Path
 import sys
@@ -69,18 +70,40 @@ login_css = Path(sys.argv[2]).read_text(encoding="utf-8").strip()
 start = "/* MEMONETWORK-LOGIN-START */"
 end = "/* MEMONETWORK-LOGIN-END */"
 block = f"{start}\n{login_css}\n{end}\n"
-
 files = sorted(folder.rglob("*.css"))
 if not files:
     raise SystemExit("FOUT: geen unauthenticated CSS-bestanden gevonden")
-
 for target in files:
     text = target.read_text(encoding="utf-8")
     if start in text:
         text = text.split(start, 1)[0].rstrip() + "\n\n"
     target.write_text(text + block, encoding="utf-8")
-
 print(f"Loginstijl toegevoegd aan {len(files)} unauthenticated stylesheets")
+PY
+
+python3 - "$THEME_PL" "$LOGIN_JS" <<'PY'
+from pathlib import Path
+import re
+import sys
+
+theme = Path(sys.argv[1])
+js = Path(sys.argv[2]).read_text(encoding="utf-8").strip()
+text = theme.read_text(encoding="utf-8")
+start = "# MEMONETWORK-LOGIN-MARKER-START"
+end = "# MEMONETWORK-LOGIN-MARKER-END"
+perl_block = (
+    f"\t{start}\n"
+    "\tprint <<'MEMONETWORK_LOGIN_MARKER';\n"
+    "<script>\n" + js + "\n</script>\n"
+    "MEMONETWORK_LOGIN_MARKER\n"
+    f"\t{end}\n"
+)
+text = re.sub(r"\t# MEMONETWORK-LOGIN-MARKER-START.*?\t# MEMONETWORK-LOGIN-MARKER-END\n", "", text, flags=re.S)
+needle = "if ($script_name =~ /session_login.cgi/) {\n"
+if needle not in text:
+    raise SystemExit("FOUT: loginblok in theme.pl niet gevonden")
+text = text.replace(needle, needle + perl_block, 1)
+theme.write_text(text, encoding="utf-8")
 PY
 
 python3 - "$LEFT_CGI" "$SIDEBAR_CSS" "$SIDEBAR_EXTRA_CSS" "$SIDEBAR_PHASE_CSS" "$SIDEBAR_JS" <<'PY'
@@ -89,27 +112,17 @@ import re
 import sys
 
 left = Path(sys.argv[1])
-css = "\n\n".join(
-    Path(path).read_text(encoding="utf-8").strip()
-    for path in sys.argv[2:5]
-)
+css = "\n\n".join(Path(path).read_text(encoding="utf-8").strip() for path in sys.argv[2:5])
 js = Path(sys.argv[5]).read_text(encoding="utf-8").strip()
 text = left.read_text(encoding="utf-8")
 text = text.replace("<strong>MemoCraft</strong>", "<strong>MemoNetwork</strong>")
-
 start = "<!-- MEMOCRAFT-SIDEBAR-STYLE-START -->"
 end = "<!-- MEMOCRAFT-SIDEBAR-STYLE-END -->"
 block = (
-    "print <<'MEMOCRAFT_SIDEBAR_STYLE';\n"
-    + start + "\n<style>\n" + css + "\n</style>\n"
-    + "<script>\n" + js + "\n</script>\n"
-    + end + "\nMEMOCRAFT_SIDEBAR_STYLE\n"
+    "print <<'MEMOCRAFT_SIDEBAR_STYLE';\n" + start + "\n<style>\n" + css + "\n</style>\n"
+    + "<script>\n" + js + "\n</script>\n" + end + "\nMEMOCRAFT_SIDEBAR_STYLE\n"
 )
-pattern = re.compile(
-    r"print <<'MEMOCRAFT_SIDEBAR_STYLE';\n" + re.escape(start)
-    + r".*?" + re.escape(end) + r"\nMEMOCRAFT_SIDEBAR_STYLE\n",
-    re.S,
-)
+pattern = re.compile(r"print <<'MEMOCRAFT_SIDEBAR_STYLE';\n" + re.escape(start) + r".*?" + re.escape(end) + r"\nMEMOCRAFT_SIDEBAR_STYLE\n", re.S)
 if pattern.search(text):
     text = pattern.sub(lambda _m: block, text, count=1)
 else:
@@ -126,25 +139,16 @@ import re
 import sys
 
 right = Path(sys.argv[1])
-css = "\n\n".join(
-    Path(path).read_text(encoding="utf-8").strip()
-    for path in sys.argv[2:4]
-)
+css = "\n\n".join(Path(path).read_text(encoding="utf-8").strip() for path in sys.argv[2:4])
 html = Path(sys.argv[4]).read_text(encoding="utf-8").strip()
 text = right.read_text(encoding="utf-8")
-
 start = "<!-- MEMOCRAFT-DASHBOARD-STYLE-START -->"
 end = "<!-- MEMOCRAFT-DASHBOARD-STYLE-END -->"
 block = (
-    "print <<'MEMOCRAFT_DASHBOARD_STYLE';\n"
-    + start + "\n<style>\n" + css + "\n</style>\n"
+    "print <<'MEMOCRAFT_DASHBOARD_STYLE';\n" + start + "\n<style>\n" + css + "\n</style>\n"
     + html + "\n" + end + "\nMEMOCRAFT_DASHBOARD_STYLE\n"
 )
-pattern = re.compile(
-    r"print <<'MEMOCRAFT_DASHBOARD_STYLE';\n" + re.escape(start)
-    + r".*?" + re.escape(end) + r"\nMEMOCRAFT_DASHBOARD_STYLE\n",
-    re.S,
-)
+pattern = re.compile(r"print <<'MEMOCRAFT_DASHBOARD_STYLE';\n" + re.escape(start) + r".*?" + re.escape(end) + r"\nMEMOCRAFT_DASHBOARD_STYLE\n", re.S)
 if pattern.search(text):
     text = pattern.sub(lambda _m: block, text, count=1)
 else:
@@ -157,14 +161,10 @@ PY
 
 rm -rf "$DIST_DIR"
 mkdir -p "$DIST_DIR"
-
-tar --create --gzip --file "$OUTPUT" --directory "$ROOT_DIR" \
-  --owner=0 --group=0 --numeric-owner memocraft-theme
-
+tar --create --gzip --file "$OUTPUT" --directory="$ROOT_DIR" --owner=0 --group=0 --numeric-owner memocraft-theme
 gzip -t "$OUTPUT"
 tar -tzf "$OUTPUT" > "$LISTING"
 grep -Fxq 'memocraft-theme/theme.info' "$LISTING" || fail "Pakket mist theme.info"
-
 if grep -Eq '(^|/)\.\.?(/|$)' "$LISTING"; then
   fail "Pakket bevat een ongeldig pad"
 fi
