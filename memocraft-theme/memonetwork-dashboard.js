@@ -1,6 +1,25 @@
 (function () {
   'use strict';
 
+  function injectStyles() {
+    if (document.getElementById('memo-live-meter-styles')) return;
+    var style = document.createElement('style');
+    style.id = 'memo-live-meter-styles';
+    style.textContent = [
+      '.memo-stat-card{padding-bottom:28px!important;}',
+      '.memo-meter{position:absolute;left:18px;right:18px;bottom:13px;height:6px;border-radius:999px;background:#0b1220;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(148,163,184,.12);}',
+      '.memo-meter span{display:block;width:0;height:100%;border-radius:inherit;transition:width .55s ease;}',
+      '.memo-meter-cpu span{background:linear-gradient(90deg,#38bdf8,#3b82f6);box-shadow:0 0 12px rgba(56,189,248,.4);}',
+      '.memo-meter-ram span{background:linear-gradient(90deg,#8b5cf6,#c084fc);box-shadow:0 0 12px rgba(139,92,246,.38);}',
+      '.memo-meter-disk span{background:linear-gradient(90deg,#22c55e,#2dd4bf);box-shadow:0 0 12px rgba(34,197,94,.35);}',
+      '.memo-online-dot{display:inline-block;width:8px;height:8px;margin-right:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.12),0 0 10px rgba(34,197,94,.65);vertical-align:middle;}',
+      '.memo-stat-card:nth-child(4){border-color:rgba(34,197,94,.28)!important;}',
+      '.memo-stat-card:nth-child(4) .memo-stat-hint{color:#86efac!important;}',
+      '@media(max-width:760px){.memo-meter{left:16px;right:16px;}}'
+    ].join('');
+    document.head.appendChild(style);
+  }
+
   function clean(value) {
     return (value || '').replace(/\s+/g, ' ').trim();
   }
@@ -155,6 +174,7 @@
   }
 
   function start() {
+    injectStyles();
     applyValues(document);
     hideOriginalSystem();
     replaceRebootNotice();
