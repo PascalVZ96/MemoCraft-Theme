@@ -7,6 +7,40 @@
     background-size: 176px auto !important;
 }
 
+/* The brand is an anchor, so override the generic sidebar link rules. */
+.leftmenu a.memo-brand,
+.leftmenu a.memo-brand:visited,
+.leftmenu a.memo-brand:hover,
+.leftmenu a.memo-brand:focus {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 20 !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: 132px !important;
+    min-height: 132px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    border-bottom: 1px solid var(--memo-border) !important;
+    background-color: var(--memo-surface) !important;
+    background-image: url("https://memocraft.nl/images/MemoNetworkLogo.png") !important;
+    background-repeat: no-repeat !important;
+    background-position: center 54% !important;
+    background-size: 176px auto !important;
+    color: inherit !important;
+    text-decoration: none !important;
+    transform: none !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .20) !important;
+}
+
+.leftmenu a.memo-brand:hover {
+    background-color: #132036 !important;
+    filter: brightness(1.05) !important;
+}
+
 .leftmenu .linkwithicon.memo-active-row,
 .leftmenu .linkwithicon:has(> .aftericon a.memo-active),
 .leftmenu .linkwithicon:has(a.memo-active) {
