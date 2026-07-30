@@ -10,17 +10,16 @@
     style.textContent = [
       '.memo-stat-card{padding-bottom:28px!important;}',
       '.memo-meter{position:absolute;left:18px;right:18px;bottom:13px;height:6px;border-radius:999px;background:#0b1220;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(148,163,184,.12);}',
-      '.memo-meter span{display:block;width:0;height:100%;border-radius:inherit;transition:width .55s ease;}',
-      '.memo-meter-cpu span{background:linear-gradient(90deg,#38bdf8,#3b82f6);box-shadow:0 0 12px rgba(56,189,248,.4);}',
-      '.memo-meter-ram span{background:linear-gradient(90deg,#8b5cf6,#c084fc);box-shadow:0 0 12px rgba(139,92,246,.38);}',
-      '.memo-meter-disk span{background:linear-gradient(90deg,#22c55e,#2dd4bf);box-shadow:0 0 12px rgba(34,197,94,.35);}',
+      '.memo-meter span{display:block;width:0;height:100%;border-radius:inherit;transition:width .4s ease;}',
+      '.memo-meter-cpu span{background:linear-gradient(90deg,#38bdf8,#3b82f6);}',
+      '.memo-meter-ram span{background:linear-gradient(90deg,#8b5cf6,#c084fc);}',
+      '.memo-meter-disk span{background:linear-gradient(90deg,#22c55e,#2dd4bf);}',
       '.memo-online-dot,.memo-live-dot{display:inline-block;width:8px;height:8px;margin-right:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.12),0 0 10px rgba(34,197,94,.65);vertical-align:middle;}',
-      '.memo-live-dot{width:7px;height:7px;margin-right:6px;animation:memoPulse 1.8s ease-in-out infinite;}',
+      '.memo-live-dot{width:7px;height:7px;margin-right:6px;animation:memoPulse 1.4s ease-in-out infinite;}',
       '.memo-live-label{display:inline-flex;align-items:center;margin-left:10px;color:#86efac!important;font-size:11px;font-weight:700;}',
-      '@keyframes memoPulse{0%,100%{opacity:.45}50%{opacity:1}}',
+      '@keyframes memoPulse{0%,100%{opacity:.4}50%{opacity:1}}',
       '.memo-stat-card:nth-child(4){border-color:rgba(34,197,94,.28)!important;}',
-      '.memo-stat-card:nth-child(4) .memo-stat-hint{color:#86efac!important;}',
-      '@media(max-width:760px){.memo-meter{left:16px;right:16px;}}'
+      '.memo-stat-card:nth-child(4) .memo-stat-hint{color:#86efac!important;}'
     ].join('');
     document.head.appendChild(style);
   }
@@ -62,14 +61,12 @@
     var match = clean(amount).match(/([0-9.,]+)\s*(MiB|GiB|TiB|MB|GB|TB)/i);
     if (!match) return 0;
     var value = parseFloat(match[1].replace(',', '.')) || 0;
-    var unit = match[2].toUpperCase();
     var powers = { MIB: 2, GIB: 3, TIB: 4, MB: 2, GB: 3, TB: 4 };
-    return value * Math.pow(1024, powers[unit] || 0);
+    return value * Math.pow(1024, powers[match[2].toUpperCase()] || 0);
   }
 
   function percent(used, total) {
-    if (!total) return 0;
-    return Math.max(0, Math.min(100, Math.round((used / total) * 100)));
+    return total ? Math.max(0, Math.min(100, Math.round((used / total) * 100))) : 0;
   }
 
   function ensureMeter(card, kind) {
@@ -83,70 +80,33 @@
     return meter.querySelector('span');
   }
 
-  function ensureStatus(card) {
-    var hint = card.querySelector('.memo-stat-hint');
-    if (!hint || hint.querySelector('.memo-online-dot')) return;
-    var dot = document.createElement('span');
-    dot.className = 'memo-online-dot';
-    hint.prepend(dot);
+  function updateMeters() {
+    var cards = document.querySelectorAll('.memo-stat-card');
+    if (cards.length < 4) return;
+    var cpu = parseFloat(clean(document.getElementById('memo-cpu').textContent)) || 0;
+    ensureMeter(cards[0], 'cpu').style.width = Math.max(0, Math.min(100, cpu)) + '%';
+    var ramUsed = toBytes(document.getElementById('memo-ram').textContent);
+    var ramTotal = toBytes(document.getElementById('memo-ram-total').textContent);
+    ensureMeter(cards[1], 'ram').style.width = percent(ramUsed, ramTotal) + '%';
+    var diskUsed = toBytes(document.getElementById('memo-disk').textContent);
+    var diskTotal = toBytes(document.getElementById('memo-disk-total').textContent);
+    ensureMeter(cards[2], 'disk').style.width = percent(diskUsed, diskTotal) + '%';
+    var hint = cards[3].querySelector('.memo-stat-hint');
+    if (hint && !hint.querySelector('.memo-online-dot')) hint.insertAdjacentHTML('afterbegin', '<span class="memo-online-dot"></span>');
   }
 
   function ensureLiveLabel() {
     var heading = document.querySelector('.memo-system-heading span');
     if (!heading || heading.querySelector('.memo-live-label')) return;
-    var live = document.createElement('span');
-    live.className = 'memo-live-label';
-    live.innerHTML = '<span class="memo-live-dot"></span>Live · 3 sec';
-    heading.appendChild(live);
+    heading.insertAdjacentHTML('beforeend', '<span class="memo-live-label"><span class="memo-live-dot"></span>Live · 2 sec</span>');
   }
 
-  function updateMeters() {
-    var cards = document.querySelectorAll('.memo-stat-card');
-    if (cards.length < 4) return;
-    var cpuText = clean(document.getElementById('memo-cpu') && document.getElementById('memo-cpu').textContent);
-    var cpuMatch = cpuText.match(/([0-9]+)%/);
-    var cpuValue = cpuMatch ? Number(cpuMatch[1]) : 0;
-    ensureMeter(cards[0], 'cpu').style.width = cpuValue + '%';
-    var ramUsed = toBytes(document.getElementById('memo-ram') && document.getElementById('memo-ram').textContent);
-    var ramTotal = toBytes(document.getElementById('memo-ram-total') && document.getElementById('memo-ram-total').textContent);
-    ensureMeter(cards[1], 'ram').style.width = percent(ramUsed, ramTotal) + '%';
-    var diskUsed = toBytes(document.getElementById('memo-disk') && document.getElementById('memo-disk').textContent);
-    var diskTotal = toBytes(document.getElementById('memo-disk-total') && document.getElementById('memo-disk-total').textContent);
-    ensureMeter(cards[2], 'disk').style.width = percent(diskUsed, diskTotal) + '%';
-    ensureStatus(cards[3]);
-  }
-
-  function hideOriginalSystem() {
-    Array.prototype.slice.call(document.querySelectorAll('summary')).forEach(function (summary) {
-      var title = clean(summary.textContent).toLowerCase();
-      if (title.indexOf('system information') !== -1 || title.indexOf('systeeminformatie') !== -1) {
-        var details = summary.closest('details');
-        if (details) details.classList.add('memo-original-system');
-      }
-    });
-  }
-
-  function replaceRebootNotice() {
-    var reboot = document.querySelector('input[value="Reboot Now"]');
-    var hide = document.querySelector('input[value="Hide Alert"]');
-    var alert = document.getElementById('memo-reboot-alert');
-    var actions = document.getElementById('memo-reboot-actions');
-    if (!reboot || !hide || !alert || !actions || actions.contains(reboot)) return;
-    var source = reboot.closest('table') || reboot.closest('form') || reboot.parentElement;
-    var original = source;
-    while (original && original.parentElement && original.parentElement !== document.body) original = original.parentElement;
-    actions.appendChild(reboot);
-    actions.appendChild(hide);
-    alert.classList.add('is-visible');
-    if (original && original !== alert) original.classList.add('memo-original-reboot');
-  }
-
-  function applyValues(root) {
+  function applyInitialValues(root) {
     var cpu = findValue(root, ['cpu usage', 'cpu-gebruik']);
     var ram = findValue(root, ['real memory', 'werkelijk geheugen']);
     var disk = findValue(root, ['local disk space', 'lokale schijfruimte']);
     var uptime = findValue(root, ['system uptime', 'systeem uptime']);
-    var cpuPercent = cpu.match(/\d+%/);
+    var cpuPercent = cpu.match(/\d+(?:[.,]\d+)?%/);
     var uptimeDays = uptime.match(/\d+\s*(?:days?|dagen?)/i);
     setText('memo-cpu', cpuPercent ? cpuPercent[0] : cpu);
     setText('memo-ram', firstAmount(ram));
@@ -165,32 +125,59 @@
     updateMeters();
   }
 
-  function refreshStats() {
+  function refreshLiveStats() {
     if (refreshBusy || document.hidden) return;
     refreshBusy = true;
-    fetch(window.location.href, { credentials: 'same-origin', cache: 'no-store' })
-      .then(function (response) { return response.text(); })
-      .then(function (html) {
-        var parsed = new DOMParser().parseFromString(html, 'text/html');
-        applyValues(parsed);
+    fetch('/memocraft-theme/live-stats.cgi?_=' + Date.now(), {
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: { 'Accept': 'application/json' }
+    })
+      .then(function (response) {
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        return response.json();
+      })
+      .then(function (data) {
+        setText('memo-cpu', Number(data.cpu_percent).toFixed(1).replace('.0', '') + '%');
+        setText('memo-ram', Number(data.ram_used_gib).toFixed(2) + ' GiB');
+        setText('memo-ram-total', Number(data.ram_total_gib).toFixed(2) + ' GiB totaal');
+        updateMeters();
       })
       .catch(function () {})
       .then(function () { refreshBusy = false; });
   }
 
+  function hideOriginalSystem() {
+    Array.prototype.slice.call(document.querySelectorAll('summary')).forEach(function (summary) {
+      var title = clean(summary.textContent).toLowerCase();
+      if (title.indexOf('system information') !== -1 || title.indexOf('systeeminformatie') !== -1) {
+        var details = summary.closest('details');
+        if (details) details.classList.add('memo-original-system');
+      }
+    });
+  }
+
+  function replaceRebootNotice() {
+    var reboot = document.querySelector('input[value="Reboot Now"]');
+    var hide = document.querySelector('input[value="Hide Alert"]');
+    var alert = document.getElementById('memo-reboot-alert');
+    var actions = document.getElementById('memo-reboot-actions');
+    if (!reboot || !hide || !alert || !actions || actions.contains(reboot)) return;
+    var original = reboot.closest('table') || reboot.closest('form') || reboot.parentElement;
+    actions.appendChild(reboot);
+    actions.appendChild(hide);
+    alert.classList.add('is-visible');
+    if (original && original !== alert) original.classList.add('memo-original-reboot');
+  }
+
   function start() {
     injectStyles();
     ensureLiveLabel();
-    applyValues(document);
+    applyInitialValues(document);
     hideOriginalSystem();
     replaceRebootNotice();
-    window.setTimeout(function () {
-      applyValues(document);
-      hideOriginalSystem();
-      replaceRebootNotice();
-      refreshStats();
-    }, 500);
-    window.setInterval(refreshStats, 3000);
+    refreshLiveStats();
+    window.setInterval(refreshLiveStats, 2000);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
