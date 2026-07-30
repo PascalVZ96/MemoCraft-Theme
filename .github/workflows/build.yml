@@ -21,10 +21,11 @@ jobs:
 
       - name: Verify package contents
         run: |
-          tar -tzf dist/memocraft-theme.wbt.gz | head -40
-          tar -tzf dist/memocraft-theme.wbt.gz | grep -q '^memocraft-theme/theme.info$'
-          tar -tzf dist/memocraft-theme.wbt.gz | grep -q '^memocraft-theme/theme.pl$'
-          tar -tzf dist/memocraft-theme.wbt.gz | grep -q '^memocraft-theme/index.cgi$'
+          tar -tzf dist/memocraft-theme.wbt.gz > dist/workflow-package-files.txt
+          head -40 dist/workflow-package-files.txt
+          grep -Fxq 'memocraft-theme/theme.info' dist/workflow-package-files.txt
+          grep -Fxq 'memocraft-theme/theme.pl' dist/workflow-package-files.txt
+          grep -Fxq 'memocraft-theme/index.cgi' dist/workflow-package-files.txt
 
       - name: Upload Webmin theme package
         uses: actions/upload-artifact@v4
