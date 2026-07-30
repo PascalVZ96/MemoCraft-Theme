@@ -1,0 +1,5 @@
+desc=MemoCraft Theme
+version=0.1.0
+depends=2.600
+headinclude=head.html
+texttitles=1
