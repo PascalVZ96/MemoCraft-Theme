@@ -1,19 +1,21 @@
-
-
-/* =========================================================
-   MemoCraft Theme v0.1
-   Visual layer for the standalone Webmin theme
-   ========================================================= */
+/* MEMOCRAFT-CUSTOM-START
+   MemoCraft Theme v1.0 — visual foundation
+   Keep this marker: build.sh uses it to replace this block safely.
+*/
 
 :root {
     --memo-bg: #0b0f16;
-    --memo-panel: #171c24;
-    --memo-panel-soft: #1d2430;
-    --memo-border: #2b3442;
+    --memo-sidebar: #111720;
+    --memo-panel: #171e29;
+    --memo-panel-soft: #202938;
+    --memo-border: #334155;
     --memo-accent: #3b82f6;
     --memo-accent-hover: #60a5fa;
-    --memo-text: #e5e7eb;
-    --memo-muted: #9ca3af;
+    --memo-text: #e8edf5;
+    --memo-muted: #a8b3c4;
+    --memo-success: #22c55e;
+    --memo-warning: #f59e0b;
+    color-scheme: dark;
 }
 
 html,
@@ -28,27 +30,19 @@ input,
 select,
 textarea,
 button {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
 }
 
-a {
-    color: var(--memo-accent-hover) !important;
+/* Legacy Gray Theme uses bgcolor attributes extensively. */
+table[bgcolor],
+tbody[bgcolor],
+tr[bgcolor],
+td[bgcolor],
+th[bgcolor] {
+    background-color: var(--memo-panel) !important;
 }
 
-a:hover,
-a:focus {
-    color: #93c5fd !important;
-}
-
-.maintitle,
-.ui_table > thead,
-.ui_table > thead td,
-.ui_table > thead th {
-    background: var(--memo-panel-soft) !important;
-    color: #fff !important;
-    border-color: var(--memo-border) !important;
-}
-
+body > table,
 .mainbody,
 .ui_table,
 .ui_table_body,
@@ -59,11 +53,55 @@ a:focus {
     border-color: var(--memo-border) !important;
 }
 
+.maintitle,
+.ui_table > thead,
+.ui_table > thead td,
+.ui_table > thead th,
+tr.ui_table_head,
+td.ui_table_head {
+    background: var(--memo-panel-soft) !important;
+    color: #ffffff !important;
+    border-color: var(--memo-border) !important;
+}
+
+/* Restore readable text where Gray Theme sets pale foreground colours. */
+body td,
+body th,
+body div,
+body span,
+body label,
+body p {
+    color: var(--memo-text);
+}
+
+body small,
+body .small,
+body .description,
+body .ui_description {
+    color: var(--memo-muted) !important;
+}
+
+a,
+a:visited {
+    color: #60a5fa !important;
+}
+
+a:hover,
+a:focus {
+    color: #93c5fd !important;
+}
+
 .ui_table,
-.shrinkwrapper {
+.shrinkwrapper,
+fieldset {
+    border: 1px solid var(--memo-border) !important;
     border-radius: 10px !important;
     overflow: hidden;
     box-shadow: 0 8px 24px rgba(0, 0, 0, .22);
+}
+
+hr {
+    border-color: var(--memo-border) !important;
 }
 
 input[type="text"],
@@ -75,7 +113,7 @@ textarea,
 select {
     background: #111827 !important;
     color: #f3f4f6 !important;
-    border: 1px solid #374151 !important;
+    border: 1px solid #475569 !important;
     border-radius: 7px !important;
 }
 
@@ -84,7 +122,7 @@ textarea:focus,
 select:focus {
     border-color: var(--memo-accent) !important;
     outline: none !important;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, .16) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, .18) !important;
 }
 
 input[type="submit"],
@@ -92,7 +130,7 @@ input[type="button"],
 button,
 .ui_submit {
     background: var(--memo-accent) !important;
-    color: #fff !important;
+    color: #ffffff !important;
     border: 1px solid var(--memo-accent) !important;
     border-radius: 7px !important;
     cursor: pointer;
@@ -111,8 +149,8 @@ th {
     border-color: var(--memo-border) !important;
 }
 
-tr:hover td {
-    background: rgba(59, 130, 246, .06);
+tr:hover > td {
+    background-color: rgba(59, 130, 246, .09) !important;
 }
 
 ::-webkit-scrollbar {
@@ -125,7 +163,9 @@ tr:hover td {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #374151;
+    background: #475569;
     border: 3px solid var(--memo-bg);
     border-radius: 10px;
 }
+
+/* MEMOCRAFT-CUSTOM-END */
