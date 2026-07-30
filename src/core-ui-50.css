@@ -1,0 +1,135 @@
+/* MemoNetwork Core UI 5.0 */
+
+body:not(.memonetwork-login) {
+  color: #e7eef8 !important;
+}
+
+body:not(.memonetwork-login) h1,
+body:not(.memonetwork-login) h2,
+body:not(.memonetwork-login) h3,
+body:not(.memonetwork-login) .maintitle,
+body:not(.memonetwork-login) .ui_post_header {
+  color: #f8fbff !important;
+}
+
+body:not(.memonetwork-login) .ui_post_header {
+  margin: 0 0 16px !important;
+  padding: 18px 20px !important;
+  border: 1px solid #2c3d55 !important;
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, #172337, #111b2a) !important;
+  box-shadow: 0 10px 28px rgba(0,0,0,.18) !important;
+}
+
+body:not(.memonetwork-login) table[bgcolor="#f5f5f5"],
+body:not(.memonetwork-login) table[bgcolor="f5f5f5"],
+body:not(.memonetwork-login) td[bgcolor="#f5f5f5"],
+body:not(.memonetwork-login) td[bgcolor="f5f5f5"],
+body:not(.memonetwork-login) .mainbody,
+body:not(.memonetwork-login) td.mainbody,
+body:not(.memonetwork-login) tr.mainbody,
+body:not(.memonetwork-login) .ui_table_body,
+body:not(.memonetwork-login) .ui_form_pair,
+body:not(.memonetwork-login) .ui_form_value {
+  background: #111a27 !important;
+  color: #dce6f3 !important;
+}
+
+body:not(.memonetwork-login) table.formsection,
+body:not(.memonetwork-login) table.ui_table,
+body:not(.memonetwork-login) table.shrinkwrapper {
+  border: 1px solid #2c3d55 !important;
+  border-radius: 14px !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  overflow: hidden !important;
+  background: #111a27 !important;
+  box-shadow: 0 10px 28px rgba(0,0,0,.16) !important;
+}
+
+body:not(.memonetwork-login) .maintitle,
+body:not(.memonetwork-login) td.maintitle,
+body:not(.memonetwork-login) th.maintitle {
+  padding: 13px 16px !important;
+  border: 0 !important;
+  border-bottom: 1px solid #34465f !important;
+  background: linear-gradient(90deg, #1d2a3d, #182436) !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+}
+
+body:not(.memonetwork-login) .ui_form_label,
+body:not(.memonetwork-login) .ui_form_label b,
+body:not(.memonetwork-login) .ui_form_label label,
+body:not(.memonetwork-login) td > b,
+body:not(.memonetwork-login) th > b {
+  color: #aebfd4 !important;
+}
+
+body:not(.memonetwork-login) a {
+  color: #69a9ff !important;
+}
+
+body:not(.memonetwork-login) a:hover {
+  color: #9ac7ff !important;
+}
+
+body:not(.memonetwork-login) input[type="submit"],
+body:not(.memonetwork-login) input[type="button"],
+body:not(.memonetwork-login) button,
+body:not(.memonetwork-login) .ui_submit {
+  appearance: none !important;
+  min-height: 38px !important;
+  padding: 0 15px !important;
+  border: 1px solid #3b82f6 !important;
+  border-radius: 9px !important;
+  background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
+  color: #ffffff !important;
+  font-weight: 750 !important;
+  cursor: pointer !important;
+  box-shadow: 0 8px 18px rgba(37,99,235,.22) !important;
+}
+
+body:not(.memonetwork-login) input[type="reset"],
+body:not(.memonetwork-login) .ui_reset {
+  min-height: 38px !important;
+  padding: 0 15px !important;
+  border: 1px solid #40526d !important;
+  border-radius: 9px !important;
+  background: #172337 !important;
+  color: #dbe7f5 !important;
+}
+
+body:not(.memonetwork-login) .tab,
+body:not(.memonetwork-login) .tabselected,
+body:not(.memonetwork-login) .ui_tabs a {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 34px !important;
+  padding: 0 12px !important;
+  border: 1px solid #34465f !important;
+  border-radius: 8px 8px 0 0 !important;
+  background: #162235 !important;
+  color: #aebed2 !important;
+  text-decoration: none !important;
+}
+
+body:not(.memonetwork-login) .tabselected,
+body:not(.memonetwork-login) .ui_tabs a.active {
+  border-color: #3b82f6 !important;
+  background: #1d3d72 !important;
+  color: #ffffff !important;
+}
+
+body:not(.memonetwork-login) hr {
+  border: 0 !important;
+  border-top: 1px solid #2b3b52 !important;
+}
+
+@media (max-width: 800px) {
+  body:not(.memonetwork-login) .ui_post_header {
+    padding: 15px 16px !important;
+    border-radius: 12px !important;
+  }
+}
