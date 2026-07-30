@@ -67,95 +67,31 @@ td.ui_table_head {
     border-color: var(--memo-border) !important;
 }
 
-/* Keep legacy module text readable. */
-body td,
-body th,
-body div,
-body span,
-body label,
-body p,
-body b,
-body strong {
+/* Default text in the dark MemoCraft interface. */
+body {
     color: var(--memo-text);
 }
 
-body small,
-body .small,
-body .description,
-body .ui_description {
-    color: var(--memo-muted) !important;
-}
-
-a,
-a:visited {
-    color: #60a5fa !important;
-}
-
-a:hover,
-a:focus {
-    color: #93c5fd !important;
-}
-
-.ui_table,
+/* Text inside confirmed dark containers. */
+.wrapper,
 .shrinkwrapper,
-fieldset {
-    border: 1px solid var(--memo-border) !important;
-    border-radius: 10px !important;
-    overflow: hidden;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, .22);
+.leftmenu,
+.maintitle,
+.ui_table_head,
+.ui_table > thead,
+.ui_table > thead td,
+.ui_table > thead th {
+    color: var(--memo-text) !important;
 }
 
-hr {
-    border-color: var(--memo-border) !important;
-}
-
-input[type="text"],
-input[type="password"],
-input[type="email"],
-input[type="number"],
-input[type="search"],
-textarea,
-select {
-    background: #111827 !important;
-    color: #f3f4f6 !important;
-    border: 1px solid #475569 !important;
-    border-radius: 7px !important;
-}
-
-input:focus,
-textarea:focus,
-select:focus {
-    border-color: var(--memo-accent) !important;
-    outline: none !important;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, .18) !important;
-}
-
-input[type="submit"],
-input[type="button"],
-button,
-.ui_submit {
-    background: var(--memo-accent) !important;
-    color: #ffffff !important;
-    border: 1px solid var(--memo-accent) !important;
-    border-radius: 7px !important;
-    cursor: pointer;
-}
-
-input[type="submit"]:hover,
-input[type="button"]:hover,
-button:hover,
-.ui_submit:hover {
-    background: var(--memo-accent-hover) !important;
-    border-color: var(--memo-accent-hover) !important;
-}
-
-td,
-th {
-    border-color: var(--memo-border) !important;
-}
-
-tr:hover > td {
-    background-color: rgba(59, 130, 246, .09) !important;
+/* Legacy Webmin content can still have a light background. */
+.ui_table_body,
+.ui_table_body td,
+.ui_table_body th,
+.formsection td,
+table[bgcolor="#ffffff"] td,
+table[bgcolor="white"] td {
+    color: #1f2937;
 }
 
 /* Phase 1: force the Gray Theme dashboard and accordion panels dark. */
@@ -225,5 +161,640 @@ td[bgcolor="#ffffcc"] {
     border: 3px solid var(--memo-bg);
     border-radius: 10px;
 }
+/* Donkere dashboardpanelen */
+body > table,
+body > form > table,
+table[bgcolor="#ffffff"],
+table[bgcolor="white"],
+td[bgcolor="#ffffff"],
+td[bgcolor="white"],
+.ui_table,
+.ui_table_body,
+.formsection,
+.wrapper,
+.shrinkwrapper {
+    background-color: #171e29 !important;
+    color: #e8edf5 !important;
+}
 
+.ui_table td,
+.ui_table th,
+.ui_table_body td,
+.ui_table_body th,
+.formsection td,
+.formsection th {
+    color: #e8edf5 !important;
+}
+
+tr[bgcolor="#d9e6f7"],
+tr[bgcolor="#d6e4f7"],
+tr[bgcolor="#c9dbf5"],
+tr[bgcolor="#e0e8f0"],
+td[bgcolor="#d9e6f7"],
+td[bgcolor="#d6e4f7"],
+td[bgcolor="#c9dbf5"],
+td[bgcolor="#e0e8f0"] {
+    background-color: #202938 !important;
+    color: #ffffff !important;
+}
 /* MEMOCRAFT-CUSTOM-END */
+
+/* MemoCraft moderne zijbalk */
+.leftmenu {
+    box-sizing: border-box !important;
+    min-height: 100vh !important;
+    padding: 0 !important;
+    background: #0f1520 !important;
+    border: 0 !important;
+}
+
+.leftmenu #main,
+.leftmenu #main tbody,
+.leftmenu #main tr,
+.leftmenu #main td {
+    background: transparent !important;
+    border: 0 !important;
+}
+
+.memo-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 16px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #293244;
+    background: #121a27;
+}
+
+.memo-brand-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    color: #ffffff !important;
+    font-size: 22px;
+    font-weight: 800;
+    box-shadow: 0 8px 20px rgba(59, 130, 246, .25);
+}
+
+.memo-brand-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.memo-brand-text strong {
+    color: #ffffff !important;
+    font-size: 17px;
+    line-height: 1.2;
+}
+
+.memo-brand-text span {
+    color: #8fa0b8 !important;
+    font-size: 11px;
+    margin-top: 3px;
+}
+
+.memo-menu-content {
+    padding: 8px 10px 18px;
+}
+
+.leftmenu details {
+    margin: 3px 0;
+    border: 0 !important;
+    border-radius: 8px;
+    overflow: hidden;
+    background: transparent !important;
+}
+
+.leftmenu summary {
+    box-sizing: border-box;
+    padding: 10px 11px;
+    border-radius: 8px;
+    color: #cbd5e1 !important;
+    font-weight: 600;
+    cursor: pointer;
+    list-style-position: inside;
+}
+
+.leftmenu summary:hover {
+    background: #1b2534 !important;
+    color: #ffffff !important;
+}
+
+.leftmenu summary span {
+    color: inherit !important;
+}
+
+.leftmenu .leftlink,
+.leftmenu .linkindented,
+.leftmenu .aftericon,
+.leftmenu .linkwithicon {
+    box-sizing: border-box;
+}
+
+.leftmenu .leftlink,
+.leftmenu .linkindented,
+.leftmenu .aftericon {
+    margin: 2px 0;
+    border-radius: 7px;
+}
+
+.leftmenu a {
+    display: block;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    border-radius: 7px;
+    color: #b8c4d6 !important;
+    text-decoration: none !important;
+    line-height: 1.25;
+}
+
+.leftmenu a:hover,
+.leftmenu a:focus {
+    background: #243147 !important;
+    color: #ffffff !important;
+}
+
+.leftmenu .linkwithicon {
+    display: flex;
+    align-items: center;
+    margin: 3px 0;
+    border-radius: 8px;
+}
+
+.leftmenu .linkwithicon > img,
+.leftmenu .linkwithicon > i {
+    width: 18px;
+    margin-left: 10px;
+    flex: 0 0 18px;
+}
+
+.leftmenu .linkwithicon .aftericon {
+    flex: 1;
+}
+
+.leftmenu hr {
+    margin: 10px 4px;
+    border: 0 !important;
+    border-top: 1px solid #293244 !important;
+}
+
+.leftmenu input[type="text"],
+.leftmenu input[type="search"] {
+    box-sizing: border-box;
+    width: 100% !important;
+    height: 36px;
+    padding: 0 11px;
+    background: #111827 !important;
+    color: #ffffff !important;
+    border: 1px solid #334155 !important;
+    border-radius: 8px !important;
+}
+
+.leftmenu input::placeholder {
+    color: #718096 !important;
+}
+
+.leftmenu .mode {
+    margin: 10px;
+    padding: 8px;
+    border-radius: 9px;
+    background: #151e2b !important;
+}
+
+.leftmenu .mode b {
+    display: block;
+    color: #ffffff !important;
+}
+EOFcat >> src/memocraft.css <<'EOF'
+
+/* MemoCraft moderne zijbalk */
+.leftmenu {
+    box-sizing: border-box !important;
+    min-height: 100vh !important;
+    padding: 0 !important;
+    background: #0f1520 !important;
+    border: 0 !important;
+}
+
+.leftmenu #main,
+.leftmenu #main tbody,
+.leftmenu #main tr,
+.leftmenu #main td {
+    background: transparent !important;
+    border: 0 !important;
+}
+
+.memo-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 16px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #293244;
+    background: #121a27;
+}
+
+.memo-brand-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    color: #ffffff !important;
+    font-size: 22px;
+    font-weight: 800;
+    box-shadow: 0 8px 20px rgba(59, 130, 246, .25);
+}
+
+.memo-brand-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.memo-brand-text strong {
+    color: #ffffff !important;
+    font-size: 17px;
+    line-height: 1.2;
+}
+
+.memo-brand-text span {
+    color: #8fa0b8 !important;
+    font-size: 11px;
+    margin-top: 3px;
+}
+
+.memo-menu-content {
+    padding: 8px 10px 18px;
+}
+
+.leftmenu details {
+    margin: 3px 0;
+    border: 0 !important;
+    border-radius: 8px;
+    overflow: hidden;
+    background: transparent !important;
+}
+
+.leftmenu summary {
+    box-sizing: border-box;
+    padding: 10px 11px;
+    border-radius: 8px;
+    color: #cbd5e1 !important;
+    font-weight: 600;
+    cursor: pointer;
+    list-style-position: inside;
+}
+
+.leftmenu summary:hover {
+    background: #1b2534 !important;
+    color: #ffffff !important;
+}
+
+.leftmenu summary span {
+    color: inherit !important;
+}
+
+.leftmenu .leftlink,
+.leftmenu .linkindented,
+.leftmenu .aftericon,
+.leftmenu .linkwithicon {
+    box-sizing: border-box;
+}
+
+.leftmenu .leftlink,
+.leftmenu .linkindented,
+.leftmenu .aftericon {
+    margin: 2px 0;
+    border-radius: 7px;
+}
+
+.leftmenu a {
+    display: block;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    border-radius: 7px;
+    color: #b8c4d6 !important;
+    text-decoration: none !important;
+    line-height: 1.25;
+}
+
+.leftmenu a:hover,
+.leftmenu a:focus {
+    background: #243147 !important;
+    color: #ffffff !important;
+}
+
+.leftmenu .linkwithicon {
+    display: flex;
+    align-items: center;
+    margin: 3px 0;
+    border-radius: 8px;
+}
+
+.leftmenu .linkwithicon > img,
+.leftmenu .linkwithicon > i {
+    width: 18px;
+    margin-left: 10px;
+    flex: 0 0 18px;
+}
+
+.leftmenu .linkwithicon .aftericon {
+    flex: 1;
+}
+
+.leftmenu hr {
+    margin: 10px 4px;
+    border: 0 !important;
+    border-top: 1px solid #293244 !important;
+}
+
+.leftmenu input[type="text"],
+.leftmenu input[type="search"] {
+    box-sizing: border-box;
+    width: 100% !important;
+    height: 36px;
+    padding: 0 11px;
+    background: #111827 !important;
+    color: #ffffff !important;
+    border: 1px solid #334155 !important;
+    border-radius: 8px !important;
+}
+
+.leftmenu input::placeholder {
+    color: #718096 !important;
+}
+
+.leftmenu .mode {
+    margin: 10px;
+    padding: 8px;
+    border-radius: 9px;
+    background: #151e2b !important;
+}
+
+.leftmenu .mode b {
+    display: block;
+    color: #ffffff !important;
+}
+
+/* MemoCraft moderne zijbalk */
+.leftmenu {
+    box-sizing: border-box !important;
+    min-height: 100vh !important;
+    padding: 0 !important;
+    background: #0f1520 !important;
+    border: 0 !important;
+}
+
+.leftmenu #main,
+.leftmenu #main tbody,
+.leftmenu #main tr,
+.leftmenu #main td {
+    background: transparent !important;
+    border: 0 !important;
+}
+
+.memo-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 16px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #293244;
+    background: #121a27;
+}
+
+.memo-brand-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    color: #ffffff !important;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.memo-brand-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.memo-brand-text strong {
+    color: #ffffff !important;
+    font-size: 17px;
+}
+
+.memo-brand-text span {
+    color: #8fa0b8 !important;
+    font-size: 11px;
+    margin-top: 3px;
+}
+
+.memo-menu-content {
+    padding: 8px 10px 18px;
+}
+
+.leftmenu details {
+    margin: 3px 0;
+    border: 0 !important;
+    border-radius: 8px;
+    background: transparent !important;
+}
+
+.leftmenu summary {
+    box-sizing: border-box;
+    padding: 10px 11px;
+    border-radius: 8px;
+    color: #cbd5e1 !important;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.leftmenu summary:hover {
+    background: #1b2534 !important;
+    color: #ffffff !important;
+}
+
+.leftmenu summary span {
+    color: inherit !important;
+}
+
+.leftmenu .leftlink,
+.leftmenu .linkindented,
+.leftmenu .aftericon {
+    margin: 2px 0;
+    border-radius: 7px;
+}
+
+.leftmenu a {
+    display: block;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    border-radius: 7px;
+    color: #b8c4d6 !important;
+    text-decoration: none !important;
+}
+
+.leftmenu a:hover,
+.leftmenu a:focus {
+    background: #243147 !important;
+    color: #ffffff !important;
+}
+
+.leftmenu hr {
+    margin: 10px 4px;
+    border: 0 !important;
+    border-top: 1px solid #293244 !important;
+}
+
+.leftmenu input[type="text"],
+.leftmenu input[type="search"] {
+    box-sizing: border-box;
+    width: 100% !important;
+    height: 36px;
+    padding: 0 11px;
+    background: #111827 !important;
+    color: #ffffff !important;
+    border: 1px solid #334155 !important;
+    border-radius: 8px !important;
+}
+EOFcat >> src/memocraft.css <<'EOF'
+
+/* MemoCraft moderne zijbalk */
+.leftmenu {
+    box-sizing: border-box !important;
+    min-height: 100vh !important;
+    padding: 0 !important;
+    background: #0f1520 !important;
+    border: 0 !important;
+}
+
+.leftmenu #main,
+.leftmenu #main tbody,
+.leftmenu #main tr,
+.leftmenu #main td {
+    background: transparent !important;
+    border: 0 !important;
+}
+
+.memo-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 16px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #293244;
+    background: #121a27;
+}
+
+.memo-brand-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    color: #ffffff !important;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.memo-brand-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.memo-brand-text strong {
+    color: #ffffff !important;
+    font-size: 17px;
+}
+
+.memo-brand-text span {
+    color: #8fa0b8 !important;
+    font-size: 11px;
+    margin-top: 3px;
+}
+
+.memo-menu-content {
+    padding: 8px 10px 18px;
+}
+
+.leftmenu details {
+    margin: 3px 0;
+    border: 0 !important;
+    border-radius: 8px;
+    background: transparent !important;
+}
+
+.leftmenu summary {
+    box-sizing: border-box;
+    padding: 10px 11px;
+    border-radius: 8px;
+    color: #cbd5e1 !important;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.leftmenu summary:hover {
+    background: #1b2534 !important;
+    color: #ffffff !important;
+}
+
+.leftmenu summary span {
+    color: inherit !important;
+}
+
+.leftmenu .leftlink,
+.leftmenu .linkindented,
+.leftmenu .aftericon {
+    margin: 2px 0;
+    border-radius: 7px;
+}
+
+.leftmenu a {
+    display: block;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    border-radius: 7px;
+    color: #b8c4d6 !important;
+    text-decoration: none !important;
+}
+
+.leftmenu a:hover,
+.leftmenu a:focus {
+    background: #243147 !important;
+    color: #ffffff !important;
+}
+
+.leftmenu hr {
+    margin: 10px 4px;
+    border: 0 !important;
+    border-top: 1px solid #293244 !important;
+}
+
+.leftmenu input[type="text"],
+.leftmenu input[type="search"] {
+    box-sizing: border-box;
+    width: 100% !important;
+    height: 36px;
+    padding: 0 11px;
+    background: #111827 !important;
+    color: #ffffff !important;
+    border: 1px solid #334155 !important;
+    border-radius: 8px !important;
+}
