@@ -43,16 +43,19 @@ body > .mode {
 .memo-brand-icon {
     display: grid !important;
     place-items: center !important;
-    width: 44px !important;
-    height: 44px !important;
-    min-width: 44px !important;
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
     border-radius: 13px !important;
-    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%) !important;
-    color: #ffffff !important;
-    font-size: 22px !important;
-    font-weight: 800 !important;
-    line-height: 1 !important;
-    box-shadow: 0 10px 24px rgba(59, 130, 246, .28) !important;
+    background-color: #0a1220 !important;
+    background-image: url('/memocraft-theme/images/memonetwork-logo.svg') !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: 46px 46px !important;
+    color: transparent !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    box-shadow: 0 10px 24px rgba(14, 165, 233, .28) !important;
 }
 
 .memo-brand-copy {
