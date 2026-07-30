@@ -221,11 +221,34 @@ summary,
 }
 
 summary {
-  padding: 12px 15px !important;
+  position: relative;
+  padding: 13px 46px 13px 16px !important;
   cursor: pointer;
   font-size: 13px !important;
   letter-spacing: .01em;
+  list-style: none;
 }
+
+summary::-webkit-details-marker { display: none; }
+summary::after {
+  content: "+";
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-50%);
+  border-radius: 7px;
+  background: rgba(59,130,246,.12);
+  color: #93c5fd;
+  font-size: 16px;
+  line-height: 1;
+}
+
+details[open] > summary::after { content: "−"; }
 
 summary,
 summary span,
@@ -236,11 +259,12 @@ summary strong {
 
 details {
   margin: 0 0 10px !important;
-  transition: border-color .18s ease, background .18s ease;
+  transition: border-color .18s ease, background .18s ease, transform .18s ease;
 }
 
 details:hover {
   border-color: #3a4d68 !important;
+  transform: translateY(-1px);
 }
 
 details[open] > summary {
@@ -295,31 +319,42 @@ button:hover {
   background: #3b82f6 !important;
 }
 
-/* Turn the classic pale reboot warning into a dark MemoNetwork alert. */
-table[bgcolor="#ffffcc"],
-table[bgcolor="#ffffe0"],
-table[bgcolor="#fffacd"],
-td[bgcolor="#ffffcc"],
-td[bgcolor="#ffffe0"],
-td[bgcolor="#fffacd"],
-body > table[style*="background"],
-body > div[style*="background-color: rgb(255"] {
-  background: linear-gradient(135deg, #2a2114, #1b1c22) !important;
+/* Target the reboot notice by its buttons instead of relying on old bgcolor attributes. */
+body > table:has(input[value="Reboot Now"]),
+body > table:has(input[value="Hide Alert"]),
+body > form:has(input[value="Reboot Now"]),
+body > form:has(input[value="Hide Alert"]),
+body > div:has(> table input[value="Reboot Now"]),
+body > div:has(> table input[value="Hide Alert"]) {
+  background: linear-gradient(135deg, #2b2113, #181c25) !important;
   color: #f8fafc !important;
-  border: 1px solid #75551f !important;
+  border: 1px solid #715321 !important;
   border-left: 4px solid #f59e0b !important;
-  border-radius: 12px !important;
-  box-shadow: 0 10px 24px rgba(0,0,0,.18) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 12px 28px rgba(0,0,0,.22) !important;
+  overflow: hidden !important;
 }
 
-table[bgcolor="#ffffcc"] td,
-table[bgcolor="#ffffe0"] td,
-table[bgcolor="#fffacd"] td,
-td[bgcolor="#ffffcc"],
-td[bgcolor="#ffffe0"],
-td[bgcolor="#fffacd"] {
+body > table:has(input[value="Reboot Now"]) td,
+body > table:has(input[value="Hide Alert"]) td,
+body > form:has(input[value="Reboot Now"]) td,
+body > form:has(input[value="Hide Alert"]) td,
+body > div:has(> table input[value="Reboot Now"]) td,
+body > div:has(> table input[value="Hide Alert"]) td {
   background: transparent !important;
   color: #f7d89a !important;
+}
+
+body input[value="Reboot Now"] {
+  background: #d97706 !important;
+  border-color: #f59e0b !important;
+  box-shadow: 0 5px 14px rgba(217,119,6,.24) !important;
+}
+
+body input[value="Hide Alert"] {
+  background: #293548 !important;
+  border-color: #42536d !important;
+  box-shadow: none !important;
 }
 
 /* Legacy login tables now match the dashboard cards. */
