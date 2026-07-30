@@ -444,3 +444,39 @@ details[open] > table {
   box-shadow: none !important;
   overflow: hidden !important;
 }
+
+/* Remove stacked borders around expanded dashboard tables */
+details[open] > div,
+details[open] > form,
+details[open] > .wrapper,
+details[open] > .shrinkwrapper {
+  margin: 0 !important;
+  padding: 10px 12px 12px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #111923 !important;
+  box-shadow: none !important;
+}
+
+details[open] > div > .wrapper,
+details[open] > div > .shrinkwrapper,
+details[open] > form > .wrapper,
+details[open] > form > .shrinkwrapper {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+details[open] table.ui_table,
+details[open] table.sortable,
+details[open] table.dataTable,
+details[open] > table {
+  margin: 0 !important;
+  border: 1px solid #334155 !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
