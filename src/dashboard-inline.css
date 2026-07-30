@@ -319,55 +319,39 @@ button:hover {
   background: #3b82f6 !important;
 }
 
-/* Reboot notice: replace the pale Webmin look with a clear warning card. */
+/* Reboot notice: compact, clear and without duplicated generated text. */
 table:has(input[value="Reboot Now"]),
 form:has(input[value="Reboot Now"]) table {
   width: 100% !important;
-  background: linear-gradient(135deg, #2b1b0b 0%, #201710 55%, #171b24 100%) !important;
-  border: 1px solid #9a5c13 !important;
+  background: linear-gradient(135deg, #2a1d0f 0%, #171c25 100%) !important;
+  border: 1px solid #8a5a20 !important;
   border-left: 5px solid #f59e0b !important;
   border-radius: 14px !important;
-  box-shadow: 0 14px 32px rgba(0,0,0,.28) !important;
+  box-shadow: 0 12px 28px rgba(0,0,0,.24) !important;
   overflow: hidden !important;
 }
 
 table:has(input[value="Reboot Now"]) td,
 form:has(input[value="Reboot Now"]) table td {
-  position: relative;
-  padding: 22px 24px !important;
+  padding: 16px 20px !important;
   background: transparent !important;
-  color: #f8fafc !important;
-  font-size: 0 !important;
-  text-align: left !important;
+  color: #fed7aa !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+  text-align: center !important;
 }
 
 table:has(input[value="Reboot Now"]) td::before,
-form:has(input[value="Reboot Now"]) table td::before {
-  content: "⚠  Herstart vereist";
-  display: block;
-  margin: 0 0 7px 0;
-  color: #fff7ed !important;
-  font-size: 17px !important;
-  font-weight: 800;
-  line-height: 1.25;
-}
-
 table:has(input[value="Reboot Now"]) td::after,
+form:has(input[value="Reboot Now"]) table td::before,
 form:has(input[value="Reboot Now"]) table td::after {
-  content: "Er zijn systeemupdates geïnstalleerd. Herstart de server om alle wijzigingen volledig toe te passen.";
-  display: block;
-  max-width: 760px;
-  margin: 0 0 16px 0;
-  color: #fdba74 !important;
-  font-size: 13px !important;
-  line-height: 1.55;
+  content: none !important;
+  display: none !important;
 }
 
 table:has(input[value="Reboot Now"]) input,
 form:has(input[value="Reboot Now"]) table input {
-  position: relative;
-  z-index: 2;
-  margin: 0 8px 0 0 !important;
+  margin: 8px 5px 0 !important;
   font-size: 13px !important;
 }
 
@@ -378,9 +362,7 @@ body input[value="Reboot Now"] {
   box-shadow: 0 7px 18px rgba(234,88,12,.3) !important;
 }
 
-body input[value="Reboot Now"]:hover {
-  background: #f97316 !important;
-}
+body input[value="Reboot Now"]:hover { background: #f97316 !important; }
 
 body input[value="Hide Alert"] {
   background: #273449 !important;
@@ -389,9 +371,7 @@ body input[value="Hide Alert"] {
   box-shadow: none !important;
 }
 
-body input[value="Hide Alert"]:hover {
-  background: #334155 !important;
-}
+body input[value="Hide Alert"]:hover { background: #334155 !important; }
 
 /* Legacy login tables now match the dashboard cards. */
 .ui_table,
@@ -430,5 +410,5 @@ img[src*="bar"], img[src*="usage"] { opacity: 1 !important; }
   .memo-dashboard-badge { display: none; }
   .memo-stat-grid, .memo-info-grid { grid-template-columns: 1fr; }
   table:has(input[value="Reboot Now"]) td,
-  form:has(input[value="Reboot Now"]) table td { padding: 18px !important; }
+  form:has(input[value="Reboot Now"]) table td { padding: 14px !important; }
 }
