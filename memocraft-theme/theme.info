@@ -1,5 +1,6 @@
 desc=MemoCraft Theme
-version=0.1.0
-depends=2.600
-headinclude=head.html
-texttitles=1
+longdesc=Standalone MemoCraft Webmin Theme
+version=0.2.0
+webmin=1
+usermin=1
+depends=2.653
