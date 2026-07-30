@@ -42,7 +42,6 @@ body > .mode { display: none !important; }
     box-shadow: inset -1px 0 0 var(--memo-border) !important;
 }
 
-/* Sticky brand area */
 .memo-brand {
     position: sticky !important;
     top: 0 !important;
@@ -55,15 +54,24 @@ body > .mode { display: none !important; }
     padding: 0 !important;
     border: 0 !important;
     border-bottom: 1px solid var(--memo-border) !important;
-    background-color: var(--memo-surface) !important;
-    background-image:
-        radial-gradient(circle at 50% 35%, rgba(59, 130, 246, .18), transparent 62%),
-        linear-gradient(180deg, rgba(17, 27, 43, .96), rgba(13, 22, 36, .98)),
-        url("https://memocraft.nl/images/MemoNetworkLogo.png") !important;
-    background-repeat: no-repeat, no-repeat, no-repeat !important;
-    background-position: center, center, center !important;
-    background-size: cover, cover, calc(100% - 28px) auto !important;
+    background-color: #0e1827 !important;
+    background-image: url("https://memocraft.nl/images/MemoNetworkLogo.png") !important;
+    background-repeat: no-repeat !important;
+    background-position: center center !important;
+    background-size: calc(100% - 34px) auto !important;
     box-shadow: 0 8px 24px rgba(0, 0, 0, .20) !important;
+    cursor: pointer !important;
+    transition: background-color var(--memo-transition), filter var(--memo-transition) !important;
+}
+
+.memo-brand:hover {
+    background-color: #111e30 !important;
+    filter: brightness(1.08) !important;
+}
+
+.memo-brand:focus-visible {
+    outline: 2px solid var(--memo-primary-light) !important;
+    outline-offset: -3px !important;
 }
 
 .memo-brand::after {
@@ -99,7 +107,6 @@ body > .mode { display: none !important; }
     background: transparent !important;
 }
 
-/* Category groups */
 .leftmenu details {
     display: block !important;
     margin: 5px 0 8px !important;
@@ -131,7 +138,6 @@ body > .mode { display: none !important; }
 }
 
 .leftmenu summary::-webkit-details-marker { display: none !important; }
-
 .leftmenu summary::after {
     content: "›" !important;
     position: absolute !important;
@@ -143,29 +149,16 @@ body > .mode { display: none !important; }
     transform: rotate(0deg) !important;
     transition: transform var(--memo-transition), color var(--memo-transition) !important;
 }
-
-.leftmenu details[open] > summary::after {
-    transform: rotate(90deg) !important;
-    color: var(--memo-primary-light) !important;
-}
-
+.leftmenu details[open] > summary::after { transform: rotate(90deg) !important; color: var(--memo-primary-light) !important; }
 .leftmenu summary:hover,
-.leftmenu details[open] > summary {
-    background: linear-gradient(90deg, rgba(35, 51, 76, .95), rgba(24, 36, 56, .90)) !important;
-    color: #ffffff !important;
-}
-
+.leftmenu details[open] > summary { background: linear-gradient(90deg, rgba(35, 51, 76, .95), rgba(24, 36, 56, .90)) !important; color: #ffffff !important; }
 .leftmenu summary:hover { transform: translateX(2px) !important; }
 .leftmenu summary span { color: inherit !important; }
 
 .leftmenu .leftlink,
 .leftmenu .linkindented,
 .leftmenu .aftericon,
-.leftmenu .linkwithicon {
-    box-sizing: border-box !important;
-    width: 100% !important;
-}
-
+.leftmenu .linkwithicon { box-sizing: border-box !important; width: 100% !important; }
 .leftmenu .linkwithicon {
     position: relative !important;
     display: flex !important;
@@ -176,13 +169,7 @@ body > .mode { display: none !important; }
     background: transparent !important;
     transition: background var(--memo-transition), transform var(--memo-transition), box-shadow var(--memo-transition) !important;
 }
-
-.leftmenu .linkwithicon:hover {
-    background: linear-gradient(90deg, rgba(59, 130, 246, .20), rgba(59, 130, 246, .05)) !important;
-    transform: translateX(2px) !important;
-    box-shadow: inset 3px 0 0 var(--memo-primary) !important;
-}
-
+.leftmenu .linkwithicon:hover { background: linear-gradient(90deg, rgba(59, 130, 246, .20), rgba(59, 130, 246, .05)) !important; transform: translateX(2px) !important; box-shadow: inset 3px 0 0 var(--memo-primary) !important; }
 .leftmenu .linkwithicon > img,
 .leftmenu .linkwithicon > i {
     width: 18px !important;
@@ -196,19 +183,9 @@ body > .mode { display: none !important; }
     filter: saturate(.85) brightness(1.08) !important;
     transition: color var(--memo-transition), opacity var(--memo-transition), transform var(--memo-transition) !important;
 }
-
 .leftmenu .linkwithicon:hover > img,
-.leftmenu .linkwithicon:hover > i {
-    color: #93c5fd !important;
-    opacity: 1 !important;
-    transform: scale(1.07) !important;
-}
-
-.leftmenu .linkwithicon .aftericon {
-    flex: 1 1 auto !important;
-    margin: 0 !important;
-}
-
+.leftmenu .linkwithicon:hover > i { color: #93c5fd !important; opacity: 1 !important; transform: scale(1.07) !important; }
+.leftmenu .linkwithicon .aftericon { flex: 1 1 auto !important; margin: 0 !important; }
 .leftmenu .leftlink,
 .leftmenu .linkindented,
 .leftmenu .aftericon { margin: 2px 0 !important; }
@@ -230,51 +207,19 @@ body > .mode { display: none !important; }
     text-decoration: none !important;
     transition: background var(--memo-transition), color var(--memo-transition), transform var(--memo-transition), box-shadow var(--memo-transition) !important;
 }
-
-.leftmenu .linkindented a {
-    padding-left: 28px !important;
-    color: #9fb0c5 !important;
-}
-
+.leftmenu .linkindented a { padding-left: 28px !important; color: #9fb0c5 !important; }
 .leftmenu .leftlink > a:hover,
 .leftmenu .linkindented > a:hover,
-.leftmenu a:focus-visible {
-    background: linear-gradient(90deg, rgba(59, 130, 246, .20), rgba(59, 130, 246, .05)) !important;
-    color: #ffffff !important;
-    outline: none !important;
-    transform: translateX(2px) !important;
-    box-shadow: inset 3px 0 0 var(--memo-primary) !important;
-}
-
-/* Active page state — supports current MemoNetwork marker and common Webmin active classes */
+.leftmenu a:focus-visible { background: linear-gradient(90deg, rgba(59, 130, 246, .20), rgba(59, 130, 246, .05)) !important; color: #ffffff !important; outline: none !important; transform: translateX(2px) !important; box-shadow: inset 3px 0 0 var(--memo-primary) !important; }
 .leftmenu a.memo-active,
 .leftmenu a.active,
 .leftmenu .selected > a,
 .leftmenu .current > a,
 .leftmenu .linkwithicon:has(a.memo-active),
-.leftmenu .linkwithicon:has(a.active) {
-    background: linear-gradient(90deg, rgba(59, 130, 246, .30), rgba(59, 130, 246, .08)) !important;
-    color: #ffffff !important;
-    font-weight: 650 !important;
-    box-shadow: inset 3px 0 0 var(--memo-primary-light), 0 6px 16px rgba(37, 99, 235, .12) !important;
-}
-
-.leftmenu hr {
-    height: 1px !important;
-    margin: 13px 6px !important;
-    padding: 0 !important;
-    border: 0 !important;
-    background: linear-gradient(90deg, transparent, #33445c 15%, #33445c 85%, transparent) !important;
-}
-
-/* Search */
+.leftmenu .linkwithicon:has(a.active) { background: linear-gradient(90deg, rgba(59, 130, 246, .30), rgba(59, 130, 246, .08)) !important; color: #ffffff !important; font-weight: 650 !important; box-shadow: inset 3px 0 0 var(--memo-primary-light), 0 6px 16px rgba(37, 99, 235, .12) !important; }
+.leftmenu hr { height: 1px !important; margin: 13px 6px !important; padding: 0 !important; border: 0 !important; background: linear-gradient(90deg, transparent, #33445c 15%, #33445c 85%, transparent) !important; }
 .leftmenu form,
-.leftmenu form .leftlink {
-    display: block !important;
-    width: 100% !important;
-    margin: 0 !important;
-}
-
+.leftmenu form .leftlink { display: block !important; width: 100% !important; margin: 0 !important; }
 .leftmenu input[type="text"],
 .leftmenu input[type="search"] {
     display: block !important;
@@ -286,9 +231,7 @@ body > .mode { display: none !important; }
     border: 1px solid #344763 !important;
     border-radius: 11px !important;
     background-color: #0a1320 !important;
-    background-image:
-        radial-gradient(circle, transparent 47%, #718198 49%, #718198 58%, transparent 60%),
-        linear-gradient(45deg, transparent 43%, #718198 45%, #718198 57%, transparent 59%) !important;
+    background-image: radial-gradient(circle, transparent 47%, #718198 49%, #718198 58%, transparent 60%), linear-gradient(45deg, transparent 43%, #718198 45%, #718198 57%, transparent 59%) !important;
     background-repeat: no-repeat, no-repeat !important;
     background-position: 14px 13px, 24px 25px !important;
     background-size: 13px 13px, 8px 8px !important;
@@ -298,28 +241,13 @@ body > .mode { display: none !important; }
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, .02) !important;
     transition: border-color var(--memo-transition), box-shadow var(--memo-transition), background-color var(--memo-transition) !important;
 }
-
 .leftmenu input[type="text"]:hover,
-.leftmenu input[type="search"]:hover {
-    border-color: #465e7e !important;
-}
-
+.leftmenu input[type="search"]:hover { border-color: #465e7e !important; }
 .leftmenu input[type="text"]:focus,
-.leftmenu input[type="search"]:focus {
-    border-color: var(--memo-primary) !important;
-    background-color: #0d1828 !important;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, .16), 0 8px 18px rgba(0, 0, 0, .16) !important;
-}
-
+.leftmenu input[type="search"]:focus { border-color: var(--memo-primary) !important; background-color: #0d1828 !important; box-shadow: 0 0 0 3px rgba(59, 130, 246, .16), 0 8px 18px rgba(0, 0, 0, .16) !important; }
 .leftmenu input::placeholder { color: #718198 !important; }
 .leftmenu .goArrow,
 .leftmenu .servers-submit { display: none !important; }
-
 @media (prefers-reduced-motion: reduce) {
-    .leftmenu *,
-    .leftmenu *::before,
-    .leftmenu *::after {
-        transition-duration: .01ms !important;
-        animation-duration: .01ms !important;
-    }
+    .leftmenu *, .leftmenu *::before, .leftmenu *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
