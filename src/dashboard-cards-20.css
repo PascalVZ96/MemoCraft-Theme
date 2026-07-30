@@ -1,0 +1,91 @@
+/* MemoNetwork Dashboard Cards 2.0 overrides */
+
+.memo-stat-grid {
+  gap: 14px !important;
+}
+
+.memo-stat-card {
+  min-height: 112px !important;
+  padding: 18px 19px !important;
+  border: 1px solid rgba(91, 122, 164, .34) !important;
+  border-radius: 16px !important;
+  background:
+    linear-gradient(145deg, rgba(31, 45, 65, .98), rgba(15, 23, 35, .98)) !important;
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, .24),
+    inset 0 1px 0 rgba(255, 255, 255, .035) !important;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease !important;
+}
+
+.memo-stat-card:hover {
+  transform: translateY(-2px) !important;
+  border-color: rgba(96, 165, 250, .58) !important;
+  box-shadow:
+    0 18px 36px rgba(0, 0, 0, .30),
+    0 0 0 1px rgba(59, 130, 246, .10),
+    inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+}
+
+.memo-stat-card::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 18px !important;
+  bottom: 18px !important;
+  width: 3px !important;
+  border-radius: 0 3px 3px 0 !important;
+  background: linear-gradient(180deg, #60a5fa, #2563eb) !important;
+}
+
+.memo-stat-card::after {
+  top: -30px !important;
+  right: -22px !important;
+  width: 94px !important;
+  height: 94px !important;
+  background: radial-gradient(circle, rgba(59, 130, 246, .16), rgba(59, 130, 246, 0) 70%) !important;
+}
+
+.memo-stat-icon {
+  width: 36px !important;
+  height: 36px !important;
+  border: 1px solid rgba(96, 165, 250, .18) !important;
+  border-radius: 10px !important;
+  background: linear-gradient(145deg, rgba(59, 130, 246, .22), rgba(37, 99, 235, .10)) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04) !important;
+}
+
+.memo-stat-label {
+  color: #a8b7ca !important;
+  font-size: 10px !important;
+  letter-spacing: .095em !important;
+}
+
+.memo-stat-value {
+  margin-top: 12px !important;
+  font-size: 29px !important;
+  letter-spacing: -.025em !important;
+}
+
+.memo-stat-hint {
+  margin-top: 6px !important;
+  color: #8393a8 !important;
+}
+
+.memo-info-grid {
+  gap: 12px !important;
+}
+
+.memo-info-card {
+  min-height: 94px !important;
+  padding: 15px !important;
+  border: 1px solid rgba(75, 98, 131, .38) !important;
+  border-radius: 13px !important;
+  background: linear-gradient(145deg, #182334, #111925) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .025) !important;
+  transition: transform .18s ease, border-color .18s ease !important;
+}
+
+.memo-info-card:hover {
+  transform: translateY(-1px) !important;
+  border-color: rgba(96, 165, 250, .40) !important;
+}
