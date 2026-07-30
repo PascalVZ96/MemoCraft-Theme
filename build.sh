@@ -7,6 +7,7 @@ DIST_DIR="$ROOT_DIR/dist"
 OUTPUT="$DIST_DIR/memocraft-theme.wbt.gz"
 LISTING="$DIST_DIR/package-files.txt"
 SOURCE_CSS="$ROOT_DIR/src/memocraft.css"
+FORMS_TABLES_CSS="$ROOT_DIR/src/forms-tables-20.css"
 LOGIN_CSS="$ROOT_DIR/src/login.css"
 LOGIN_JS="$ROOT_DIR/src/login-marker.js"
 SIDEBAR_CSS="$ROOT_DIR/src/sidebar.css"
@@ -30,6 +31,7 @@ for required in \
   "$THEME_DIR" \
   "$THEME_DIR/theme.info" \
   "$SOURCE_CSS" \
+  "$FORMS_TABLES_CSS" \
   "$LOGIN_CSS" \
   "$LOGIN_JS" \
   "$SIDEBAR_CSS" \
@@ -48,17 +50,18 @@ done
 
 grep -q '^desc=' "$THEME_DIR/theme.info" || fail "theme.info bevat geen desc="
 
-python3 - "$TARGET_CSS" "$SOURCE_CSS" <<'PY'
+python3 - "$TARGET_CSS" "$SOURCE_CSS" "$FORMS_TABLES_CSS" <<'PY'
 from pathlib import Path
 import sys
 
 target = Path(sys.argv[1])
-source = Path(sys.argv[2])
+sources = [Path(path) for path in sys.argv[2:]]
 css = target.read_text(encoding="utf-8")
 markers = ("/* MEMOCRAFT-CUSTOM-START", "/* MemoCraft Theme */")
 positions = [css.find(marker) for marker in markers if css.find(marker) >= 0]
 css = css[:min(positions)].rstrip() + "\n\n" if positions else css.rstrip() + "\n\n"
-target.write_text(css + source.read_text(encoding="utf-8").strip() + "\n", encoding="utf-8")
+custom = "\n\n".join(source.read_text(encoding="utf-8").strip() for source in sources)
+target.write_text(css + custom + "\n", encoding="utf-8")
 PY
 
 python3 - "$THEME_DIR/unauthenticated" "$LOGIN_CSS" <<'PY'
