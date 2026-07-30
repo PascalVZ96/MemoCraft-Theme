@@ -1,17 +1,19 @@
 /* MemoNetwork dashboard */
-html, body {
+html,
+body {
   background: #0a0f17 !important;
   color: #e8edf5 !important;
 }
 
 body {
+  box-sizing: border-box;
   margin: 0 !important;
   padding: 18px 20px 28px !important;
-  box-sizing: border-box;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
 }
 
 .main-logo { display: none !important; }
+a, a:visited { color: #60a5fa !important; }
 
 .memo-dashboard-head {
   display: flex;
@@ -23,12 +25,12 @@ body {
   border: 1px solid #26344a;
   border-radius: 16px;
   background: linear-gradient(135deg, #172235 0%, #111927 65%, #101726 100%);
-  box-shadow: 0 18px 40px rgba(0,0,0,.25);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .25);
 }
 
 .memo-dashboard-title {
   margin: 0;
-  color: #ffffff !important;
+  color: #fff !important;
   font-size: 26px;
   line-height: 1.15;
 }
@@ -41,9 +43,9 @@ body {
 
 .memo-dashboard-badge {
   padding: 8px 12px;
-  border: 1px solid rgba(96,165,250,.35);
+  border: 1px solid rgba(96, 165, 250, .35);
   border-radius: 999px;
-  background: rgba(59,130,246,.12);
+  background: rgba(59, 130, 246, .12);
   color: #93c5fd !important;
   font-size: 12px;
   white-space: nowrap;
@@ -58,25 +60,25 @@ body {
 
 .memo-stat-card {
   position: relative;
+  box-sizing: border-box;
   min-height: 102px;
   padding: 17px 18px;
-  box-sizing: border-box;
+  overflow: hidden;
   border: 1px solid #26364d;
   border-radius: 14px;
   background: linear-gradient(145deg, #172131, #111923);
-  box-shadow: 0 12px 28px rgba(0,0,0,.2);
-  overflow: hidden;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .2);
 }
 
 .memo-stat-card::after {
   content: "";
   position: absolute;
-  right: -24px;
   top: -24px;
+  right: -24px;
   width: 82px;
   height: 82px;
   border-radius: 50%;
-  background: rgba(59,130,246,.09);
+  background: rgba(59, 130, 246, .09);
 }
 
 .memo-stat-top {
@@ -92,7 +94,7 @@ body {
   width: 32px;
   height: 32px;
   border-radius: 9px;
-  background: rgba(59,130,246,.16);
+  background: rgba(59, 130, 246, .16);
   color: #93c5fd !important;
   font-size: 16px;
 }
@@ -108,7 +110,7 @@ body {
 .memo-stat-value {
   display: block;
   margin-top: 11px;
-  color: #ffffff !important;
+  color: #fff !important;
   font-size: 27px;
   font-weight: 800;
   line-height: 1.1;
@@ -127,7 +129,7 @@ body {
   border: 1px solid #2b394f;
   border-radius: 14px;
   background: #111923;
-  box-shadow: 0 10px 26px rgba(0,0,0,.18);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, .18);
 }
 
 .memo-system-heading {
@@ -156,12 +158,12 @@ body {
 }
 
 .memo-info-card {
+  box-sizing: border-box;
   min-height: 88px;
   padding: 14px;
   border: 1px solid #26364d;
   border-radius: 11px;
   background: linear-gradient(145deg, #172131, #131c28);
-  box-sizing: border-box;
 }
 
 .memo-info-label {
@@ -192,19 +194,17 @@ body {
 }
 .right-top-links a { color: #60a5fa !important; }
 
-body > table,
-body > form > table,
 .wrapper,
 .shrinkwrapper,
 .ui_table,
 .formsection,
 details {
-  background: #151d29 !important;
-  color: #e8edf5 !important;
+  overflow: hidden;
   border: 1px solid #2b394f !important;
   border-radius: 12px !important;
-  overflow: hidden;
-  box-shadow: 0 10px 26px rgba(0,0,0,.18);
+  background: #151d29 !important;
+  color: #e8edf5 !important;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, .18);
 }
 
 summary,
@@ -214,52 +214,44 @@ summary,
 .ui_table > thead tr,
 .ui_table > thead td,
 .ui_table > thead th {
+  border-color: #334155 !important;
   background: #1d2939 !important;
   color: #f8fafc !important;
-  border-color: #334155 !important;
   font-weight: 700 !important;
 }
 
 summary {
   position: relative;
   padding: 13px 46px 13px 16px !important;
+  list-style: none;
   cursor: pointer;
   font-size: 13px !important;
-  letter-spacing: .01em;
-  list-style: none;
 }
 
 summary::-webkit-details-marker { display: none; }
 summary::after {
   content: "+";
   position: absolute;
-  right: 16px;
   top: 50%;
-  width: 24px;
-  height: 24px;
+  right: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 24px;
+  height: 24px;
   transform: translateY(-50%);
   border-radius: 7px;
-  background: rgba(59,130,246,.12);
+  background: rgba(59, 130, 246, .12);
   color: #93c5fd;
   font-size: 16px;
-  line-height: 1;
 }
 
 details[open] > summary::after { content: "−"; }
-
-summary,
-summary span,
-summary b,
-summary strong {
-  color: #dbe5f2 !important;
-}
+summary, summary span, summary b, summary strong { color: #dbe5f2 !important; }
 
 details {
   margin: 0 0 10px !important;
-  transition: border-color .18s ease, background .18s ease, transform .18s ease;
+  transition: border-color .18s ease, transform .18s ease;
 }
 
 details:hover {
@@ -268,147 +260,151 @@ details:hover {
 }
 
 details[open] > summary {
-  background: #203047 !important;
-  color: #ffffff !important;
   border-bottom: 1px solid #334155 !important;
+  background: #203047 !important;
+  color: #fff !important;
 }
 
 details > table,
 details > div,
-details > form {
-  margin: 0 !important;
+details > form { margin: 0 !important; }
+
+/* Force every legacy Webmin table row into a readable dark theme. */
+details table,
+.ui_table,
+table.sortable,
+table.dataTable,
+table.ui_table {
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  background: #101720 !important;
+  color: #dbe5f2 !important;
 }
 
-.ui_table_body,
-.ui_table_body tr,
+details table thead tr,
+details table tr.ui_table_head,
+.ui_table thead tr,
+table.sortable thead tr,
+table.dataTable thead tr {
+  background: #1c2a3d !important;
+}
+
+details table th,
+details table thead td,
+details table tr.ui_table_head td,
+.ui_table th,
+.ui_table thead td,
+table.sortable th,
+table.dataTable th {
+  padding: 10px 12px !important;
+  border: 0 !important;
+  border-bottom: 1px solid #334155 !important;
+  background: #1c2a3d !important;
+  color: #93c5fd !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  text-align: left !important;
+}
+
+details table tbody tr,
+.ui_table tbody tr,
+table.sortable tbody tr,
+table.dataTable tbody tr {
+  background: #111923 !important;
+}
+
+details table tbody tr:nth-child(even),
+.ui_table tbody tr:nth-child(even),
+table.sortable tbody tr:nth-child(even),
+table.dataTable tbody tr:nth-child(even) {
+  background: #151f2c !important;
+}
+
+details table tbody td,
+.ui_table tbody td,
+table.sortable tbody td,
+table.dataTable tbody td,
 .ui_table_body td,
 .ui_table_body th,
 .formsection td,
 .formsection th,
 table[bgcolor] td,
 table[bgcolor] th {
-  background: #151d29 !important;
+  padding: 9px 12px !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(51, 65, 85, .55) !important;
+  background: transparent !important;
   color: #dbe5f2 !important;
-  border-color: #2b394f !important;
+  vertical-align: middle !important;
 }
 
-.ui_table_body tr:nth-child(even) td,
-table.dataTable tr:nth-child(even) td,
-table.sortable tr:nth-child(even) td { background: #111923 !important; }
+details table tbody tr:hover,
+.ui_table tbody tr:hover,
+table.sortable tbody tr:hover,
+table.dataTable tbody tr:hover {
+  background: #1d2d42 !important;
+}
 
-.ui_table_body tr:hover td,
-table.dataTable tr:hover td,
-table.sortable tr:hover td { background: #1c2a3d !important; }
+details table tbody tr:hover td,
+.ui_table tbody tr:hover td,
+table.sortable tbody tr:hover td,
+table.dataTable tbody tr:hover td {
+  background: transparent !important;
+  color: #fff !important;
+}
+
+details table td a,
+.ui_table td a,
+table.sortable td a,
+table.dataTable td a {
+  color: #60a5fa !important;
+}
 
 body b, body strong, body label, body th { color: #f1f5f9 !important; }
 body td, body p, body span, body div { border-color: #2b394f; }
-a, a:visited { color: #60a5fa !important; }
 
-input[type="submit"], input[type="button"], button {
+input[type="submit"],
+input[type="button"],
+button {
   padding: 8px 12px !important;
   border: 1px solid #3b82f6 !important;
   border-radius: 8px !important;
   background: #2563eb !important;
-  color: #ffffff !important;
-  box-shadow: 0 5px 14px rgba(37,99,235,.2);
+  color: #fff !important;
+  box-shadow: 0 5px 14px rgba(37, 99, 235, .2);
 }
 
 input[type="submit"]:hover,
 input[type="button"]:hover,
-button:hover {
-  background: #3b82f6 !important;
-}
-
-/* Reboot notice: compact, clear and without duplicated generated text. */
-table:has(input[value="Reboot Now"]),
-form:has(input[value="Reboot Now"]) table {
-  width: 100% !important;
-  background: linear-gradient(135deg, #2a1d0f 0%, #171c25 100%) !important;
-  border: 1px solid #8a5a20 !important;
-  border-left: 5px solid #f59e0b !important;
-  border-radius: 14px !important;
-  box-shadow: 0 12px 28px rgba(0,0,0,.24) !important;
-  overflow: hidden !important;
-}
-
-table:has(input[value="Reboot Now"]) td,
-form:has(input[value="Reboot Now"]) table td {
-  padding: 16px 20px !important;
-  background: transparent !important;
-  color: #fed7aa !important;
-  font-size: 13px !important;
-  line-height: 1.5 !important;
-  text-align: center !important;
-}
-
-table:has(input[value="Reboot Now"]) td::before,
-table:has(input[value="Reboot Now"]) td::after,
-form:has(input[value="Reboot Now"]) table td::before,
-form:has(input[value="Reboot Now"]) table td::after {
-  content: none !important;
-  display: none !important;
-}
-
-table:has(input[value="Reboot Now"]) input,
-form:has(input[value="Reboot Now"]) table input {
-  margin: 8px 5px 0 !important;
-  font-size: 13px !important;
-}
+button:hover { background: #3b82f6 !important; }
 
 body input[value="Reboot Now"] {
-  background: #ea580c !important;
   border-color: #fb923c !important;
-  color: #ffffff !important;
-  box-shadow: 0 7px 18px rgba(234,88,12,.3) !important;
+  background: #ea580c !important;
+  color: #fff !important;
+  box-shadow: 0 7px 18px rgba(234, 88, 12, .3) !important;
 }
-
 body input[value="Reboot Now"]:hover { background: #f97316 !important; }
-
 body input[value="Hide Alert"] {
-  background: #273449 !important;
   border-color: #475569 !important;
+  background: #273449 !important;
   color: #e2e8f0 !important;
   box-shadow: none !important;
 }
-
 body input[value="Hide Alert"]:hover { background: #334155 !important; }
-
-/* Legacy login tables now match the dashboard cards. */
-.ui_table,
-table.sortable,
-table.dataTable {
-  width: 100% !important;
-  border-collapse: separate !important;
-  border-spacing: 0 !important;
-}
-
-.ui_table th,
-table.sortable th,
-table.dataTable th {
-  padding: 10px 12px !important;
-  background: #1c2a3d !important;
-  color: #93c5fd !important;
-  font-size: 12px !important;
-  text-align: left !important;
-}
-
-.ui_table td,
-table.sortable td,
-table.dataTable td {
-  padding: 8px 12px !important;
-}
 
 img[src*="bar"], img[src*="usage"] { opacity: 1 !important; }
 
 @media (max-width: 1100px) {
-  .memo-stat-grid, .memo-info-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .memo-stat-grid,
+  .memo-info-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 620px) {
   body { padding: 12px !important; }
   .memo-dashboard-head { align-items: flex-start; padding: 18px; }
   .memo-dashboard-badge { display: none; }
-  .memo-stat-grid, .memo-info-grid { grid-template-columns: 1fr; }
-  table:has(input[value="Reboot Now"]) td,
-  form:has(input[value="Reboot Now"]) table td { padding: 14px !important; }
+  .memo-stat-grid,
+  .memo-info-grid { grid-template-columns: 1fr; }
 }
