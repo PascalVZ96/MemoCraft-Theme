@@ -220,7 +220,40 @@ summary,
   font-weight: 700 !important;
 }
 
-summary { padding: 11px 14px !important; cursor: pointer; }
+summary {
+  padding: 12px 15px !important;
+  cursor: pointer;
+  font-size: 13px !important;
+  letter-spacing: .01em;
+}
+
+summary,
+summary span,
+summary b,
+summary strong {
+  color: #dbe5f2 !important;
+}
+
+details {
+  margin: 0 0 10px !important;
+  transition: border-color .18s ease, background .18s ease;
+}
+
+details:hover {
+  border-color: #3a4d68 !important;
+}
+
+details[open] > summary {
+  background: #203047 !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid #334155 !important;
+}
+
+details > table,
+details > div,
+details > form {
+  margin: 0 !important;
+}
 
 .ui_table_body,
 .ui_table_body tr,
@@ -248,11 +281,70 @@ body td, body p, body span, body div { border-color: #2b394f; }
 a, a:visited { color: #60a5fa !important; }
 
 input[type="submit"], input[type="button"], button {
-  padding: 7px 11px !important;
+  padding: 8px 12px !important;
   border: 1px solid #3b82f6 !important;
   border-radius: 8px !important;
   background: #2563eb !important;
   color: #ffffff !important;
+  box-shadow: 0 5px 14px rgba(37,99,235,.2);
+}
+
+input[type="submit"]:hover,
+input[type="button"]:hover,
+button:hover {
+  background: #3b82f6 !important;
+}
+
+/* Turn the classic pale reboot warning into a dark MemoNetwork alert. */
+table[bgcolor="#ffffcc"],
+table[bgcolor="#ffffe0"],
+table[bgcolor="#fffacd"],
+td[bgcolor="#ffffcc"],
+td[bgcolor="#ffffe0"],
+td[bgcolor="#fffacd"],
+body > table[style*="background"],
+body > div[style*="background-color: rgb(255"] {
+  background: linear-gradient(135deg, #2a2114, #1b1c22) !important;
+  color: #f8fafc !important;
+  border: 1px solid #75551f !important;
+  border-left: 4px solid #f59e0b !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 24px rgba(0,0,0,.18) !important;
+}
+
+table[bgcolor="#ffffcc"] td,
+table[bgcolor="#ffffe0"] td,
+table[bgcolor="#fffacd"] td,
+td[bgcolor="#ffffcc"],
+td[bgcolor="#ffffe0"],
+td[bgcolor="#fffacd"] {
+  background: transparent !important;
+  color: #f7d89a !important;
+}
+
+/* Legacy login tables now match the dashboard cards. */
+.ui_table,
+table.sortable,
+table.dataTable {
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+.ui_table th,
+table.sortable th,
+table.dataTable th {
+  padding: 10px 12px !important;
+  background: #1c2a3d !important;
+  color: #93c5fd !important;
+  font-size: 12px !important;
+  text-align: left !important;
+}
+
+.ui_table td,
+table.sortable td,
+table.dataTable td {
+  padding: 8px 12px !important;
 }
 
 img[src*="bar"], img[src*="usage"] { opacity: 1 !important; }
