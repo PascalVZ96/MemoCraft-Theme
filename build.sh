@@ -22,6 +22,7 @@ TARGET_CSS="$THEME_DIR/unauthenticated/gray-theme.css"
 THEME_PL="$THEME_DIR/theme.pl"
 LEFT_CGI="$THEME_DIR/left.cgi"
 RIGHT_CGI="$THEME_DIR/right.cgi"
+LIVE_STATS_CGI="$THEME_DIR/live-stats.cgi"
 
 fail() {
   echo "FOUT: $*" >&2
@@ -46,11 +47,13 @@ for required in \
   "$TARGET_CSS" \
   "$THEME_PL" \
   "$LEFT_CGI" \
-  "$RIGHT_CGI"; do
+  "$RIGHT_CGI" \
+  "$LIVE_STATS_CGI"; do
   [[ -e "$required" ]] || fail "Ontbreekt: $required"
 done
 
 grep -q '^desc=' "$THEME_DIR/theme.info" || fail "theme.info bevat geen desc="
+chmod 755 "$LIVE_STATS_CGI"
 
 python3 - "$TARGET_CSS" "$SOURCE_CSS" "$FORMS_TABLES_CSS" "$CORE_UI_CSS" <<'PY'
 from pathlib import Path
