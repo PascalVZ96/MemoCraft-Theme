@@ -1,20 +1,18 @@
 /* MEMOCRAFT-CUSTOM-START
-   MemoCraft Theme v1.0 — visual foundation
-   Keep this marker: build.sh uses it to replace this block safely.
+   MemoCraft Theme v1.0
 */
 
 :root {
-    --memo-bg: #0b0f16;
-    --memo-sidebar: #111720;
+    --memo-bg: #0a0f17;
+    --memo-sidebar: #0f1724;
+    --memo-sidebar-soft: #151f2f;
     --memo-panel: #171e29;
     --memo-panel-soft: #202938;
     --memo-border: #334155;
     --memo-accent: #3b82f6;
     --memo-accent-hover: #60a5fa;
     --memo-text: #e8edf5;
-    --memo-muted: #a8b3c4;
-    --memo-success: #22c55e;
-    --memo-warning: #f59e0b;
+    --memo-muted: #94a3b8;
     color-scheme: dark;
 }
 
@@ -33,26 +31,23 @@ button {
     font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
 }
 
-/* Gray Theme uses bgcolor attributes and nested legacy tables. */
-table[bgcolor],
-tbody[bgcolor],
-tr[bgcolor],
-td[bgcolor],
-th[bgcolor],
-body > table,
-body > form > table,
-body > center > table {
-    background-color: var(--memo-panel) !important;
-    color: var(--memo-text) !important;
+a,
+a:visited {
+    color: #60a5fa !important;
 }
 
+a:hover,
+a:focus {
+    color: #93c5fd !important;
+}
+
+/* Main Webmin content foundation */
 .mainbody,
+.wrapper,
+.shrinkwrapper,
 .ui_table,
 .ui_table_body,
-.wrapper,
-.shrinkwrapper {
-    background: var(--memo-panel) !important;
-    color: var(--memo-text) !important;
+.formsection {
     border-color: var(--memo-border) !important;
 }
 
@@ -67,849 +62,242 @@ td.ui_table_head {
     border-color: var(--memo-border) !important;
 }
 
-/* Default text in the dark MemoCraft interface. */
-body {
-    color: var(--memo-text);
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="search"],
+textarea,
+select {
+    background: #111827 !important;
+    color: #f8fafc !important;
+    border: 1px solid #475569 !important;
+    border-radius: 7px !important;
 }
 
-/* Text inside confirmed dark containers. */
-.wrapper,
-.shrinkwrapper,
-.leftmenu,
-.maintitle,
-.ui_table_head,
-.ui_table > thead,
-.ui_table > thead td,
-.ui_table > thead th {
-    color: var(--memo-text) !important;
+input[type="submit"],
+input[type="button"],
+button,
+.ui_submit {
+    background: var(--memo-accent) !important;
+    color: #ffffff !important;
+    border: 1px solid var(--memo-accent) !important;
+    border-radius: 7px !important;
+    cursor: pointer;
 }
 
-/* Legacy Webmin content can still have a light background. */
-.ui_table_body,
-.ui_table_body td,
-.ui_table_body th,
-.formsection td,
-table[bgcolor="#ffffff"] td,
-table[bgcolor="white"] td {
-    color: #1f2937;
+input[type="submit"]:hover,
+input[type="button"]:hover,
+button:hover,
+.ui_submit:hover {
+    background: var(--memo-accent-hover) !important;
+    border-color: var(--memo-accent-hover) !important;
 }
 
-/* Phase 1: force the Gray Theme dashboard and accordion panels dark. */
-body > table,
-body > form > table,
-table.formsection,
-table.ui_table,
-table.dataTable,
-table.sortable,
-table[width="100%"] {
-    background: var(--memo-panel) !important;
+/* MemoCraft sidebar */
+body:has(.leftmenu) {
+    margin: 0 !important;
+    overflow-x: hidden;
+    background: var(--memo-sidebar) !important;
 }
 
-tr:nth-child(even) > td:not([class]),
-.ui_table_body tr:nth-child(even) > td {
-    background-color: #141b25 !important;
+.leftmenu.wrapper,
+.leftmenu {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: var(--memo-sidebar) !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    overflow: hidden;
 }
 
-tr:nth-child(odd) > td:not([class]),
-.ui_table_body tr:nth-child(odd) > td {
-    background-color: var(--memo-panel) !important;
+.memo-brand {
+    display: flex !important;
+    align-items: center !important;
+    gap: 11px !important;
+    box-sizing: border-box;
+    min-height: 76px;
+    padding: 15px 14px !important;
+    background: linear-gradient(180deg, #172235 0%, #121b29 100%) !important;
+    border-bottom: 1px solid #29374b !important;
 }
 
-/* Gray Theme section headers often use pale blue inline backgrounds. */
-tr[bgcolor="#d9e6f7"] > td,
-tr[bgcolor="#d6e4f7"] > td,
-tr[bgcolor="#c9dbf5"] > td,
-td[bgcolor="#d9e6f7"],
-td[bgcolor="#d6e4f7"],
-td[bgcolor="#c9dbf5"] {
-    background: var(--memo-panel-soft) !important;
+.memo-brand-icon {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    border-radius: 12px !important;
+    background: linear-gradient(135deg, #2563eb, #7c3aed) !important;
+    color: #ffffff !important;
+    font-size: 21px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    box-shadow: 0 8px 22px rgba(59, 130, 246, .28) !important;
+}
+
+.memo-brand-copy {
+    display: flex !important;
+    flex-direction: column !important;
+    min-width: 0;
+}
+
+.memo-brand-copy strong {
+    display: block !important;
+    color: #ffffff !important;
+    font-size: 16px !important;
+    font-weight: 750 !important;
+    line-height: 1.2 !important;
+}
+
+.memo-brand-copy span {
+    display: block !important;
+    margin-top: 3px !important;
+    color: var(--memo-muted) !important;
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+    letter-spacing: .02em;
+}
+
+.memo-menu-content {
+    box-sizing: border-box;
+    padding: 10px 9px 18px !important;
+}
+
+.leftmenu #main,
+.leftmenu #main tbody,
+.leftmenu #main tr,
+.leftmenu #main td {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+}
+
+.leftmenu details {
+    margin: 3px 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 9px !important;
+    background: transparent !important;
+    overflow: hidden;
+}
+
+.leftmenu summary {
+    box-sizing: border-box;
+    padding: 10px 10px !important;
+    border-radius: 8px !important;
+    color: #cbd5e1 !important;
+    font-size: 12px !important;
+    font-weight: 650 !important;
+    line-height: 1.25 !important;
+    cursor: pointer;
+}
+
+.leftmenu summary:hover,
+.leftmenu details[open] > summary {
+    background: #1d2a3d !important;
     color: #ffffff !important;
 }
 
-/* Sidebar foundation. */
-body.leftpage,
-body#leftpage,
-#leftmenu,
-.leftmenu,
-.menu,
-#menu {
-    background: var(--memo-sidebar) !important;
-    color: var(--memo-text) !important;
+.leftmenu summary span {
+    color: inherit !important;
 }
 
-/* Alerts and information boxes. */
-table[bgcolor="#fffceb"],
-td[bgcolor="#fffceb"],
-table[bgcolor="#ffffcc"],
-td[bgcolor="#ffffcc"] {
-    background: #2a2415 !important;
-    color: #fde68a !important;
-    border-color: #66521c !important;
+.leftmenu .leftlink,
+.leftmenu .linkindented,
+.leftmenu .aftericon,
+.leftmenu .linkwithicon {
+    box-sizing: border-box !important;
 }
 
-::-webkit-scrollbar {
-    width: 11px;
-    height: 11px;
+.leftmenu .linkwithicon {
+    display: flex !important;
+    align-items: center !important;
+    margin: 3px 0 !important;
+    border-radius: 8px !important;
 }
 
-::-webkit-scrollbar-track {
-    background: var(--memo-bg);
+.leftmenu .linkwithicon > img,
+.leftmenu .linkwithicon > i {
+    width: 18px !important;
+    min-width: 18px !important;
+    margin-left: 9px !important;
 }
 
-::-webkit-scrollbar-thumb {
-    background: #475569;
-    border: 3px solid var(--memo-bg);
-    border-radius: 10px;
-}
-/* Donkere dashboardpanelen */
-body > table,
-body > form > table,
-table[bgcolor="#ffffff"],
-table[bgcolor="white"],
-td[bgcolor="#ffffff"],
-td[bgcolor="white"],
-.ui_table,
-.ui_table_body,
-.formsection,
-.wrapper,
-.shrinkwrapper {
-    background-color: #171e29 !important;
-    color: #e8edf5 !important;
+.leftmenu .linkwithicon .aftericon {
+    flex: 1;
+    margin: 0 !important;
 }
 
-.ui_table td,
-.ui_table th,
+.leftmenu a {
+    display: block !important;
+    box-sizing: border-box;
+    padding: 8px 9px !important;
+    border-radius: 7px !important;
+    color: #bdc9da !important;
+    font-size: 12px !important;
+    line-height: 1.25 !important;
+    text-decoration: none !important;
+}
+
+.leftmenu a:hover,
+.leftmenu a:focus {
+    background: #24344d !important;
+    color: #ffffff !important;
+}
+
+.leftmenu hr {
+    margin: 10px 3px !important;
+    border: 0 !important;
+    border-top: 1px solid #304057 !important;
+}
+
+.leftmenu form {
+    margin: 0 !important;
+}
+
+.leftmenu input[type="text"],
+.leftmenu input[type="search"] {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: 36px !important;
+    margin: 0 !important;
+    padding: 0 10px !important;
+    background: #0d1522 !important;
+    color: #ffffff !important;
+    border: 1px solid #3b4b63 !important;
+    border-radius: 8px !important;
+}
+
+.leftmenu input::placeholder {
+    color: #718096 !important;
+}
+
+.leftmenu .mode {
+    margin: 8px !important;
+    padding: 8px !important;
+    border-radius: 9px !important;
+    background: var(--memo-sidebar-soft) !important;
+}
+
+.leftmenu .mode b {
+    display: block !important;
+    color: #ffffff !important;
+}
+
+/* Keep legacy dashboard text readable until the dashboard rewrite. */
 .ui_table_body td,
 .ui_table_body th,
 .formsection td,
 .formsection th {
-    color: #e8edf5 !important;
+    color: #111827 !important;
 }
 
-tr[bgcolor="#d9e6f7"],
-tr[bgcolor="#d6e4f7"],
-tr[bgcolor="#c9dbf5"],
-tr[bgcolor="#e0e8f0"],
-td[bgcolor="#d9e6f7"],
-td[bgcolor="#d6e4f7"],
-td[bgcolor="#c9dbf5"],
-td[bgcolor="#e0e8f0"] {
-    background-color: #202938 !important;
-    color: #ffffff !important;
-}
 /* MEMOCRAFT-CUSTOM-END */
-
-/* MemoCraft moderne zijbalk */
-.leftmenu {
-    box-sizing: border-box !important;
-    min-height: 100vh !important;
-    padding: 0 !important;
-    background: #0f1520 !important;
-    border: 0 !important;
-}
-
-.leftmenu #main,
-.leftmenu #main tbody,
-.leftmenu #main tr,
-.leftmenu #main td {
-    background: transparent !important;
-    border: 0 !important;
-}
-
-.memo-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 20px 16px;
-    margin-bottom: 8px;
-    border-bottom: 1px solid #293244;
-    background: #121a27;
-}
-
-.memo-brand-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 42px;
-    height: 42px;
-    flex: 0 0 42px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #2563eb, #7c3aed);
-    color: #ffffff !important;
-    font-size: 22px;
-    font-weight: 800;
-    box-shadow: 0 8px 20px rgba(59, 130, 246, .25);
-}
-
-.memo-brand-text {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-
-.memo-brand-text strong {
-    color: #ffffff !important;
-    font-size: 17px;
-    line-height: 1.2;
-}
-
-.memo-brand-text span {
-    color: #8fa0b8 !important;
-    font-size: 11px;
-    margin-top: 3px;
-}
-
-.memo-menu-content {
-    padding: 8px 10px 18px;
-}
-
-.leftmenu details {
-    margin: 3px 0;
-    border: 0 !important;
-    border-radius: 8px;
-    overflow: hidden;
-    background: transparent !important;
-}
-
-.leftmenu summary {
-    box-sizing: border-box;
-    padding: 10px 11px;
-    border-radius: 8px;
-    color: #cbd5e1 !important;
-    font-weight: 600;
-    cursor: pointer;
-    list-style-position: inside;
-}
-
-.leftmenu summary:hover {
-    background: #1b2534 !important;
-    color: #ffffff !important;
-}
-
-.leftmenu summary span {
-    color: inherit !important;
-}
-
-.leftmenu .leftlink,
-.leftmenu .linkindented,
-.leftmenu .aftericon,
-.leftmenu .linkwithicon {
-    box-sizing: border-box;
-}
-
-.leftmenu .leftlink,
-.leftmenu .linkindented,
-.leftmenu .aftericon {
-    margin: 2px 0;
-    border-radius: 7px;
-}
-
-.leftmenu a {
-    display: block;
-    box-sizing: border-box;
-    padding: 8px 10px;
-    border-radius: 7px;
-    color: #b8c4d6 !important;
-    text-decoration: none !important;
-    line-height: 1.25;
-}
-
-.leftmenu a:hover,
-.leftmenu a:focus {
-    background: #243147 !important;
-    color: #ffffff !important;
-}
-
-.leftmenu .linkwithicon {
-    display: flex;
-    align-items: center;
-    margin: 3px 0;
-    border-radius: 8px;
-}
-
-.leftmenu .linkwithicon > img,
-.leftmenu .linkwithicon > i {
-    width: 18px;
-    margin-left: 10px;
-    flex: 0 0 18px;
-}
-
-.leftmenu .linkwithicon .aftericon {
-    flex: 1;
-}
-
-.leftmenu hr {
-    margin: 10px 4px;
-    border: 0 !important;
-    border-top: 1px solid #293244 !important;
-}
-
-.leftmenu input[type="text"],
-.leftmenu input[type="search"] {
-    box-sizing: border-box;
-    width: 100% !important;
-    height: 36px;
-    padding: 0 11px;
-    background: #111827 !important;
-    color: #ffffff !important;
-    border: 1px solid #334155 !important;
-    border-radius: 8px !important;
-}
-
-.leftmenu input::placeholder {
-    color: #718096 !important;
-}
-
-.leftmenu .mode {
-    margin: 10px;
-    padding: 8px;
-    border-radius: 9px;
-    background: #151e2b !important;
-}
-
-.leftmenu .mode b {
-    display: block;
-    color: #ffffff !important;
-}
-EOFcat >> src/memocraft.css <<'EOF'
-
-/* MemoCraft moderne zijbalk */
-.leftmenu {
-    box-sizing: border-box !important;
-    min-height: 100vh !important;
-    padding: 0 !important;
-    background: #0f1520 !important;
-    border: 0 !important;
-}
-
-.leftmenu #main,
-.leftmenu #main tbody,
-.leftmenu #main tr,
-.leftmenu #main td {
-    background: transparent !important;
-    border: 0 !important;
-}
-
-.memo-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 20px 16px;
-    margin-bottom: 8px;
-    border-bottom: 1px solid #293244;
-    background: #121a27;
-}
-
-.memo-brand-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 42px;
-    height: 42px;
-    flex: 0 0 42px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #2563eb, #7c3aed);
-    color: #ffffff !important;
-    font-size: 22px;
-    font-weight: 800;
-    box-shadow: 0 8px 20px rgba(59, 130, 246, .25);
-}
-
-.memo-brand-text {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-
-.memo-brand-text strong {
-    color: #ffffff !important;
-    font-size: 17px;
-    line-height: 1.2;
-}
-
-.memo-brand-text span {
-    color: #8fa0b8 !important;
-    font-size: 11px;
-    margin-top: 3px;
-}
-
-.memo-menu-content {
-    padding: 8px 10px 18px;
-}
-
-.leftmenu details {
-    margin: 3px 0;
-    border: 0 !important;
-    border-radius: 8px;
-    overflow: hidden;
-    background: transparent !important;
-}
-
-.leftmenu summary {
-    box-sizing: border-box;
-    padding: 10px 11px;
-    border-radius: 8px;
-    color: #cbd5e1 !important;
-    font-weight: 600;
-    cursor: pointer;
-    list-style-position: inside;
-}
-
-.leftmenu summary:hover {
-    background: #1b2534 !important;
-    color: #ffffff !important;
-}
-
-.leftmenu summary span {
-    color: inherit !important;
-}
-
-.leftmenu .leftlink,
-.leftmenu .linkindented,
-.leftmenu .aftericon,
-.leftmenu .linkwithicon {
-    box-sizing: border-box;
-}
-
-.leftmenu .leftlink,
-.leftmenu .linkindented,
-.leftmenu .aftericon {
-    margin: 2px 0;
-    border-radius: 7px;
-}
-
-.leftmenu a {
-    display: block;
-    box-sizing: border-box;
-    padding: 8px 10px;
-    border-radius: 7px;
-    color: #b8c4d6 !important;
-    text-decoration: none !important;
-    line-height: 1.25;
-}
-
-.leftmenu a:hover,
-.leftmenu a:focus {
-    background: #243147 !important;
-    color: #ffffff !important;
-}
-
-.leftmenu .linkwithicon {
-    display: flex;
-    align-items: center;
-    margin: 3px 0;
-    border-radius: 8px;
-}
-
-.leftmenu .linkwithicon > img,
-.leftmenu .linkwithicon > i {
-    width: 18px;
-    margin-left: 10px;
-    flex: 0 0 18px;
-}
-
-.leftmenu .linkwithicon .aftericon {
-    flex: 1;
-}
-
-.leftmenu hr {
-    margin: 10px 4px;
-    border: 0 !important;
-    border-top: 1px solid #293244 !important;
-}
-
-.leftmenu input[type="text"],
-.leftmenu input[type="search"] {
-    box-sizing: border-box;
-    width: 100% !important;
-    height: 36px;
-    padding: 0 11px;
-    background: #111827 !important;
-    color: #ffffff !important;
-    border: 1px solid #334155 !important;
-    border-radius: 8px !important;
-}
-
-.leftmenu input::placeholder {
-    color: #718096 !important;
-}
-
-.leftmenu .mode {
-    margin: 10px;
-    padding: 8px;
-    border-radius: 9px;
-    background: #151e2b !important;
-}
-
-.leftmenu .mode b {
-    display: block;
-    color: #ffffff !important;
-}
-
-/* MemoCraft moderne zijbalk */
-.leftmenu {
-    box-sizing: border-box !important;
-    min-height: 100vh !important;
-    padding: 0 !important;
-    background: #0f1520 !important;
-    border: 0 !important;
-}
-
-.leftmenu #main,
-.leftmenu #main tbody,
-.leftmenu #main tr,
-.leftmenu #main td {
-    background: transparent !important;
-    border: 0 !important;
-}
-
-.memo-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 20px 16px;
-    margin-bottom: 8px;
-    border-bottom: 1px solid #293244;
-    background: #121a27;
-}
-
-.memo-brand-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 42px;
-    height: 42px;
-    flex: 0 0 42px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #2563eb, #7c3aed);
-    color: #ffffff !important;
-    font-size: 22px;
-    font-weight: 800;
-}
-
-.memo-brand-text {
-    display: flex;
-    flex-direction: column;
-}
-
-.memo-brand-text strong {
-    color: #ffffff !important;
-    font-size: 17px;
-}
-
-.memo-brand-text span {
-    color: #8fa0b8 !important;
-    font-size: 11px;
-    margin-top: 3px;
-}
-
-.memo-menu-content {
-    padding: 8px 10px 18px;
-}
-
-.leftmenu details {
-    margin: 3px 0;
-    border: 0 !important;
-    border-radius: 8px;
-    background: transparent !important;
-}
-
-.leftmenu summary {
-    box-sizing: border-box;
-    padding: 10px 11px;
-    border-radius: 8px;
-    color: #cbd5e1 !important;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.leftmenu summary:hover {
-    background: #1b2534 !important;
-    color: #ffffff !important;
-}
-
-.leftmenu summary span {
-    color: inherit !important;
-}
-
-.leftmenu .leftlink,
-.leftmenu .linkindented,
-.leftmenu .aftericon {
-    margin: 2px 0;
-    border-radius: 7px;
-}
-
-.leftmenu a {
-    display: block;
-    box-sizing: border-box;
-    padding: 8px 10px;
-    border-radius: 7px;
-    color: #b8c4d6 !important;
-    text-decoration: none !important;
-}
-
-.leftmenu a:hover,
-.leftmenu a:focus {
-    background: #243147 !important;
-    color: #ffffff !important;
-}
-
-.leftmenu hr {
-    margin: 10px 4px;
-    border: 0 !important;
-    border-top: 1px solid #293244 !important;
-}
-
-.leftmenu input[type="text"],
-.leftmenu input[type="search"] {
-    box-sizing: border-box;
-    width: 100% !important;
-    height: 36px;
-    padding: 0 11px;
-    background: #111827 !important;
-    color: #ffffff !important;
-    border: 1px solid #334155 !important;
-    border-radius: 8px !important;
-}
-EOFcat >> src/memocraft.css <<'EOF'
-
-/* MemoCraft moderne zijbalk */
-.leftmenu {
-    box-sizing: border-box !important;
-    min-height: 100vh !important;
-    padding: 0 !important;
-    background: #0f1520 !important;
-    border: 0 !important;
-}
-
-.leftmenu #main,
-.leftmenu #main tbody,
-.leftmenu #main tr,
-.leftmenu #main td {
-    background: transparent !important;
-    border: 0 !important;
-}
-
-.memo-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 20px 16px;
-    margin-bottom: 8px;
-    border-bottom: 1px solid #293244;
-    background: #121a27;
-}
-
-.memo-brand-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 42px;
-    height: 42px;
-    flex: 0 0 42px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #2563eb, #7c3aed);
-    color: #ffffff !important;
-    font-size: 22px;
-    font-weight: 800;
-}
-
-.memo-brand-text {
-    display: flex;
-    flex-direction: column;
-}
-
-.memo-brand-text strong {
-    color: #ffffff !important;
-    font-size: 17px;
-}
-
-.memo-brand-text span {
-    color: #8fa0b8 !important;
-    font-size: 11px;
-    margin-top: 3px;
-}
-
-.memo-menu-content {
-    padding: 8px 10px 18px;
-}
-
-.leftmenu details {
-    margin: 3px 0;
-    border: 0 !important;
-    border-radius: 8px;
-    background: transparent !important;
-}
-
-.leftmenu summary {
-    box-sizing: border-box;
-    padding: 10px 11px;
-    border-radius: 8px;
-    color: #cbd5e1 !important;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.leftmenu summary:hover {
-    background: #1b2534 !important;
-    color: #ffffff !important;
-}
-
-.leftmenu summary span {
-    color: inherit !important;
-}
-
-.leftmenu .leftlink,
-.leftmenu .linkindented,
-.leftmenu .aftericon {
-    margin: 2px 0;
-    border-radius: 7px;
-}
-
-.leftmenu a {
-    display: block;
-    box-sizing: border-box;
-    padding: 8px 10px;
-    border-radius: 7px;
-    color: #b8c4d6 !important;
-    text-decoration: none !important;
-}
-
-.leftmenu a:hover,
-.leftmenu a:focus {
-    background: #243147 !important;
-    color: #ffffff !important;
-}
-
-.leftmenu hr {
-    margin: 10px 4px;
-    border: 0 !important;
-    border-top: 1px solid #293244 !important;
-}
-
-.leftmenu input[type="text"],
-.leftmenu input[type="search"] {
-    box-sizing: border-box;
-    width: 100% !important;
-    height: 36px;
-    padding: 0 11px;
-    background: #111827 !important;
-    color: #ffffff !important;
-    border: 1px solid #334155 !important;
-    border-radius: 8px !important;
-}
-
-/* MEMOCRAFT-SIDEBAR-START */
-.leftmenu {
-    min-height: 100vh !important;
-    padding: 0 !important;
-    border: 0 !important;
-    background: #0f1520 !important;
-}
-
-.leftmenu #main,
-.leftmenu #main tbody,
-.leftmenu #main tr,
-.leftmenu #main td {
-    background: transparent !important;
-    border: 0 !important;
-}
-
-.memo-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 18px 14px;
-    border-bottom: 1px solid #2c3749;
-    background: #131b28;
-}
-
-.memo-brand-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 42px;
-    height: 42px;
-    flex: 0 0 42px;
-    border-radius: 11px;
-    background: linear-gradient(135deg, #2563eb, #7c3aed);
-    color: #ffffff !important;
-    font-size: 22px;
-    font-weight: 800;
-}
-
-.memo-brand-copy {
-    display: flex;
-    flex-direction: column;
-}
-
-.memo-brand-copy strong {
-    color: #ffffff !important;
-    font-size: 17px;
-}
-
-.memo-brand-copy span {
-    margin-top: 3px;
-    color: #94a3b8 !important;
-    font-size: 11px;
-}
-
-.memo-menu-content {
-    padding: 10px;
-}
-
-.leftmenu details {
-    margin: 3px 0;
-    border: 0 !important;
-    background: transparent !important;
-}
-
-.leftmenu summary {
-    padding: 9px 10px;
-    border-radius: 7px;
-    color: #d3dbe8 !important;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.leftmenu summary:hover {
-    background: #202c3d !important;
-    color: #ffffff !important;
-}
-
-.leftmenu summary span {
-    color: inherit !important;
-}
-
-.leftmenu a {
-    display: block;
-    padding: 8px 10px;
-    border-radius: 7px;
-    color: #c2ccdb !important;
-    text-decoration: none !important;
-}
-
-.leftmenu a:hover {
-    background: #243249 !important;
-    color: #ffffff !important;
-}
-
-.leftmenu hr {
-    margin: 10px 3px;
-    border: 0 !important;
-    border-top: 1px solid #334155 !important;
-}
-
-.leftmenu input[type="text"],
-.leftmenu input[type="search"] {
-    box-sizing: border-box;
-    width: 100% !important;
-    height: 36px;
-    padding: 0 10px;
-    background: #111827 !important;
-    color: #ffffff !important;
-    border: 1px solid #3b4a60 !important;
-    border-radius: 8px !important;
-}
-/* MEMOCRAFT-SIDEBAR-END */
-
