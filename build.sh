@@ -62,6 +62,9 @@ source = Path(sys.argv[2])
 text = left.read_text(encoding="utf-8")
 css = source.read_text(encoding="utf-8").strip()
 
+# Keep old source files compatible while changing the visible product name.
+text = text.replace("<strong>MemoCraft</strong>", "<strong>MemoNetwork</strong>")
+
 start = "<!-- MEMOCRAFT-SIDEBAR-STYLE-START -->"
 end = "<!-- MEMOCRAFT-SIDEBAR-STYLE-END -->"
 block = (
@@ -91,7 +94,7 @@ else:
 left.write_text(text, encoding="utf-8")
 PY
 
-# Inline the dashboard stylesheet and MemoCraft heading in right.cgi.
+# Inline the dashboard stylesheet and MemoNetwork heading in right.cgi.
 python3 - "$RIGHT_CGI" "$DASHBOARD_CSS" <<'PY'
 from pathlib import Path
 import re
@@ -109,7 +112,7 @@ block = (
     + start + "\n<style>\n"
     + css + "\n</style>\n"
     + "<div class=\"memo-dashboard-head\">\n"
-    + "  <div><h1 class=\"memo-dashboard-title\">MemoCraft Dashboard</h1>"
+    + "  <div><h1 class=\"memo-dashboard-title\">MemoNetwork Dashboard</h1>"
     + "<p class=\"memo-dashboard-subtitle\">Serverstatus en systeeminformatie</p></div>\n"
     + "  <div class=\"memo-dashboard-badge\">Webmin 2.653</div>\n"
     + "</div>\n"
