@@ -1,9 +1,10 @@
-/* MemoNetwork Forms & Tables 2.0 */
+/* MemoNetwork Forms, Tables & Modules 3.0 */
 
 body:not(.memonetwork-login) .ui_table,
 body:not(.memonetwork-login) .formsection,
 body:not(.memonetwork-login) .sortable,
-body:not(.memonetwork-login) table.wrapper {
+body:not(.memonetwork-login) table.wrapper,
+body:not(.memonetwork-login) table.shrinkwrapper {
   border: 1px solid #2b3b52 !important;
   border-radius: 14px !important;
   border-collapse: separate !important;
@@ -39,8 +40,16 @@ body:not(.memonetwork-login) .sortable thead th {
 
 body:not(.memonetwork-login) .ui_table tbody,
 body:not(.memonetwork-login) .formsection tbody,
-body:not(.memonetwork-login) .sortable tbody {
+body:not(.memonetwork-login) .sortable tbody,
+body:not(.memonetwork-login) .ui_table_body,
+body:not(.memonetwork-login) .ui_table_body > td,
+body:not(.memonetwork-login) .ui_table_body > td > table,
+body:not(.memonetwork-login) .formsection > tbody > tr > td,
+body:not(.memonetwork-login) .shrinkwrapper > tbody,
+body:not(.memonetwork-login) .shrinkwrapper > tbody > tr,
+body:not(.memonetwork-login) .shrinkwrapper > tbody > tr > td {
   background: #111a27 !important;
+  color: #d8e2ef !important;
 }
 
 body:not(.memonetwork-login) .ui_table tbody tr,
@@ -81,6 +90,12 @@ body:not(.memonetwork-login) .ui_form_label label {
   color: #aebdd0 !important;
   font-size: 12px !important;
   font-weight: 700 !important;
+}
+
+body:not(.memonetwork-login) .ui_form_value,
+body:not(.memonetwork-login) .ui_form_value b,
+body:not(.memonetwork-login) .ui_form_value label {
+  color: #d8e2ef !important;
 }
 
 body:not(.memonetwork-login) input[type="text"],
@@ -161,8 +176,73 @@ body:not(.memonetwork-login) table.ui_form_end_buttons td {
   background: transparent !important;
 }
 
+/* Legacy Webmin module overview -> modern card grid */
+body:not(.memonetwork-login) table.icons_table {
+  width: 100% !important;
+  border: 0 !important;
+  border-collapse: separate !important;
+  border-spacing: 12px !important;
+  background: transparent !important;
+}
+
+body:not(.memonetwork-login) table.icons_table > tbody > tr {
+  background: transparent !important;
+}
+
+body:not(.memonetwork-login) table.icons_table > tbody > tr > td {
+  min-width: 170px !important;
+  padding: 16px 12px !important;
+  border: 1px solid #2b3b52 !important;
+  border-radius: 13px !important;
+  background: linear-gradient(145deg, #172234, #121b29) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .17) !important;
+  transition: transform .16s ease, border-color .16s ease, background .16s ease !important;
+}
+
+body:not(.memonetwork-login) table.icons_table > tbody > tr > td:hover {
+  transform: translateY(-2px) !important;
+  border-color: #3d5a7d !important;
+  background: linear-gradient(145deg, #1b2b41, #142033) !important;
+}
+
+body:not(.memonetwork-login) table.icons_table img {
+  width: 42px !important;
+  height: 42px !important;
+  object-fit: contain !important;
+  margin-bottom: 7px !important;
+}
+
+body:not(.memonetwork-login) table.icons_table a {
+  color: #8fc1ff !important;
+  font-size: 12px !important;
+  font-weight: 650 !important;
+  text-decoration: none !important;
+}
+
 body:not(.memonetwork-login) code,
 body:not(.memonetwork-login) pre,
 body:not(.memonetwork-login) tt {
   color: #bfdbfe !important;
+}
+
+@media (max-width: 900px) {
+  body:not(.memonetwork-login) table.icons_table,
+  body:not(.memonetwork-login) table.icons_table tbody,
+  body:not(.memonetwork-login) table.icons_table tr {
+    display: block !important;
+  }
+
+  body:not(.memonetwork-login) table.icons_table > tbody > tr > td {
+    display: inline-block !important;
+    box-sizing: border-box !important;
+    width: calc(50% - 12px) !important;
+    margin: 6px !important;
+    vertical-align: top !important;
+  }
+}
+
+@media (max-width: 560px) {
+  body:not(.memonetwork-login) table.icons_table > tbody > tr > td {
+    width: calc(100% - 12px) !important;
+  }
 }
