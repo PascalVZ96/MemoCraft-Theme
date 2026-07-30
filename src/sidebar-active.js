@@ -21,7 +21,36 @@
     return "";
   };
 
+  const openDashboard = () => {
+    try {
+      if (parent && parent.frames && parent.frames.length > 1) {
+        parent.frames[1].location.href = "/right.cgi";
+      } else {
+        window.top.location.href = "/right.cgi";
+      }
+    } catch (_error) {
+      window.top.location.href = "/right.cgi";
+    }
+  };
+
+  const setupBrand = () => {
+    const brand = document.querySelector('.memo-brand');
+    if (!brand || brand.dataset.memoReady === '1') return;
+    brand.dataset.memoReady = '1';
+    brand.setAttribute('role', 'link');
+    brand.setAttribute('tabindex', '0');
+    brand.setAttribute('aria-label', 'Ga naar MemoNetwork Dashboard');
+    brand.addEventListener('click', openDashboard);
+    brand.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openDashboard();
+      }
+    });
+  };
+
   const updateActiveLink = () => {
+    setupBrand();
     const current = normalize(currentContentUrl());
     if (!current) return;
 
