@@ -1,0 +1,95 @@
+/* MemoNetwork Sidebar 3.1 overrides */
+
+/* Logo: fully visible, no glow or overlay */
+.memo-brand {
+    height: 126px !important;
+    min-height: 126px !important;
+    border-bottom: 1px solid #243249 !important;
+    background-color: #0d1623 !important;
+    background-image: url("https://memocraft.nl/images/MemoNetworkLogo.png") !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: calc(100% - 30px) auto !important;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .18) !important;
+}
+
+.memo-brand::before,
+.memo-brand::after {
+    display: none !important;
+    content: none !important;
+}
+
+.memo-menu-content {
+    padding-top: 12px !important;
+}
+
+/* Search alignment */
+.leftmenu input[type="text"],
+.leftmenu input[type="search"] {
+    height: 40px !important;
+    margin-bottom: 10px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    line-height: 40px !important;
+    background-position: 14px 12px, 24px 24px !important;
+}
+
+/* Quieter category headings */
+.leftmenu summary {
+    min-height: 36px !important;
+    padding: 9px 31px 9px 12px !important;
+    color: #7f91a9 !important;
+    font-size: 10px !important;
+    font-weight: 750 !important;
+    letter-spacing: .105em !important;
+}
+
+.leftmenu summary::after {
+    content: "⌄" !important;
+    top: 9px !important;
+    right: 12px !important;
+    font-size: 13px !important;
+    line-height: 16px !important;
+    transform: rotate(-90deg) !important;
+}
+
+.leftmenu details[open] > summary::after {
+    transform: rotate(0deg) !important;
+}
+
+.leftmenu summary:hover,
+.leftmenu details[open] > summary {
+    background: rgba(30, 43, 63, .72) !important;
+    color: #b9c7d9 !important;
+}
+
+/* Stronger active state */
+.leftmenu a.memo-active,
+.leftmenu a.active,
+.leftmenu .selected > a,
+.leftmenu .current > a,
+.leftmenu .linkwithicon:has(a.memo-active),
+.leftmenu .linkwithicon:has(a.active),
+.leftmenu .linkwithicon.selected,
+.leftmenu .linkwithicon.current {
+    background: linear-gradient(90deg, rgba(37, 99, 235, .58), rgba(37, 99, 235, .24)) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: inset 4px 0 0 #7db7ff, 0 7px 18px rgba(37, 99, 235, .20) !important;
+}
+
+.leftmenu a.memo-active::after,
+.leftmenu a.active::after,
+.leftmenu .selected > a::after,
+.leftmenu .current > a::after {
+    content: "" !important;
+    position: absolute !important;
+    top: 50% !important;
+    right: 11px !important;
+    width: 6px !important;
+    height: 6px !important;
+    margin-top: -3px !important;
+    border-radius: 50% !important;
+    background: #bfdbfe !important;
+    box-shadow: 0 0 10px rgba(147, 197, 253, .8) !important;
+}
