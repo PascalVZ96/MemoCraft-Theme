@@ -7,7 +7,9 @@ DIST_DIR="$ROOT_DIR/dist"
 OUTPUT="$DIST_DIR/memocraft-theme.wbt.gz"
 LISTING="$DIST_DIR/package-files.txt"
 SOURCE_CSS="$ROOT_DIR/src/memocraft.css"
+SIDEBAR_CSS="$ROOT_DIR/src/sidebar.css"
 TARGET_CSS="$THEME_DIR/unauthenticated/gray-theme.css"
+LEFT_CGI="$THEME_DIR/left.cgi"
 
 fail() {
   echo "FOUT: $*" >&2
@@ -17,7 +19,9 @@ fail() {
 [[ -d "$THEME_DIR" ]] || fail "Map ontbreekt: $THEME_DIR"
 [[ -f "$THEME_DIR/theme.info" ]] || fail "theme.info ontbreekt"
 [[ -f "$SOURCE_CSS" ]] || fail "Bron-CSS ontbreekt: $SOURCE_CSS"
+[[ -f "$SIDEBAR_CSS" ]] || fail "Zijbalk-CSS ontbreekt: $SIDEBAR_CSS"
 [[ -f "$TARGET_CSS" ]] || fail "Gray Theme CSS ontbreekt: $TARGET_CSS"
+[[ -f "$LEFT_CGI" ]] || fail "left.cgi ontbreekt: $LEFT_CGI"
 grep -q '^desc=' "$THEME_DIR/theme.info" || fail "theme.info bevat geen desc="
 
 # Replace an earlier MemoCraft block instead of appending duplicates on every build.
@@ -41,6 +45,47 @@ else:
 
 custom = source.read_text(encoding="utf-8").strip() + "\n"
 target.write_text(css + custom, encoding="utf-8")
+PY
+
+# Inline the sidebar stylesheet in left.cgi. This avoids Gray Theme path
+# resolution from overriding or skipping the MemoCraft sidebar rules.
+python3 - "$LEFT_CGI" "$SIDEBAR_CSS" <<'PY'
+from pathlib import Path
+import re
+import sys
+
+left = Path(sys.argv[1])
+source = Path(sys.argv[2])
+text = left.read_text(encoding="utf-8")
+css = source.read_text(encoding="utf-8").strip()
+
+start = "<!-- MEMOCRAFT-SIDEBAR-STYLE-START -->"
+end = "<!-- MEMOCRAFT-SIDEBAR-STYLE-END -->"
+block = (
+    'print <<\'MEMOCRAFT_SIDEBAR_STYLE\';\n'
+    + start + "\n<style>\n"
+    + css + "\n</style>\n"
+    + end + "\nMEMOCRAFT_SIDEBAR_STYLE\n"
+)
+
+pattern = re.compile(
+    r"print <<'MEMOCRAFT_SIDEBAR_STYLE';\n"
+    + re.escape(start)
+    + r".*?"
+    + re.escape(end)
+    + r"\nMEMOCRAFT_SIDEBAR_STYLE\n",
+    re.S,
+)
+
+if pattern.search(text):
+    text = pattern.sub(block, text, count=1)
+else:
+    needle = 'popup_header("Virtualmin");\n'
+    if needle not in text:
+        raise SystemExit("FOUT: popup_header in left.cgi niet gevonden")
+    text = text.replace(needle, needle + block, 1)
+
+left.write_text(text, encoding="utf-8")
 PY
 
 rm -rf "$DIST_DIR"
