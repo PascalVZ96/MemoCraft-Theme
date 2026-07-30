@@ -32,7 +32,6 @@ done
 
 grep -q '^desc=' "$THEME_DIR/theme.info" || fail "theme.info bevat geen desc="
 
-# Replace the custom theme block in Gray Theme CSS.
 python3 - "$TARGET_CSS" "$SOURCE_CSS" <<'PY'
 from pathlib import Path
 import sys
@@ -46,7 +45,6 @@ css = css[:min(positions)].rstrip() + "\n\n" if positions else css.rstrip() + "\
 target.write_text(css + source.read_text(encoding="utf-8").strip() + "\n", encoding="utf-8")
 PY
 
-# Inline the standalone sidebar styling.
 python3 - "$LEFT_CGI" "$SIDEBAR_CSS" <<'PY'
 from pathlib import Path
 import re
@@ -56,7 +54,6 @@ left = Path(sys.argv[1])
 css = Path(sys.argv[2]).read_text(encoding="utf-8").strip()
 text = left.read_text(encoding="utf-8")
 text = text.replace("<strong>MemoCraft</strong>", "<strong>MemoNetwork</strong>")
-
 start = "<!-- MEMOCRAFT-SIDEBAR-STYLE-START -->"
 end = "<!-- MEMOCRAFT-SIDEBAR-STYLE-END -->"
 block = (
@@ -79,7 +76,6 @@ else:
 left.write_text(text, encoding="utf-8")
 PY
 
-# Inline the dashboard style, heading and live summary cards.
 python3 - "$RIGHT_CGI" "$DASHBOARD_CSS" <<'PY'
 from pathlib import Path
 import re
@@ -88,7 +84,6 @@ import sys
 right = Path(sys.argv[1])
 css = Path(sys.argv[2]).read_text(encoding="utf-8").strip()
 text = right.read_text(encoding="utf-8")
-
 start = "<!-- MEMOCRAFT-DASHBOARD-STYLE-START -->"
 end = "<!-- MEMOCRAFT-DASHBOARD-STYLE-END -->"
 html = r'''<div class="memo-dashboard-head">
@@ -96,10 +91,22 @@ html = r'''<div class="memo-dashboard-head">
   <div class="memo-dashboard-badge">Webmin 2.653</div>
 </div>
 <div class="memo-stat-grid" id="memo-stat-grid">
-  <div class="memo-stat-card"><span class="memo-stat-label">CPU-gebruik</span><strong id="memo-cpu">--</strong><small>Actuele belasting</small></div>
-  <div class="memo-stat-card"><span class="memo-stat-label">Werkgeheugen</span><strong id="memo-ram">--</strong><small>Gebruikt geheugen</small></div>
-  <div class="memo-stat-card"><span class="memo-stat-label">Opslag</span><strong id="memo-disk">--</strong><small>Lokale schijfruimte</small></div>
-  <div class="memo-stat-card"><span class="memo-stat-label">Uptime</span><strong id="memo-uptime">--</strong><small>Server online</small></div>
+  <div class="memo-stat-card">
+    <div class="memo-stat-top"><span class="memo-stat-icon">◫</span><span class="memo-stat-label">CPU</span></div>
+    <strong class="memo-stat-value" id="memo-cpu">--</strong><small class="memo-stat-hint">Actuele belasting</small>
+  </div>
+  <div class="memo-stat-card">
+    <div class="memo-stat-top"><span class="memo-stat-icon">◈</span><span class="memo-stat-label">Geheugen</span></div>
+    <strong class="memo-stat-value" id="memo-ram">--</strong><small class="memo-stat-hint" id="memo-ram-hint">Gebruikt geheugen</small>
+  </div>
+  <div class="memo-stat-card">
+    <div class="memo-stat-top"><span class="memo-stat-icon">▰</span><span class="memo-stat-label">Opslag</span></div>
+    <strong class="memo-stat-value" id="memo-disk">--</strong><small class="memo-stat-hint" id="memo-disk-hint">Lokale schijfruimte</small>
+  </div>
+  <div class="memo-stat-card">
+    <div class="memo-stat-top"><span class="memo-stat-icon">◷</span><span class="memo-stat-label">Uptime</span></div>
+    <strong class="memo-stat-value" id="memo-uptime">--</strong><small class="memo-stat-hint">Server online</small>
+  </div>
 </div>
 <script>
 (function () {
@@ -122,25 +129,32 @@ html = r'''<div class="memo-dashboard-head">
     var node = document.getElementById(id);
     if (node) node.textContent = value || fallback;
   }
+  function usedAndTotal(value) {
+    var matches = value.match(/([\d.,]+\s*(?:GiB|MiB|TiB|GB|MB|TB))/gi) || [];
+    return { used: matches[0] || value, total: matches[matches.length - 1] || '' };
+  }
+  function shortUptime(value) {
+    var match = value.match(/(\d+\s*(?:days?|dagen?))/i);
+    if (match) return match[1].replace(/days?/i, 'dagen');
+    return value;
+  }
   function updateCards() {
     var cpu = findValue(['cpu usage', 'cpu-gebruik']);
-    var ram = findValue(['real memory', 'werkelijk geheugen']);
-    var disk = findValue(['local disk space', 'lokale schijfruimte']);
+    var ram = usedAndTotal(findValue(['real memory', 'werkelijk geheugen']));
+    var disk = usedAndTotal(findValue(['local disk space', 'lokale schijfruimte']));
     var uptime = findValue(['system uptime', 'systeem uptime']);
     var cpuPercent = cpu.match(/\d+%/);
     set('memo-cpu', cpuPercent ? cpuPercent[0] : cpu, 'Onbekend');
-    set('memo-ram', ram, 'Onbekend');
-    set('memo-disk', disk, 'Onbekend');
-    set('memo-uptime', uptime, 'Onbekend');
+    set('memo-ram', ram.used, 'Onbekend');
+    set('memo-ram-hint', ram.total ? ram.total + ' totaal' : 'Gebruikt geheugen', 'Gebruikt geheugen');
+    set('memo-disk', disk.used, 'Onbekend');
+    set('memo-disk-hint', disk.total ? disk.total + ' totaal' : 'Lokale schijfruimte', 'Lokale schijfruimte');
+    set('memo-uptime', shortUptime(uptime), 'Onbekend');
   }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', updateCards);
-  } else {
-    updateCards();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', updateCards);
+  else updateCards();
 })();
 </script>'''
-
 block = (
     "print <<'MEMOCRAFT_DASHBOARD_STYLE';\n"
     + start + "\n<style>\n" + css + "\n</style>\n"
@@ -163,18 +177,12 @@ PY
 
 rm -rf "$DIST_DIR"
 mkdir -p "$DIST_DIR"
-
 tar --create --gzip --file "$OUTPUT" --directory "$ROOT_DIR" \
   --owner=0 --group=0 --numeric-owner memocraft-theme
-
 gzip -t "$OUTPUT"
 tar -tzf "$OUTPUT" > "$LISTING"
 grep -Fxq 'memocraft-theme/theme.info' "$LISTING" || fail "Pakket mist theme.info"
-
-if grep -Eq '(^|/)\.\.?(/|$)' "$LISTING"; then
-  fail "Pakket bevat een ongeldig pad"
-fi
-
+if grep -Eq '(^|/)\.\.?(/|$)' "$LISTING"; then fail "Pakket bevat een ongeldig pad"; fi
 echo "Gereed: $OUTPUT"
 echo "Aantal bestanden: $(wc -l < "$LISTING")"
 echo "Eerste 30 onderdelen:"
