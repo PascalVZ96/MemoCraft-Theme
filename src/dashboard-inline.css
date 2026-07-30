@@ -222,10 +222,13 @@ summary,
 
 summary {
   position: relative;
-  padding: 13px 46px 13px 16px !important;
+  min-height: 46px !important;
+  padding: 12px 46px 12px 18px !important;
   list-style: none;
   cursor: pointer;
-  font-size: 13px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  letter-spacing: .01em;
 }
 
 summary::-webkit-details-marker { display: none; }
@@ -265,21 +268,44 @@ details[open] > summary {
   color: #fff !important;
 }
 
-details > table,
-details > div,
-details > form { margin: 0 !important; }
+details[open] > :not(summary) {
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 8px 10px 10px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #111923 !important;
+  box-shadow: none !important;
+}
 
-/* Force every legacy Webmin table row into a readable dark theme. */
+details[open] .wrapper,
+details[open] .shrinkwrapper,
+details[open] .formsection,
+details[open] form {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Modern MemoNetwork tables */
 details table,
 .ui_table,
 table.sortable,
 table.dataTable,
 table.ui_table {
   width: 100% !important;
+  margin: 0 !important;
+  border: 1px solid #2d3c52 !important;
   border-collapse: separate !important;
   border-spacing: 0 !important;
+  border-radius: 10px !important;
   background: #101720 !important;
   color: #dbe5f2 !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
 }
 
 details table thead tr,
@@ -287,7 +313,7 @@ details table tr.ui_table_head,
 .ui_table thead tr,
 table.sortable thead tr,
 table.dataTable thead tr {
-  background: #1c2a3d !important;
+  background: linear-gradient(180deg, #22324a 0%, #1c2a3d 100%) !important;
 }
 
 details table th,
@@ -297,14 +323,17 @@ details table tr.ui_table_head td,
 .ui_table thead td,
 table.sortable th,
 table.dataTable th {
-  padding: 10px 12px !important;
+  padding: 12px 14px !important;
   border: 0 !important;
-  border-bottom: 1px solid #334155 !important;
-  background: #1c2a3d !important;
-  color: #93c5fd !important;
-  font-size: 12px !important;
-  font-weight: 700 !important;
+  border-bottom: 1px solid #3a4b63 !important;
+  background: transparent !important;
+  color: #8ec5ff !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: .045em;
   text-align: left !important;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 details table tbody tr,
@@ -312,13 +341,14 @@ details table tbody tr,
 table.sortable tbody tr,
 table.dataTable tbody tr {
   background: #111923 !important;
+  transition: background .16s ease;
 }
 
 details table tbody tr:nth-child(even),
 .ui_table tbody tr:nth-child(even),
 table.sortable tbody tr:nth-child(even),
 table.dataTable tbody tr:nth-child(even) {
-  background: #151f2c !important;
+  background: #162130 !important;
 }
 
 details table tbody td,
@@ -331,11 +361,13 @@ table.dataTable tbody td,
 .formsection th,
 table[bgcolor] td,
 table[bgcolor] th {
-  padding: 9px 12px !important;
+  padding: 10px 14px !important;
   border: 0 !important;
   border-bottom: 1px solid rgba(51, 65, 85, .55) !important;
   background: transparent !important;
   color: #dbe5f2 !important;
+  font-size: 13px !important;
+  line-height: 1.4 !important;
   vertical-align: middle !important;
 }
 
@@ -343,7 +375,7 @@ details table tbody tr:hover,
 .ui_table tbody tr:hover,
 table.sortable tbody tr:hover,
 table.dataTable tbody tr:hover {
-  background: #1d2d42 !important;
+  background: #22354d !important;
 }
 
 details table tbody tr:hover td,
@@ -354,12 +386,38 @@ table.dataTable tbody tr:hover td {
   color: #fff !important;
 }
 
+details table tbody tr:last-child td,
+.ui_table tbody tr:last-child td,
+table.sortable tbody tr:last-child td,
+table.dataTable tbody tr:last-child td {
+  border-bottom: 0 !important;
+}
+
 details table td a,
 .ui_table td a,
 table.sortable td a,
 table.dataTable td a {
   color: #60a5fa !important;
+  text-decoration: none !important;
 }
+
+details table td a:hover,
+.ui_table td a:hover,
+table.sortable td a:hover,
+table.dataTable td a:hover {
+  color: #93c5fd !important;
+  text-decoration: underline !important;
+}
+
+details[open] > :not(summary) > a:last-child,
+details[open] > :not(summary) > div > a:last-child {
+  display: inline-block !important;
+  margin: 8px 2px 0 !important;
+  font-size: 12px !important;
+}
+
+details[open] br:first-child,
+details[open] br:last-child { display: none !important; }
 
 body b, body strong, body label, body th { color: #f1f5f9 !important; }
 body td, body p, body span, body div { border-color: #2b394f; }
@@ -401,173 +459,12 @@ img[src*="bar"], img[src*="usage"] { opacity: 1 !important; }
   .memo-info-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-@media (max-width: 620px) {
+@media (max-width: 760px) {
   body { padding: 12px !important; }
   .memo-dashboard-head { align-items: flex-start; padding: 18px; }
   .memo-dashboard-badge { display: none; }
   .memo-stat-grid,
   .memo-info-grid { grid-template-columns: 1fr; }
+  details { overflow-x: auto !important; }
+  details table { min-width: 720px; }
 }
-
-/* MemoNetwork compact dashboard panels */
-details {
-  margin-bottom: 10px !important;
-}
-
-details > summary {
-  min-height: 46px !important;
-  padding: 12px 46px 12px 18px !important;
-}
-
-details[open] > summary {
-  border-bottom: 1px solid #334155 !important;
-}
-
-/* Maak alle inhoud tussen de paneelkop en tabel transparant. */
-details[open] > :not(summary) {
-  box-sizing: border-box !important;
-  margin: 0 !important;
-  padding: 8px 10px 10px !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: #111923 !important;
-  box-shadow: none !important;
-}
-
-details[open] .wrapper,
-details[open] .shrinkwrapper,
-details[open] .formsection,
-details[open] form {
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-/* Eén subtiele rand rond de daadwerkelijke tabel. */
-details[open] table {
-  width: 100% !important;
-  margin: 0 !important;
-  border: 1px solid #2d3c52 !important;
-  border-collapse: separate !important;
-  border-spacing: 0 !important;
-  border-radius: 9px !important;
-  background: #111923 !important;
-  box-shadow: none !important;
-  overflow: hidden !important;
-}
-
-/* Compactere tabelkop en rijen. */
-details[open] table th,
-details[open] table thead td,
-details[open] table tr.ui_table_head td {
-  padding: 9px 12px !important;
-}
-
-details[open] table tbody td {
-  padding: 8px 12px !important;
-  line-height: 1.35 !important;
-}
-
-details[open] table tbody tr:last-child td {
-  border-bottom: 0 !important;
-}
-
-/* Links onder tabellen, zoals All sessions. */
-details[open] > :not(summary) > a:last-child,
-details[open] > :not(summary) > div > a:last-child {
-  display: inline-block !important;
-  margin: 8px 2px 0 !important;
-  font-size: 12px !important;
-}
-
-/* Geen extra hoogte door lege Webmin-elementen. */
-details[open] br:first-child,
-details[open] br:last-child {
-  display: none !important;
-}
-
-
-
-/* MemoNetwork compact dashboard panels */
-details {
-  margin-bottom: 10px !important;
-}
-
-details > summary {
-  min-height: 46px !important;
-  padding: 12px 46px 12px 18px !important;
-}
-
-details[open] > summary {
-  border-bottom: 1px solid #334155 !important;
-}
-
-/* Maak alle inhoud tussen de paneelkop en tabel transparant. */
-details[open] > :not(summary) {
-  box-sizing: border-box !important;
-  margin: 0 !important;
-  padding: 8px 10px 10px !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: #111923 !important;
-  box-shadow: none !important;
-}
-
-details[open] .wrapper,
-details[open] .shrinkwrapper,
-details[open] .formsection,
-details[open] form {
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-/* Eén subtiele rand rond de daadwerkelijke tabel. */
-details[open] table {
-  width: 100% !important;
-  margin: 0 !important;
-  border: 1px solid #2d3c52 !important;
-  border-collapse: separate !important;
-  border-spacing: 0 !important;
-  border-radius: 9px !important;
-  background: #111923 !important;
-  box-shadow: none !important;
-  overflow: hidden !important;
-}
-
-/* Compactere tabelkop en rijen. */
-details[open] table th,
-details[open] table thead td,
-details[open] table tr.ui_table_head td {
-  padding: 9px 12px !important;
-}
-
-details[open] table tbody td {
-  padding: 8px 12px !important;
-  line-height: 1.35 !important;
-}
-
-details[open] table tbody tr:last-child td {
-  border-bottom: 0 !important;
-}
-
-/* Links onder tabellen, zoals All sessions. */
-details[open] > :not(summary) > a:last-child,
-details[open] > :not(summary) > div > a:last-child {
-  display: inline-block !important;
-  margin: 8px 2px 0 !important;
-  font-size: 12px !important;
-}
-
-/* Geen extra hoogte door lege Webmin-elementen. */
-details[open] br:first-child,
-details[open] br:last-child {
-  display: none !important;
-}
-
