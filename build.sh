@@ -135,9 +135,10 @@ print "<strong>MemoNetwork</strong>\\n";
 print "<span>Server Management</span>\\n";
 print "</div>\\n";
 print "</a>\\n";'''
-if old_brand not in text:
+if old_brand in text:
+    text = text.replace(old_brand, new_brand, 1)
+elif "class='memo-brand'" not in text:
     raise SystemExit("FOUT: MemoNetwork-logoblok in left.cgi niet gevonden")
-text = text.replace(old_brand, new_brand, 1)
 start = "<!-- MEMOCRAFT-SIDEBAR-STYLE-START -->"
 end = "<!-- MEMOCRAFT-SIDEBAR-STYLE-END -->"
 block = (
