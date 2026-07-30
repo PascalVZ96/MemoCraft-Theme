@@ -1,11 +1,28 @@
-/* MemoNetwork sidebar — loaded inline by build.sh */
+/* MemoNetwork Sidebar 3.0 — loaded inline by build.sh */
+:root {
+    --memo-bg: #0b111b;
+    --memo-sidebar: #0f1724;
+    --memo-sidebar-deep: #0a111c;
+    --memo-surface: #111b2b;
+    --memo-surface-hover: #18263a;
+    --memo-border: #29384d;
+    --memo-border-soft: #223047;
+    --memo-primary: #3b82f6;
+    --memo-primary-light: #60a5fa;
+    --memo-text: #eef5ff;
+    --memo-text-soft: #c7d2e1;
+    --memo-muted: #8293aa;
+    --memo-radius: 10px;
+    --memo-transition: .18s ease;
+}
+
 html,
 body {
     margin: 0 !important;
     padding: 0 !important;
     min-height: 100% !important;
-    background: #0b111b !important;
-    color: #e5edf7 !important;
+    background: var(--memo-bg) !important;
+    color: var(--memo-text) !important;
     font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
 }
 
@@ -19,41 +36,54 @@ body > .mode { display: none !important; }
     min-height: 100vh !important;
     margin: 0 !important;
     padding: 0 !important;
-    overflow: hidden !important;
+    overflow-x: hidden !important;
     border: 0 !important;
-    background: linear-gradient(180deg, #0f1724 0%, #0b121d 100%) !important;
-    box-shadow: inset -1px 0 0 #263449 !important;
+    background: linear-gradient(180deg, var(--memo-sidebar) 0%, var(--memo-sidebar-deep) 100%) !important;
+    box-shadow: inset -1px 0 0 var(--memo-border) !important;
 }
 
-/* Full original MemoNetwork logo */
+/* Sticky brand area */
 .memo-brand {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 20 !important;
     display: block !important;
     box-sizing: border-box !important;
     width: 100% !important;
-    height: 142px !important;
-    min-height: 142px !important;
+    height: 132px !important;
+    min-height: 132px !important;
     padding: 0 !important;
     border: 0 !important;
-    border-bottom: 1px solid #29384d !important;
-    background-color: #111b2b !important;
+    border-bottom: 1px solid var(--memo-border) !important;
+    background-color: var(--memo-surface) !important;
     background-image:
-        radial-gradient(circle at 50% 35%, rgba(37, 99, 235, .15), transparent 62%),
+        radial-gradient(circle at 50% 35%, rgba(59, 130, 246, .18), transparent 62%),
+        linear-gradient(180deg, rgba(17, 27, 43, .96), rgba(13, 22, 36, .98)),
         url("https://memocraft.nl/images/MemoNetworkLogo.png") !important;
-    background-repeat: no-repeat, no-repeat !important;
-    background-position: center, center !important;
-    background-size: cover, calc(100% - 24px) auto !important;
+    background-repeat: no-repeat, no-repeat, no-repeat !important;
+    background-position: center, center, center !important;
+    background-size: cover, cover, calc(100% - 28px) auto !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .20) !important;
+}
+
+.memo-brand::after {
+    content: "" !important;
+    position: absolute !important;
+    left: 18px !important;
+    right: 18px !important;
+    bottom: -1px !important;
+    height: 1px !important;
+    background: linear-gradient(90deg, transparent, rgba(96, 165, 250, .75), transparent) !important;
 }
 
 .memo-brand-icon,
-.memo-brand-copy {
-    display: none !important;
-}
+.memo-brand-copy { display: none !important; }
 
 .memo-menu-content {
     display: block !important;
     box-sizing: border-box !important;
     width: 100% !important;
-    padding: 13px 10px 22px !important;
+    padding: 14px 10px 24px !important;
 }
 
 .leftmenu #main,
@@ -69,12 +99,13 @@ body > .mode { display: none !important; }
     background: transparent !important;
 }
 
+/* Category groups */
 .leftmenu details {
     display: block !important;
-    margin: 4px 0 !important;
+    margin: 5px 0 8px !important;
     padding: 0 !important;
     border: 0 !important;
-    border-radius: 10px !important;
+    border-radius: var(--memo-radius) !important;
     background: transparent !important;
     overflow: hidden !important;
 }
@@ -83,18 +114,20 @@ body > .mode { display: none !important; }
     display: block !important;
     box-sizing: border-box !important;
     position: relative !important;
-    min-height: 40px !important;
-    padding: 11px 34px 11px 13px !important;
+    min-height: 38px !important;
+    padding: 10px 34px 10px 13px !important;
     border: 0 !important;
     border-radius: 9px !important;
     background: transparent !important;
-    color: #c9d4e3 !important;
-    font-size: 12px !important;
-    font-weight: 700 !important;
+    color: var(--memo-text-soft) !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    letter-spacing: .08em !important;
     line-height: 18px !important;
+    text-transform: uppercase !important;
     cursor: pointer !important;
     list-style: none !important;
-    transition: background .18s ease, color .18s ease, transform .18s ease !important;
+    transition: background var(--memo-transition), color var(--memo-transition), transform var(--memo-transition) !important;
 }
 
 .leftmenu summary::-webkit-details-marker { display: none !important; }
@@ -102,23 +135,23 @@ body > .mode { display: none !important; }
 .leftmenu summary::after {
     content: "›" !important;
     position: absolute !important;
-    top: 10px !important;
+    top: 9px !important;
     right: 13px !important;
-    color: #72839b !important;
+    color: var(--memo-muted) !important;
     font-size: 18px !important;
     line-height: 18px !important;
     transform: rotate(0deg) !important;
-    transition: transform .18s ease, color .18s ease !important;
+    transition: transform var(--memo-transition), color var(--memo-transition) !important;
 }
 
 .leftmenu details[open] > summary::after {
     transform: rotate(90deg) !important;
-    color: #60a5fa !important;
+    color: var(--memo-primary-light) !important;
 }
 
 .leftmenu summary:hover,
 .leftmenu details[open] > summary {
-    background: linear-gradient(90deg, #1d2c42 0%, #182438 100%) !important;
+    background: linear-gradient(90deg, rgba(35, 51, 76, .95), rgba(24, 36, 56, .90)) !important;
     color: #ffffff !important;
 }
 
@@ -134,19 +167,20 @@ body > .mode { display: none !important; }
 }
 
 .leftmenu .linkwithicon {
+    position: relative !important;
     display: flex !important;
     align-items: center !important;
     min-height: 40px !important;
     margin: 3px 0 !important;
     border-radius: 9px !important;
     background: transparent !important;
-    transition: background .18s ease, transform .18s ease, box-shadow .18s ease !important;
+    transition: background var(--memo-transition), transform var(--memo-transition), box-shadow var(--memo-transition) !important;
 }
 
 .leftmenu .linkwithicon:hover {
-    background: linear-gradient(90deg, rgba(37, 99, 235, .18), rgba(37, 99, 235, .06)) !important;
+    background: linear-gradient(90deg, rgba(59, 130, 246, .20), rgba(59, 130, 246, .05)) !important;
     transform: translateX(2px) !important;
-    box-shadow: inset 3px 0 0 #3b82f6 !important;
+    box-shadow: inset 3px 0 0 var(--memo-primary) !important;
 }
 
 .leftmenu .linkwithicon > img,
@@ -158,15 +192,16 @@ body > .mode { display: none !important; }
     margin: 0 0 0 11px !important;
     color: #7fa9df !important;
     object-fit: contain !important;
-    opacity: .9 !important;
-    transition: color .18s ease, opacity .18s ease, transform .18s ease !important;
+    opacity: .92 !important;
+    filter: saturate(.85) brightness(1.08) !important;
+    transition: color var(--memo-transition), opacity var(--memo-transition), transform var(--memo-transition) !important;
 }
 
 .leftmenu .linkwithicon:hover > img,
 .leftmenu .linkwithicon:hover > i {
     color: #93c5fd !important;
     opacity: 1 !important;
-    transform: scale(1.06) !important;
+    transform: scale(1.07) !important;
 }
 
 .leftmenu .linkwithicon .aftericon {
@@ -180,6 +215,7 @@ body > .mode { display: none !important; }
 
 .leftmenu a,
 .leftmenu a:visited {
+    position: relative !important;
     display: block !important;
     box-sizing: border-box !important;
     width: 100% !important;
@@ -189,9 +225,10 @@ body > .mode { display: none !important; }
     background: transparent !important;
     color: #bdc9d9 !important;
     font-size: 12px !important;
+    font-weight: 500 !important;
     line-height: 18px !important;
     text-decoration: none !important;
-    transition: background .18s ease, color .18s ease, transform .18s ease, box-shadow .18s ease !important;
+    transition: background var(--memo-transition), color var(--memo-transition), transform var(--memo-transition), box-shadow var(--memo-transition) !important;
 }
 
 .leftmenu .linkindented a {
@@ -201,29 +238,36 @@ body > .mode { display: none !important; }
 
 .leftmenu .leftlink > a:hover,
 .leftmenu .linkindented > a:hover,
-.leftmenu a:focus {
-    background: linear-gradient(90deg, rgba(37, 99, 235, .18), rgba(37, 99, 235, .06)) !important;
+.leftmenu a:focus-visible {
+    background: linear-gradient(90deg, rgba(59, 130, 246, .20), rgba(59, 130, 246, .05)) !important;
     color: #ffffff !important;
     outline: none !important;
     transform: translateX(2px) !important;
-    box-shadow: inset 3px 0 0 #3b82f6 !important;
+    box-shadow: inset 3px 0 0 var(--memo-primary) !important;
 }
 
+/* Active page state — supports current MemoNetwork marker and common Webmin active classes */
 .leftmenu a.memo-active,
-.leftmenu .linkwithicon:has(a.memo-active) {
-    background: linear-gradient(90deg, rgba(37, 99, 235, .28), rgba(37, 99, 235, .08)) !important;
+.leftmenu a.active,
+.leftmenu .selected > a,
+.leftmenu .current > a,
+.leftmenu .linkwithicon:has(a.memo-active),
+.leftmenu .linkwithicon:has(a.active) {
+    background: linear-gradient(90deg, rgba(59, 130, 246, .30), rgba(59, 130, 246, .08)) !important;
     color: #ffffff !important;
-    box-shadow: inset 3px 0 0 #60a5fa, 0 5px 14px rgba(37, 99, 235, .10) !important;
+    font-weight: 650 !important;
+    box-shadow: inset 3px 0 0 var(--memo-primary-light), 0 6px 16px rgba(37, 99, 235, .12) !important;
 }
 
 .leftmenu hr {
     height: 1px !important;
-    margin: 12px 5px !important;
+    margin: 13px 6px !important;
     padding: 0 !important;
     border: 0 !important;
     background: linear-gradient(90deg, transparent, #33445c 15%, #33445c 85%, transparent) !important;
 }
 
+/* Search */
 .leftmenu form,
 .leftmenu form .leftlink {
     display: block !important;
@@ -236,29 +280,46 @@ body > .mode { display: none !important; }
     display: block !important;
     box-sizing: border-box !important;
     width: 100% !important;
-    height: 40px !important;
-    margin: 0 !important;
-    padding: 0 13px 0 36px !important;
-    border: 1px solid #3a4b64 !important;
-    border-radius: 10px !important;
-    background-color: #0b1421 !important;
-    background-image: linear-gradient(45deg, transparent 48%, #718198 49%, #718198 51%, transparent 52%) !important;
-    background-repeat: no-repeat !important;
-    background-position: 17px 18px !important;
-    background-size: 9px 9px !important;
+    height: 42px !important;
+    margin: 0 0 11px !important;
+    padding: 0 13px 0 39px !important;
+    border: 1px solid #344763 !important;
+    border-radius: 11px !important;
+    background-color: #0a1320 !important;
+    background-image:
+        radial-gradient(circle, transparent 47%, #718198 49%, #718198 58%, transparent 60%),
+        linear-gradient(45deg, transparent 43%, #718198 45%, #718198 57%, transparent 59%) !important;
+    background-repeat: no-repeat, no-repeat !important;
+    background-position: 14px 13px, 24px 25px !important;
+    background-size: 13px 13px, 8px 8px !important;
     color: #ffffff !important;
     font-size: 12px !important;
     outline: none !important;
-    transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .02) !important;
+    transition: border-color var(--memo-transition), box-shadow var(--memo-transition), background-color var(--memo-transition) !important;
+}
+
+.leftmenu input[type="text"]:hover,
+.leftmenu input[type="search"]:hover {
+    border-color: #465e7e !important;
 }
 
 .leftmenu input[type="text"]:focus,
 .leftmenu input[type="search"]:focus {
-    border-color: #3b82f6 !important;
+    border-color: var(--memo-primary) !important;
     background-color: #0d1828 !important;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, .16) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, .16), 0 8px 18px rgba(0, 0, 0, .16) !important;
 }
 
 .leftmenu input::placeholder { color: #718198 !important; }
 .leftmenu .goArrow,
 .leftmenu .servers-submit { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+    .leftmenu *,
+    .leftmenu *::before,
+    .leftmenu *::after {
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+    }
+}
