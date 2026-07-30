@@ -1,0 +1,131 @@
+
+
+/* =========================================================
+   MemoCraft Theme v0.1
+   Visual layer for the standalone Webmin theme
+   ========================================================= */
+
+:root {
+    --memo-bg: #0b0f16;
+    --memo-panel: #171c24;
+    --memo-panel-soft: #1d2430;
+    --memo-border: #2b3442;
+    --memo-accent: #3b82f6;
+    --memo-accent-hover: #60a5fa;
+    --memo-text: #e5e7eb;
+    --memo-muted: #9ca3af;
+}
+
+html,
+body {
+    background: var(--memo-bg) !important;
+    color: var(--memo-text) !important;
+}
+
+body,
+table,
+input,
+select,
+textarea,
+button {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+
+a {
+    color: var(--memo-accent-hover) !important;
+}
+
+a:hover,
+a:focus {
+    color: #93c5fd !important;
+}
+
+.maintitle,
+.ui_table > thead,
+.ui_table > thead td,
+.ui_table > thead th {
+    background: var(--memo-panel-soft) !important;
+    color: #fff !important;
+    border-color: var(--memo-border) !important;
+}
+
+.mainbody,
+.ui_table,
+.ui_table_body,
+.wrapper,
+.shrinkwrapper {
+    background: var(--memo-panel) !important;
+    color: var(--memo-text) !important;
+    border-color: var(--memo-border) !important;
+}
+
+.ui_table,
+.shrinkwrapper {
+    border-radius: 10px !important;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .22);
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="search"],
+textarea,
+select {
+    background: #111827 !important;
+    color: #f3f4f6 !important;
+    border: 1px solid #374151 !important;
+    border-radius: 7px !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--memo-accent) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, .16) !important;
+}
+
+input[type="submit"],
+input[type="button"],
+button,
+.ui_submit {
+    background: var(--memo-accent) !important;
+    color: #fff !important;
+    border: 1px solid var(--memo-accent) !important;
+    border-radius: 7px !important;
+    cursor: pointer;
+}
+
+input[type="submit"]:hover,
+input[type="button"]:hover,
+button:hover,
+.ui_submit:hover {
+    background: var(--memo-accent-hover) !important;
+    border-color: var(--memo-accent-hover) !important;
+}
+
+td,
+th {
+    border-color: var(--memo-border) !important;
+}
+
+tr:hover td {
+    background: rgba(59, 130, 246, .06);
+}
+
+::-webkit-scrollbar {
+    width: 11px;
+    height: 11px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--memo-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: #374151;
+    border: 3px solid var(--memo-bg);
+    border-radius: 10px;
+}
