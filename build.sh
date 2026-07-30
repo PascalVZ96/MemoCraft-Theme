@@ -10,29 +10,26 @@ OUTPUT_DIR="$ROOT_DIR/dist"
 rm -rf "$BUILD_DIR" "$OUTPUT_DIR"
 mkdir -p "$BUILD_DIR" "$OUTPUT_DIR"
 
-git clone --depth 1 https://github.com/webmin/webmin.git "$SOURCE_DIR"
+# Build from the exact Webmin version used on Pascal's server.
+git clone --depth 1 --branch 2.653 https://github.com/webmin/webmin.git "$SOURCE_DIR"
 cp -a "$SOURCE_DIR/gray-theme" "$THEME_DIR"
 
-# Rename internal references so this becomes an independent theme.
-while IFS= read -r -d '' file; do
-  if grep -Iq . "$file"; then
-    sed -i 's/gray-theme/memocraft-theme/g' "$file"
-  fi
-done < <(find "$THEME_DIR" -type f -print0)
-
+# Keep all internal gray-theme references and filenames intact.
+# Only the installation directory and visible metadata are changed.
 cat > "$THEME_DIR/theme.info" <<'EOF'
 desc=MemoCraft Theme
-longdesc=A standalone dark Webmin theme based on the official Framed Theme
-version=0.1.0
+longdesc=A standalone MemoCraft variant of Webmin's Framed Theme
+version=0.1.1
 webmin=1
-usermin=0
-depends=2.000
+usermin=1
+depends=2.000 1.860 2.653
 EOF
 
-# Append our own styling while keeping the proven Framed Theme implementation.
-cat "$ROOT_DIR/src/memocraft.css" >> "$THEME_DIR/unauthenticated/memocraft-theme.css"
+# Add MemoCraft styling to the original stylesheet that the theme already loads.
+printf '\n/* MemoCraft Theme custom styles */\n' >> "$THEME_DIR/unauthenticated/gray-theme.css"
+cat "$ROOT_DIR/src/memocraft.css" >> "$THEME_DIR/unauthenticated/gray-theme.css"
 
-# Webmin packages require the theme directory as the archive root.
+# Preserve executable bits and package the theme directory at archive root.
 tar -C "$BUILD_DIR" -czf "$OUTPUT_DIR/memocraft-theme.wbt.gz" memocraft-theme
 
 echo "Built: $OUTPUT_DIR/memocraft-theme.wbt.gz"
