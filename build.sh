@@ -44,18 +44,43 @@ done
 
 grep -q '^desc=' "$THEME_DIR/theme.info" || fail "theme.info bevat geen desc="
 
-python3 - "$TARGET_CSS" "$SOURCE_CSS" "$LOGIN_CSS" <<'PY'
+# Algemene MemoNetwork-stijl in de hoofdstylesheet plaatsen.
+python3 - "$TARGET_CSS" "$SOURCE_CSS" <<'PY'
 from pathlib import Path
 import sys
 
 target = Path(sys.argv[1])
-sources = [Path(path) for path in sys.argv[2:]]
+source = Path(sys.argv[2])
 css = target.read_text(encoding="utf-8")
 markers = ("/* MEMOCRAFT-CUSTOM-START", "/* MemoCraft Theme */")
 positions = [css.find(marker) for marker in markers if css.find(marker) >= 0]
 css = css[:min(positions)].rstrip() + "\n\n" if positions else css.rstrip() + "\n\n"
-custom = "\n\n".join(source.read_text(encoding="utf-8").strip() for source in sources)
-target.write_text(css + custom + "\n", encoding="utf-8")
+target.write_text(css + source.read_text(encoding="utf-8").strip() + "\n", encoding="utf-8")
+PY
+
+# Webmin kan voor de loginpagina verschillende unauthenticated stylesheets laden.
+# Voeg de loginstijl daarom idempotent toe aan iedere CSS-file in die map.
+python3 - "$THEME_DIR/unauthenticated" "$LOGIN_CSS" <<'PY'
+from pathlib import Path
+import sys
+
+folder = Path(sys.argv[1])
+login_css = Path(sys.argv[2]).read_text(encoding="utf-8").strip()
+start = "/* MEMONETWORK-LOGIN-START */"
+end = "/* MEMONETWORK-LOGIN-END */"
+block = f"{start}\n{login_css}\n{end}\n"
+
+files = sorted(folder.rglob("*.css"))
+if not files:
+    raise SystemExit("FOUT: geen unauthenticated CSS-bestanden gevonden")
+
+for target in files:
+    text = target.read_text(encoding="utf-8")
+    if start in text:
+        text = text.split(start, 1)[0].rstrip() + "\n\n"
+    target.write_text(text + block, encoding="utf-8")
+
+print(f"Loginstijl toegevoegd aan {len(files)} unauthenticated stylesheets")
 PY
 
 python3 - "$LEFT_CGI" "$SIDEBAR_CSS" "$SIDEBAR_EXTRA_CSS" "$SIDEBAR_PHASE_CSS" "$SIDEBAR_JS" <<'PY'
