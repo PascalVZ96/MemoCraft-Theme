@@ -409,23 +409,35 @@ img[src*="bar"], img[src*="usage"] { opacity: 1 !important; }
   .memo-info-grid { grid-template-columns: 1fr; }
 }
 
-/* Remove stacked borders around expanded dashboard tables */
-details[open] > div,
-details[open] > form,
-details[open] > .wrapper,
-details[open] > .shrinkwrapper {
+/* MemoNetwork compact dashboard panels */
+details {
+  margin-bottom: 10px !important;
+}
+
+details > summary {
+  min-height: 46px !important;
+  padding: 12px 46px 12px 18px !important;
+}
+
+details[open] > summary {
+  border-bottom: 1px solid #334155 !important;
+}
+
+/* Maak alle inhoud tussen de paneelkop en tabel transparant. */
+details[open] > :not(summary) {
+  box-sizing: border-box !important;
   margin: 0 !important;
-  padding: 10px 12px 12px !important;
+  padding: 8px 10px 10px !important;
   border: 0 !important;
   border-radius: 0 !important;
   background: #111923 !important;
   box-shadow: none !important;
 }
 
-details[open] > div > .wrapper,
-details[open] > div > .shrinkwrapper,
-details[open] > form > .wrapper,
-details[open] > form > .shrinkwrapper {
+details[open] .wrapper,
+details[open] .shrinkwrapper,
+details[open] .formsection,
+details[open] form {
   margin: 0 !important;
   padding: 0 !important;
   border: 0 !important;
@@ -434,129 +446,46 @@ details[open] > form > .shrinkwrapper {
   box-shadow: none !important;
 }
 
-details[open] table.ui_table,
-details[open] table.sortable,
-details[open] table.dataTable,
-details[open] > table {
-  margin: 0 !important;
-  border: 1px solid #334155 !important;
-  border-radius: 10px !important;
-  box-shadow: none !important;
-  overflow: hidden !important;
-}
-
-/* Remove stacked borders around expanded dashboard tables */
-details[open] > div,
-details[open] > form,
-details[open] > .wrapper,
-details[open] > .shrinkwrapper {
-  margin: 0 !important;
-  padding: 10px 12px 12px !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: #111923 !important;
-  box-shadow: none !important;
-}
-
-details[open] > div > .wrapper,
-details[open] > div > .shrinkwrapper,
-details[open] > form > .wrapper,
-details[open] > form > .shrinkwrapper {
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-details[open] table.ui_table,
-details[open] table.sortable,
-details[open] table.dataTable,
-details[open] > table {
-  margin: 0 !important;
-  border: 1px solid #334155 !important;
-  border-radius: 10px !important;
-  box-shadow: none !important;
-  overflow: hidden !important;
-}
-
-/* MemoNetwork: keep only one border around expanded panels */
-details[open] > :not(summary) {
-  box-sizing: border-box !important;
-  margin: 0 !important;
-  padding: 10px 12px 12px !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: #111923 !important;
-  box-shadow: none !important;
-}
-
-details[open] > :not(summary) > *,
-details[open] > :not(summary) > * > *,
-details[open] .wrapper,
-details[open] .shrinkwrapper,
-details[open] .ui_table,
-details[open] table,
-details[open] form {
-  border-left: 0 !important;
-  border-right: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-}
-
+/* Eén subtiele rand rond de daadwerkelijke tabel. */
 details[open] table {
   width: 100% !important;
   margin: 0 !important;
-  border: 0 !important;
-  outline: 0 !important;
+  border: 1px solid #2d3c52 !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  border-radius: 9px !important;
+  background: #111923 !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
 }
 
-details[open] table thead th,
-details[open] table thead td {
-  border-top: 0 !important;
+/* Compactere tabelkop en rijen. */
+details[open] table th,
+details[open] table thead td,
+details[open] table tr.ui_table_head td {
+  padding: 9px 12px !important;
+}
+
+details[open] table tbody td {
+  padding: 8px 12px !important;
+  line-height: 1.35 !important;
 }
 
 details[open] table tbody tr:last-child td {
   border-bottom: 0 !important;
 }
 
-/* MemoNetwork: keep only one border around expanded panels */
-details[open] > :not(summary) {
-  box-sizing: border-box !important;
-  margin: 0 !important;
-  padding: 10px 12px 12px !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: #111923 !important;
-  box-shadow: none !important;
+/* Links onder tabellen, zoals All sessions. */
+details[open] > :not(summary) > a:last-child,
+details[open] > :not(summary) > div > a:last-child {
+  display: inline-block !important;
+  margin: 8px 2px 0 !important;
+  font-size: 12px !important;
 }
 
-details[open] > :not(summary) > *,
-details[open] > :not(summary) > * > *,
-details[open] .wrapper,
-details[open] .shrinkwrapper,
-details[open] .ui_table,
-details[open] table,
-details[open] form {
-  border-left: 0 !important;
-  border-right: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
+/* Geen extra hoogte door lege Webmin-elementen. */
+details[open] br:first-child,
+details[open] br:last-child {
+  display: none !important;
 }
 
-details[open] table {
-  width: 100% !important;
-  margin: 0 !important;
-  border: 0 !important;
-  outline: 0 !important;
-}
-
-details[open] table thead th,
-details[open] table thead td {
-  border-top: 0 !important;
-}
-
-details[open] table tbody tr:last-child td {
-  border-bottom: 0 !important;
-}
