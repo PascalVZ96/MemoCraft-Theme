@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 THEME_DIR="$ROOT_DIR/memocraft-theme"
 DIST_DIR="$ROOT_DIR/dist"
 OUTPUT="$DIST_DIR/memocraft-theme.wbt.gz"
+LISTING="$DIST_DIR/package-files.txt"
 
 fail() {
   echo "FOUT: $*" >&2
@@ -29,13 +30,16 @@ tar \
   memocraft-theme
 
 gzip -t "$OUTPUT"
-tar -tzf "$OUTPUT" | grep -qx 'memocraft-theme/theme.info' \
+tar -tzf "$OUTPUT" > "$LISTING"
+
+grep -Fxq 'memocraft-theme/theme.info' "$LISTING" \
   || fail "Pakket bevat theme.info niet op de juiste plaats"
 
-if tar -tzf "$OUTPUT" | grep -qE '(^|/)\.\.?(/|$)'; then
+if grep -Eq '(^|/)\.\.?(/|$)' "$LISTING"; then
   fail "Pakket bevat een ongeldig pad"
 fi
 
 echo "Gereed: $OUTPUT"
-echo "Inhoud:"
-tar -tzf "$OUTPUT"
+echo "Aantal bestanden: $(wc -l < "$LISTING")"
+echo "Eerste 30 onderdelen:"
+head -30 "$LISTING"
