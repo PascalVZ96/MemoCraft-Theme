@@ -1,0 +1,31 @@
+/* MemoNetwork Sidebar 3.2 refinements */
+
+.memo-brand {
+    height: 132px !important;
+    min-height: 132px !important;
+    background-position: center 54% !important;
+    background-size: 176px auto !important;
+}
+
+.leftmenu .linkwithicon.memo-active-row,
+.leftmenu .linkwithicon:has(> .aftericon a.memo-active),
+.leftmenu .linkwithicon:has(a.memo-active) {
+    background: linear-gradient(90deg, rgba(37, 99, 235, .62), rgba(30, 64, 175, .28)) !important;
+    box-shadow: inset 4px 0 0 #8ec5ff, 0 8px 20px rgba(37, 99, 235, .22) !important;
+}
+
+.leftmenu .linkwithicon.memo-active-row > img,
+.leftmenu .linkwithicon.memo-active-row > i,
+.leftmenu .linkwithicon:has(a.memo-active) > img,
+.leftmenu .linkwithicon:has(a.memo-active) > i {
+    opacity: 1 !important;
+    filter: brightness(1.28) saturate(1.08) !important;
+}
+
+.leftmenu a.memo-active,
+.leftmenu .memo-active-row a {
+    background: transparent !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: none !important;
+}
