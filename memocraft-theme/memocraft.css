@@ -1,0 +1,73 @@
+:root {
+  color-scheme: dark;
+  --memo-bg: #0b1220;
+  --memo-panel: #111827;
+  --memo-panel-2: #1f2937;
+  --memo-border: #334155;
+  --memo-text: #e5e7eb;
+  --memo-muted: #94a3b8;
+  --memo-accent: #22c55e;
+  --memo-accent-hover: #16a34a;
+}
+
+html,
+body {
+  background: var(--memo-bg) !important;
+  color: var(--memo-text) !important;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+
+a {
+  color: #60a5fa !important;
+}
+
+a:hover {
+  color: #93c5fd !important;
+}
+
+input,
+select,
+textarea,
+button {
+  background: var(--memo-panel-2) !important;
+  color: var(--memo-text) !important;
+  border: 1px solid var(--memo-border) !important;
+  border-radius: 6px !important;
+}
+
+input[type="submit"],
+input[type="button"],
+button {
+  background: var(--memo-accent) !important;
+  color: #052e16 !important;
+  font-weight: 700 !important;
+  cursor: pointer;
+}
+
+input[type="submit"]:hover,
+input[type="button"]:hover,
+button:hover {
+  background: var(--memo-accent-hover) !important;
+  color: #ffffff !important;
+}
+
+table {
+  border-color: var(--memo-border) !important;
+}
+
+tr,
+td,
+th {
+  border-color: var(--memo-border) !important;
+}
+
+th,
+.tableheader,
+.ui_table_head {
+  background: var(--memo-panel-2) !important;
+  color: var(--memo-text) !important;
+}
+
+hr {
+  border-color: var(--memo-border) !important;
+}
