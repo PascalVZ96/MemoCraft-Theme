@@ -28,7 +28,6 @@ fail() {
 [[ -f "$RIGHT_CGI" ]] || fail "right.cgi ontbreekt: $RIGHT_CGI"
 grep -q '^desc=' "$THEME_DIR/theme.info" || fail "theme.info bevat geen desc="
 
-# Replace an earlier MemoCraft block instead of appending duplicates on every build.
 python3 - "$TARGET_CSS" "$SOURCE_CSS" <<'PY'
 from pathlib import Path
 import sys
@@ -36,22 +35,13 @@ import sys
 target = Path(sys.argv[1])
 source = Path(sys.argv[2])
 css = target.read_text(encoding="utf-8")
-
-markers = (
-    "/* MEMOCRAFT-CUSTOM-START",
-    "/* MemoCraft Theme */",
-)
+markers = ("/* MEMOCRAFT-CUSTOM-START", "/* MemoCraft Theme */")
 positions = [css.find(marker) for marker in markers if css.find(marker) >= 0]
-if positions:
-    css = css[:min(positions)].rstrip() + "\n\n"
-else:
-    css = css.rstrip() + "\n\n"
-
+css = css[:min(positions)].rstrip() + "\n\n" if positions else css.rstrip() + "\n\n"
 custom = source.read_text(encoding="utf-8").strip() + "\n"
 target.write_text(css + custom, encoding="utf-8")
 PY
 
-# Inline the sidebar stylesheet in left.cgi.
 python3 - "$LEFT_CGI" "$SIDEBAR_CSS" <<'PY'
 from pathlib import Path
 import re
@@ -61,28 +51,15 @@ left = Path(sys.argv[1])
 source = Path(sys.argv[2])
 text = left.read_text(encoding="utf-8")
 css = source.read_text(encoding="utf-8").strip()
-
-# Keep old source files compatible while changing the visible product name.
 text = text.replace("<strong>MemoCraft</strong>", "<strong>MemoNetwork</strong>")
 
 start = "<!-- MEMOCRAFT-SIDEBAR-STYLE-START -->"
 end = "<!-- MEMOCRAFT-SIDEBAR-STYLE-END -->"
 block = (
-    "print <<'MEMOCRAFT_SIDEBAR_STYLE';\n"
-    + start + "\n<style>\n"
-    + css + "\n</style>\n"
-    + end + "\nMEMOCRAFT_SIDEBAR_STYLE\n"
+    "print <<'MEMOCRAFT_SIDEBAR_STYLE';\n" + start + "\n<style>\n" + css +
+    "\n</style>\n" + end + "\nMEMOCRAFT_SIDEBAR_STYLE\n"
 )
-
-pattern = re.compile(
-    r"print <<'MEMOCRAFT_SIDEBAR_STYLE';\n"
-    + re.escape(start)
-    + r".*?"
-    + re.escape(end)
-    + r"\nMEMOCRAFT_SIDEBAR_STYLE\n",
-    re.S,
-)
-
+pattern = re.compile(r"print <<'MEMOCRAFT_SIDEBAR_STYLE';\n" + re.escape(start) + r".*?" + re.escape(end) + r"\nMEMOCRAFT_SIDEBAR_STYLE\n", re.S)
 if pattern.search(text):
     text = pattern.sub(block, text, count=1)
 else:
@@ -90,11 +67,9 @@ else:
     if needle not in text:
         raise SystemExit("FOUT: popup_header in left.cgi niet gevonden")
     text = text.replace(needle, needle + block, 1)
-
 left.write_text(text, encoding="utf-8")
 PY
 
-# Inline the dashboard stylesheet and MemoNetwork heading in right.cgi.
 python3 - "$RIGHT_CGI" "$DASHBOARD_CSS" <<'PY'
 from pathlib import Path
 import re
@@ -109,25 +84,49 @@ start = "<!-- MEMOCRAFT-DASHBOARD-STYLE-START -->"
 end = "<!-- MEMOCRAFT-DASHBOARD-STYLE-END -->"
 block = (
     "print <<'MEMOCRAFT_DASHBOARD_STYLE';\n"
-    + start + "\n<style>\n"
-    + css + "\n</style>\n"
+    + start + "\n<style>\n" + css + "\n</style>\n"
     + "<div class=\"memo-dashboard-head\">\n"
     + "  <div><h1 class=\"memo-dashboard-title\">MemoNetwork Dashboard</h1>"
     + "<p class=\"memo-dashboard-subtitle\">Serverstatus en systeeminformatie</p></div>\n"
     + "  <div class=\"memo-dashboard-badge\">Webmin 2.653</div>\n"
     + "</div>\n"
+    + "<div class=\"memo-stat-grid\" id=\"memo-stat-grid\">\n"
+    + "  <div class=\"memo-stat-card\"><span class=\"memo-stat-label\">CPU</span><strong class=\"memo-stat-value\" data-stat=\"cpu\">Laden...</strong><span class=\"memo-stat-hint\">Huidig gebruik</span></div>\n"
+    + "  <div class=\"memo-stat-card\"><span class=\"memo-stat-label\">Geheugen</span><strong class=\"memo-stat-value\" data-stat=\"memory\">Laden...</strong><span class=\"memo-stat-hint\">Werkgeheugen</span></div>\n"
+    + "  <div class=\"memo-stat-card\"><span class=\"memo-stat-label\">Opslag</span><strong class=\"memo-stat-value\" data-stat=\"disk\">Laden...</strong><span class=\"memo-stat-hint\">Lokale schijven</span></div>\n"
+    + "  <div class=\"memo-stat-card\"><span class=\"memo-stat-label\">Uptime</span><strong class=\"memo-stat-value\" data-stat=\"uptime\">Laden...</strong><span class=\"memo-stat-hint\">Sinds laatste herstart</span></div>\n"
+    + "</div>\n"
+    + "<script>\n"
+    + "document.addEventListener('DOMContentLoaded', function () {\n"
+    + "  function clean(v) { return (v || '').replace(/\\s+/g, ' ').trim(); }\n"
+    + "  function findValue(labels) {\n"
+    + "    var cells = Array.prototype.slice.call(document.querySelectorAll('td, th'));\n"
+    + "    for (var i = 0; i < cells.length; i++) {\n"
+    + "      var label = clean(cells[i].textContent).toLowerCase();\n"
+    + "      for (var j = 0; j < labels.length; j++) {\n"
+    + "        if (label === labels[j] || label.indexOf(labels[j]) === 0) {\n"
+    + "          var next = cells[i].nextElementSibling;\n"
+    + "          if (next) { var value = clean(next.textContent); if (value) return value; }\n"
+    + "        }\n"
+    + "      }\n"
+    + "    }\n"
+    + "    return 'Niet beschikbaar';\n"
+    + "  }\n"
+    + "  var values = {\n"
+    + "    cpu: findValue(['cpu usage', 'cpu gebruik']),\n"
+    + "    memory: findValue(['real memory', 'echt geheugen', 'werkgeheugen']),\n"
+    + "    disk: findValue(['local disk space', 'lokale schijfruimte', 'local disk']),\n"
+    + "    uptime: findValue(['system uptime', 'systeem uptime'])\n"
+    + "  };\n"
+    + "  Object.keys(values).forEach(function (key) {\n"
+    + "    var target = document.querySelector('[data-stat=\"' + key + '\"]');\n"
+    + "    if (target) target.textContent = values[key];\n"
+    + "  });\n"
+    + "});\n"
+    + "</script>\n"
     + end + "\nMEMOCRAFT_DASHBOARD_STYLE\n"
 )
-
-pattern = re.compile(
-    r"print <<'MEMOCRAFT_DASHBOARD_STYLE';\n"
-    + re.escape(start)
-    + r".*?"
-    + re.escape(end)
-    + r"\nMEMOCRAFT_DASHBOARD_STYLE\n",
-    re.S,
-)
-
+pattern = re.compile(r"print <<'MEMOCRAFT_DASHBOARD_STYLE';\n" + re.escape(start) + r".*?" + re.escape(end) + r"\nMEMOCRAFT_DASHBOARD_STYLE\n", re.S)
 if pattern.search(text):
     text = pattern.sub(block, text, count=1)
 else:
@@ -135,29 +134,17 @@ else:
     if needle not in text:
         raise SystemExit("FOUT: popup_header in right.cgi niet gevonden")
     text = text.replace(needle, needle + block, 1)
-
 right.write_text(text, encoding="utf-8")
 PY
 
 rm -rf "$DIST_DIR"
 mkdir -p "$DIST_DIR"
 
-tar \
-  --create \
-  --gzip \
-  --file "$OUTPUT" \
-  --directory "$ROOT_DIR" \
-  --owner=0 \
-  --group=0 \
-  --numeric-owner \
-  memocraft-theme
+tar --create --gzip --file "$OUTPUT" --directory "$ROOT_DIR" --owner=0 --group=0 --numeric-owner memocraft-theme
 
 gzip -t "$OUTPUT"
 tar -tzf "$OUTPUT" > "$LISTING"
-
-grep -Fxq 'memocraft-theme/theme.info' "$LISTING" \
-  || fail "Pakket bevat theme.info niet op de juiste plaats"
-
+grep -Fxq 'memocraft-theme/theme.info' "$LISTING" || fail "Pakket bevat theme.info niet op de juiste plaats"
 if grep -Eq '(^|/)\.\.?(/|$)' "$LISTING"; then
   fail "Pakket bevat een ongeldig pad"
 fi
