@@ -1,10 +1,10 @@
-/* MemoNetwork Login 5.0 — uitsluitend actief na de login-marker */
+/* MemoNetwork Login 5.1 — uitsluitend actief op session_login.cgi */
 html.memonetwork-login,
-body.memonetwork-login {
+html.memonetwork-login body {
   min-height: 100% !important;
 }
 
-body.memonetwork-login {
+html.memonetwork-login body {
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
@@ -12,9 +12,9 @@ body.memonetwork-login {
   box-sizing: border-box !important;
   min-height: 100vh !important;
   margin: 0 !important;
-  padding: 150px 20px 32px !important;
+  padding: 160px 20px 36px !important;
   background:
-    url("https://memocraft.nl/images/MemoNetworkLogo.png") center calc(50% - 275px) / 210px auto no-repeat,
+    url("https://memocraft.nl/images/MemoNetworkLogo.png") center calc(50% - 270px) / 210px auto no-repeat,
     radial-gradient(circle at 18% 18%, rgba(37, 99, 235, .23), transparent 34%),
     radial-gradient(circle at 82% 78%, rgba(14, 165, 233, .14), transparent 30%),
     linear-gradient(145deg, #07101c 0%, #0b1422 48%, #08111d 100%) !important;
@@ -22,7 +22,7 @@ body.memonetwork-login {
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
 }
 
-body.memonetwork-login::before {
+html.memonetwork-login body::before {
   content: "" !important;
   position: fixed !important;
   inset: 0 !important;
@@ -33,17 +33,15 @@ body.memonetwork-login::before {
   background-size: 42px 42px !important;
 }
 
-body.memonetwork-login > *,
-body.memonetwork-login form,
-body.memonetwork-login center {
+html.memonetwork-login body > * {
   position: relative !important;
   z-index: 1 !important;
 }
 
-body.memonetwork-login form,
-body.memonetwork-login center,
-body.memonetwork-login .wrapper,
-body.memonetwork-login .shrinkwrapper {
+html.memonetwork-login form,
+html.memonetwork-login center,
+html.memonetwork-login .wrapper,
+html.memonetwork-login .shrinkwrapper {
   box-sizing: border-box !important;
   width: min(460px, calc(100vw - 32px)) !important;
   max-width: 460px !important;
@@ -51,12 +49,9 @@ body.memonetwork-login .shrinkwrapper {
   margin-right: auto !important;
 }
 
-body.memonetwork-login .wrapper,
-body.memonetwork-login .shrinkwrapper,
-body.memonetwork-login table.loginform,
-body.memonetwork-login table.formsection,
-body.memonetwork-login form > table,
-body.memonetwork-login center > table {
+html.memonetwork-login table,
+html.memonetwork-login .wrapper,
+html.memonetwork-login .shrinkwrapper {
   box-sizing: border-box !important;
   width: 100% !important;
   max-width: 460px !important;
@@ -70,50 +65,50 @@ body.memonetwork-login center > table {
   box-shadow: 0 28px 70px rgba(0, 0, 0, .48), inset 0 1px 0 rgba(255,255,255,.04) !important;
 }
 
-body.memonetwork-login thead,
-body.memonetwork-login thead tr,
-body.memonetwork-login thead td,
-body.memonetwork-login thead th,
-body.memonetwork-login .maintitle {
+html.memonetwork-login thead,
+html.memonetwork-login thead tr,
+html.memonetwork-login thead td,
+html.memonetwork-login thead th,
+html.memonetwork-login .maintitle {
   border: 0 !important;
   background: #182438 !important;
   color: #ffffff !important;
 }
 
-body.memonetwork-login thead td,
-body.memonetwork-login thead th,
-body.memonetwork-login .maintitle {
+html.memonetwork-login thead td,
+html.memonetwork-login thead th,
+html.memonetwork-login .maintitle {
   padding: 18px 24px !important;
   font-size: 18px !important;
   font-weight: 800 !important;
   text-align: center !important;
 }
 
-body.memonetwork-login tbody,
-body.memonetwork-login tbody tr,
-body.memonetwork-login tbody td,
-body.memonetwork-login tbody th,
-body.memonetwork-login .mainbody {
+html.memonetwork-login tbody,
+html.memonetwork-login tbody tr,
+html.memonetwork-login tbody td,
+html.memonetwork-login tbody th,
+html.memonetwork-login .mainbody {
   border: 0 !important;
   background: transparent !important;
   color: #b8c7d9 !important;
 }
 
-body.memonetwork-login tbody td,
-body.memonetwork-login tbody th {
+html.memonetwork-login tbody td,
+html.memonetwork-login tbody th {
   padding: 8px 22px !important;
   font-size: 12px !important;
 }
 
-body.memonetwork-login b,
-body.memonetwork-login strong,
-body.memonetwork-login label {
+html.memonetwork-login b,
+html.memonetwork-login strong,
+html.memonetwork-login label {
   color: #dbe7f5 !important;
 }
 
-body.memonetwork-login input[type="text"],
-body.memonetwork-login input[type="password"],
-body.memonetwork-login input[type="email"] {
+html.memonetwork-login input[type="text"],
+html.memonetwork-login input[type="password"],
+html.memonetwork-login input[type="email"] {
   box-sizing: border-box !important;
   width: 100% !important;
   min-width: 0 !important;
@@ -128,16 +123,16 @@ body.memonetwork-login input[type="email"] {
   outline: none !important;
 }
 
-body.memonetwork-login input[type="text"]:focus,
-body.memonetwork-login input[type="password"]:focus,
-body.memonetwork-login input[type="email"]:focus {
+html.memonetwork-login input[type="text"]:focus,
+html.memonetwork-login input[type="password"]:focus,
+html.memonetwork-login input[type="email"]:focus {
   border-color: #3b82f6 !important;
   box-shadow: 0 0 0 4px rgba(59, 130, 246, .17) !important;
 }
 
-body.memonetwork-login input[type="submit"],
-body.memonetwork-login input[type="reset"],
-body.memonetwork-login input[type="button"] {
+html.memonetwork-login input[type="submit"],
+html.memonetwork-login input[type="reset"],
+html.memonetwork-login input[type="button"] {
   min-height: 44px !important;
   margin: 14px 4px 0 !important;
   padding: 0 20px !important;
@@ -147,45 +142,31 @@ body.memonetwork-login input[type="button"] {
   cursor: pointer !important;
 }
 
-body.memonetwork-login input[type="submit"] {
+html.memonetwork-login input[type="submit"] {
   border: 1px solid #3b82f6 !important;
   background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
   color: #ffffff !important;
   box-shadow: 0 10px 25px rgba(37, 99, 235, .28) !important;
 }
 
-body.memonetwork-login input[type="reset"],
-body.memonetwork-login input[type="button"] {
+html.memonetwork-login input[type="reset"],
+html.memonetwork-login input[type="button"] {
   border: 1px solid #40526d !important;
   background: #172337 !important;
   color: #dbe7f5 !important;
 }
 
-body.memonetwork-login input[type="checkbox"] {
+html.memonetwork-login input[type="checkbox"] {
   width: 16px !important;
   height: 16px !important;
   accent-color: #3b82f6 !important;
 }
 
-body.memonetwork-login > div:first-child,
-body.memonetwork-login > p:first-child {
-  color: #90a4bd !important;
-  text-align: center !important;
-}
-
 @media (max-width: 560px) {
-  body.memonetwork-login {
+  html.memonetwork-login body {
     justify-content: flex-start !important;
     padding: 145px 14px 24px !important;
     background-position: center 24px, center, center, center !important;
     background-size: 175px auto, auto, auto, auto !important;
-  }
-
-  body.memonetwork-login tbody td,
-  body.memonetwork-login tbody th,
-  body.memonetwork-login thead td,
-  body.memonetwork-login thead th {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
   }
 }
