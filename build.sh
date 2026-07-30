@@ -6,6 +6,8 @@ THEME_DIR="$ROOT_DIR/memocraft-theme"
 DIST_DIR="$ROOT_DIR/dist"
 OUTPUT="$DIST_DIR/memocraft-theme.wbt.gz"
 LISTING="$DIST_DIR/package-files.txt"
+SOURCE_CSS="$ROOT_DIR/src/memocraft.css"
+TARGET_CSS="$THEME_DIR/unauthenticated/gray-theme.css"
 
 fail() {
   echo "FOUT: $*" >&2
@@ -14,7 +16,32 @@ fail() {
 
 [[ -d "$THEME_DIR" ]] || fail "Map ontbreekt: $THEME_DIR"
 [[ -f "$THEME_DIR/theme.info" ]] || fail "theme.info ontbreekt"
+[[ -f "$SOURCE_CSS" ]] || fail "Bron-CSS ontbreekt: $SOURCE_CSS"
+[[ -f "$TARGET_CSS" ]] || fail "Gray Theme CSS ontbreekt: $TARGET_CSS"
 grep -q '^desc=' "$THEME_DIR/theme.info" || fail "theme.info bevat geen desc="
+
+# Replace an earlier MemoCraft block instead of appending duplicates on every build.
+python3 - "$TARGET_CSS" "$SOURCE_CSS" <<'PY'
+from pathlib import Path
+import sys
+
+target = Path(sys.argv[1])
+source = Path(sys.argv[2])
+css = target.read_text(encoding="utf-8")
+
+markers = (
+    "/* MEMOCRAFT-CUSTOM-START",
+    "/* MemoCraft Theme */",
+)
+positions = [css.find(marker) for marker in markers if css.find(marker) >= 0]
+if positions:
+    css = css[:min(positions)].rstrip() + "\n\n"
+else:
+    css = css.rstrip() + "\n\n"
+
+custom = source.read_text(encoding="utf-8").strip() + "\n"
+target.write_text(css + custom, encoding="utf-8")
+PY
 
 rm -rf "$DIST_DIR"
 mkdir -p "$DIST_DIR"
