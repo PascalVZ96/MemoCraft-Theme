@@ -86,6 +86,14 @@ if (@has > 1) {
 	}
 print &ui_switch_theme_javascript();
 print "<div class='wrapper leftmenu'>\n";
+print "<div class='memo-brand'>\n";
+print "<div class='memo-brand-icon'>M</div>\n";
+print "<div class='memo-brand-copy'>\n";
+print "<strong>MemoCraft</strong>\n";
+print "<span>Server Management</span>\n";
+print "</div>\n";
+print "</div>\n";
+print "<div class='memo-menu-content'>\n";
 print "<table id='main' width='100%'><tbody><tr><td>\n";
 
 my $selwidth = (get_left_frame_width() - 70)."px";
@@ -164,6 +172,7 @@ if ($ENV{'HTTP_WEBMIN_SERVERS'}) {
 show_menu_items_list(\@leftitems, 0);
 
 print "</td></tr></tbody></table>\n";
+print "</div>\n";
 print <<EOF;
 <script type='text/javascript'>
 (function() {

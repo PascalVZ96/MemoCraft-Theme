@@ -798,3 +798,118 @@ EOFcat >> src/memocraft.css <<'EOF'
     border: 1px solid #334155 !important;
     border-radius: 8px !important;
 }
+
+/* MEMOCRAFT-SIDEBAR-START */
+.leftmenu {
+    min-height: 100vh !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: #0f1520 !important;
+}
+
+.leftmenu #main,
+.leftmenu #main tbody,
+.leftmenu #main tr,
+.leftmenu #main td {
+    background: transparent !important;
+    border: 0 !important;
+}
+
+.memo-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 14px;
+    border-bottom: 1px solid #2c3749;
+    background: #131b28;
+}
+
+.memo-brand-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    border-radius: 11px;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    color: #ffffff !important;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.memo-brand-copy {
+    display: flex;
+    flex-direction: column;
+}
+
+.memo-brand-copy strong {
+    color: #ffffff !important;
+    font-size: 17px;
+}
+
+.memo-brand-copy span {
+    margin-top: 3px;
+    color: #94a3b8 !important;
+    font-size: 11px;
+}
+
+.memo-menu-content {
+    padding: 10px;
+}
+
+.leftmenu details {
+    margin: 3px 0;
+    border: 0 !important;
+    background: transparent !important;
+}
+
+.leftmenu summary {
+    padding: 9px 10px;
+    border-radius: 7px;
+    color: #d3dbe8 !important;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.leftmenu summary:hover {
+    background: #202c3d !important;
+    color: #ffffff !important;
+}
+
+.leftmenu summary span {
+    color: inherit !important;
+}
+
+.leftmenu a {
+    display: block;
+    padding: 8px 10px;
+    border-radius: 7px;
+    color: #c2ccdb !important;
+    text-decoration: none !important;
+}
+
+.leftmenu a:hover {
+    background: #243249 !important;
+    color: #ffffff !important;
+}
+
+.leftmenu hr {
+    margin: 10px 3px;
+    border: 0 !important;
+    border-top: 1px solid #334155 !important;
+}
+
+.leftmenu input[type="text"],
+.leftmenu input[type="search"] {
+    box-sizing: border-box;
+    width: 100% !important;
+    height: 36px;
+    padding: 0 10px;
+    background: #111827 !important;
+    color: #ffffff !important;
+    border: 1px solid #3b4a60 !important;
+    border-radius: 8px !important;
+}
+/* MEMOCRAFT-SIDEBAR-END */
+
