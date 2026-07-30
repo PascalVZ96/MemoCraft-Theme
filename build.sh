@@ -8,8 +8,10 @@ OUTPUT="$DIST_DIR/memocraft-theme.wbt.gz"
 LISTING="$DIST_DIR/package-files.txt"
 SOURCE_CSS="$ROOT_DIR/src/memocraft.css"
 SIDEBAR_CSS="$ROOT_DIR/src/sidebar.css"
+DASHBOARD_CSS="$ROOT_DIR/src/dashboard-inline.css"
 TARGET_CSS="$THEME_DIR/unauthenticated/gray-theme.css"
 LEFT_CGI="$THEME_DIR/left.cgi"
+RIGHT_CGI="$THEME_DIR/right.cgi"
 
 fail() {
   echo "FOUT: $*" >&2
@@ -20,8 +22,10 @@ fail() {
 [[ -f "$THEME_DIR/theme.info" ]] || fail "theme.info ontbreekt"
 [[ -f "$SOURCE_CSS" ]] || fail "Bron-CSS ontbreekt: $SOURCE_CSS"
 [[ -f "$SIDEBAR_CSS" ]] || fail "Zijbalk-CSS ontbreekt: $SIDEBAR_CSS"
+[[ -f "$DASHBOARD_CSS" ]] || fail "Dashboard-CSS ontbreekt: $DASHBOARD_CSS"
 [[ -f "$TARGET_CSS" ]] || fail "Gray Theme CSS ontbreekt: $TARGET_CSS"
 [[ -f "$LEFT_CGI" ]] || fail "left.cgi ontbreekt: $LEFT_CGI"
+[[ -f "$RIGHT_CGI" ]] || fail "right.cgi ontbreekt: $RIGHT_CGI"
 grep -q '^desc=' "$THEME_DIR/theme.info" || fail "theme.info bevat geen desc="
 
 # Replace an earlier MemoCraft block instead of appending duplicates on every build.
@@ -47,8 +51,7 @@ custom = source.read_text(encoding="utf-8").strip() + "\n"
 target.write_text(css + custom, encoding="utf-8")
 PY
 
-# Inline the sidebar stylesheet in left.cgi. This avoids Gray Theme path
-# resolution from overriding or skipping the MemoCraft sidebar rules.
+# Inline the sidebar stylesheet in left.cgi.
 python3 - "$LEFT_CGI" "$SIDEBAR_CSS" <<'PY'
 from pathlib import Path
 import re
@@ -62,7 +65,7 @@ css = source.read_text(encoding="utf-8").strip()
 start = "<!-- MEMOCRAFT-SIDEBAR-STYLE-START -->"
 end = "<!-- MEMOCRAFT-SIDEBAR-STYLE-END -->"
 block = (
-    'print <<\'MEMOCRAFT_SIDEBAR_STYLE\';\n'
+    "print <<'MEMOCRAFT_SIDEBAR_STYLE';\n"
     + start + "\n<style>\n"
     + css + "\n</style>\n"
     + end + "\nMEMOCRAFT_SIDEBAR_STYLE\n"
@@ -86,6 +89,51 @@ else:
     text = text.replace(needle, needle + block, 1)
 
 left.write_text(text, encoding="utf-8")
+PY
+
+# Inline the dashboard stylesheet and MemoCraft heading in right.cgi.
+python3 - "$RIGHT_CGI" "$DASHBOARD_CSS" <<'PY'
+from pathlib import Path
+import re
+import sys
+
+right = Path(sys.argv[1])
+source = Path(sys.argv[2])
+text = right.read_text(encoding="utf-8")
+css = source.read_text(encoding="utf-8").strip()
+
+start = "<!-- MEMOCRAFT-DASHBOARD-STYLE-START -->"
+end = "<!-- MEMOCRAFT-DASHBOARD-STYLE-END -->"
+block = (
+    "print <<'MEMOCRAFT_DASHBOARD_STYLE';\n"
+    + start + "\n<style>\n"
+    + css + "\n</style>\n"
+    + "<div class=\"memo-dashboard-head\">\n"
+    + "  <div><h1 class=\"memo-dashboard-title\">MemoCraft Dashboard</h1>"
+    + "<p class=\"memo-dashboard-subtitle\">Serverstatus en systeeminformatie</p></div>\n"
+    + "  <div class=\"memo-dashboard-badge\">Webmin 2.653</div>\n"
+    + "</div>\n"
+    + end + "\nMEMOCRAFT_DASHBOARD_STYLE\n"
+)
+
+pattern = re.compile(
+    r"print <<'MEMOCRAFT_DASHBOARD_STYLE';\n"
+    + re.escape(start)
+    + r".*?"
+    + re.escape(end)
+    + r"\nMEMOCRAFT_DASHBOARD_STYLE\n",
+    re.S,
+)
+
+if pattern.search(text):
+    text = pattern.sub(block, text, count=1)
+else:
+    needle = "&popup_header(undef, $prehead);\n"
+    if needle not in text:
+        raise SystemExit("FOUT: popup_header in right.cgi niet gevonden")
+    text = text.replace(needle, needle + block, 1)
+
+right.write_text(text, encoding="utf-8")
 PY
 
 rm -rf "$DIST_DIR"
