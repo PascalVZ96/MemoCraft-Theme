@@ -13,6 +13,7 @@ FORMS_TABLES_CSS="$ROOT_DIR/src/forms-tables-20.css"
 CORE_UI_CSS="$ROOT_DIR/src/core-ui-50.css"
 LOGIN_CSS="$ROOT_DIR/src/login.css"
 LOGIN_JS="$ROOT_DIR/src/login-marker.js"
+PACKAGE_UPDATES_JS="$ROOT_DIR/src/package-updates-fix.js"
 SIDEBAR_CSS="$ROOT_DIR/src/sidebar.css"
 SIDEBAR_EXTRA_CSS="$ROOT_DIR/src/sidebar-31.css"
 SIDEBAR_PHASE_CSS="$ROOT_DIR/src/sidebar-32.css"
@@ -44,6 +45,7 @@ for required in \
   "$CORE_UI_CSS" \
   "$LOGIN_CSS" \
   "$LOGIN_JS" \
+  "$PACKAGE_UPDATES_JS" \
   "$SIDEBAR_CSS" \
   "$SIDEBAR_EXTRA_CSS" \
   "$SIDEBAR_PHASE_CSS" \
@@ -93,28 +95,46 @@ for target in files:
 print(f"Loginstijl toegevoegd aan {len(files)} unauthenticated stylesheets")
 PY
 
-python3 - "$THEME_PL" "$LOGIN_JS" <<'PY'
+python3 - "$THEME_PL" "$LOGIN_JS" "$PACKAGE_UPDATES_JS" <<'PY'
 from pathlib import Path
 import re
 import sys
 
 theme = Path(sys.argv[1])
-js = Path(sys.argv[2]).read_text(encoding="utf-8").strip()
+login_js = Path(sys.argv[2]).read_text(encoding="utf-8").strip()
+updates_js = Path(sys.argv[3]).read_text(encoding="utf-8").strip()
 text = theme.read_text(encoding="utf-8")
-start = "# MEMONETWORK-LOGIN-MARKER-START"
-end = "# MEMONETWORK-LOGIN-MARKER-END"
-block = (
-    f"\t{start}\n"
+
+login_start = "# MEMONETWORK-LOGIN-MARKER-START"
+login_end = "# MEMONETWORK-LOGIN-MARKER-END"
+login_block = (
+    f"\t{login_start}\n"
     "\tprint <<'MEMONETWORK_LOGIN_MARKER';\n"
-    "<script>\n" + js + "\n</script>\n"
+    "<script>\n" + login_js + "\n</script>\n"
     "MEMONETWORK_LOGIN_MARKER\n"
-    f"\t{end}\n"
+    f"\t{login_end}\n"
 )
 text = re.sub(r"\t# MEMONETWORK-LOGIN-MARKER-START.*?\t# MEMONETWORK-LOGIN-MARKER-END\n", "", text, flags=re.S)
 needle = "if ($script_name =~ /session_login.cgi/) {\n"
 if needle not in text:
     raise SystemExit("FOUT: loginblok in theme.pl niet gevonden")
-text = text.replace(needle, needle + block, 1)
+text = text.replace(needle, needle + login_block, 1)
+
+runtime_start = "# MEMONETWORK-PACKAGE-UPDATES-FIX-START"
+runtime_end = "# MEMONETWORK-PACKAGE-UPDATES-FIX-END"
+runtime_block = (
+    f"\t{runtime_start}\n"
+    "\tprint <<'MEMONETWORK_PACKAGE_UPDATES_FIX';\n"
+    "<script>\n" + updates_js + "\n</script>\n"
+    "MEMONETWORK_PACKAGE_UPDATES_FIX\n"
+    f"\t{runtime_end}\n"
+)
+text = re.sub(r"\t# MEMONETWORK-PACKAGE-UPDATES-FIX-START.*?\t# MEMONETWORK-PACKAGE-UPDATES-FIX-END\n", "", text, flags=re.S)
+header_needle = "print &ui_post_header($text);\n"
+if header_needle not in text:
+    raise SystemExit("FOUT: ui_post_header in theme.pl niet gevonden")
+text = text.replace(header_needle, runtime_block + header_needle, 1)
+
 theme.write_text(text, encoding="utf-8")
 PY
 
@@ -214,6 +234,7 @@ grep -Fxq 'memo-network/system-info.cgi' "$LISTING" || fail "Pakket mist memo-ne
 grep -Fxq 'memo-network/processes.cgi' "$LISTING" || fail "Pakket mist memo-network/processes.cgi"
 grep -q '/memo-network/system-info.cgi' "$RIGHT_CGI" || fail "right.cgi gebruikt niet de veilige systeeminformatiepagina"
 grep -q '/memo-network/processes.cgi' "$RIGHT_CGI" || fail "right.cgi gebruikt niet de veilige processenpagina"
+grep -q 'MEMONETWORK-PACKAGE-UPDATES-FIX-START' "$THEME_PL" || fail "theme.pl mist de package-updates runtime fix"
 
 if grep -Eq '(^|/)\.\.?(/|$)' "$LISTING"; then
   fail "Pakket bevat een ongeldig pad"
@@ -221,4 +242,5 @@ fi
 
 echo "Gereed: $OUTPUT"
 echo "Dashboard v3 gebruikt veilige MemoNetwork beheerpagina's"
+echo "Package-updates runtime contrastfix toegevoegd"
 echo "Aantal bestanden: $(wc -l < "$LISTING")"
