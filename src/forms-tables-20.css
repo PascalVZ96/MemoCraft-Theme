@@ -225,6 +225,41 @@ body:not(.memonetwork-login) tt {
   color: #bfdbfe !important;
 }
 
+/* Legacy package-updates module uses hard-coded white table cells. */
+body:not(.memonetwork-login) table[bgcolor],
+body:not(.memonetwork-login) td[bgcolor="#ffffff"],
+body:not(.memonetwork-login) td[bgcolor="white"],
+body:not(.memonetwork-login) tr[bgcolor="#ffffff"],
+body:not(.memonetwork-login) tr[bgcolor="white"] {
+  background: #111a27 !important;
+  color: #d8e2ef !important;
+}
+
+body:not(.memonetwork-login) table[bgcolor] td,
+body:not(.memonetwork-login) table[bgcolor] th {
+  color: #d8e2ef !important;
+  border-color: #2b3b52 !important;
+}
+
+body:not(.memonetwork-login) table[bgcolor] a {
+  color: #7dc4ff !important;
+}
+
+body:not(.memonetwork-login) tr[bgcolor="#ccffcc"],
+body:not(.memonetwork-login) tr[bgcolor="#CCFFCC"],
+body:not(.memonetwork-login) td[bgcolor="#ccffcc"],
+body:not(.memonetwork-login) td[bgcolor="#CCFFCC"] {
+  background: #163b2d !important;
+  color: #d1fae5 !important;
+}
+
+body:not(.memonetwork-login) tr[bgcolor="#ccffcc"] a,
+body:not(.memonetwork-login) tr[bgcolor="#CCFFCC"] a,
+body:not(.memonetwork-login) td[bgcolor="#ccffcc"] a,
+body:not(.memonetwork-login) td[bgcolor="#CCFFCC"] a {
+  color: #86efac !important;
+}
+
 @media (max-width: 900px) {
   body:not(.memonetwork-login) table.icons_table,
   body:not(.memonetwork-login) table.icons_table tbody,
