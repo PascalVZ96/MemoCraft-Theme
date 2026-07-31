@@ -62,14 +62,24 @@ sub line_count {
 
 sub docker_stats {
     return (0,0) if system('command -v docker >/dev/null 2>&1') != 0;
-    my $running=line_count('docker ps --format "{{.ID}}"');
-    my $total=line_count('docker ps -a --format "{{.ID}}"');
-    return ($running,$total);
+    return (
+        line_count('docker ps --format "{{.ID}}"'),
+        line_count('docker ps -a --format "{{.ID}}"')
+    );
+}
+
+sub clean_amp_value {
+    my ($value)=@_;
+    $value //= '';
+    $value =~ s/\e\[[0-9;?]*[ -\/]*[@-~]//g;
+    $value =~ s/^\s+|\s+$//g;
+    return $value;
 }
 
 sub amp_stats {
-    my $output = `sudo -n -u amp -H ampinstmgr -t 2>/dev/null`;
-    $output = `su -s /bin/sh amp -c 'ampinstmgr -t' 2>/dev/null` unless $output =~ /Instance Name/;
+    my $output = `sudo -n -u amp -H env TERM=dumb NO_COLOR=1 ampinstmgr -t 2>/dev/null`;
+    $output = `su -s /bin/sh amp -c 'env TERM=dumb NO_COLOR=1 ampinstmgr -t' 2>/dev/null`
+        unless $output =~ /Instance Name/;
 
     if ($output =~ /Instance Name/) {
         my ($running,$total)=(0,0);
@@ -78,27 +88,39 @@ sub amp_stats {
             next if $line =~ /Instance Name|^[\s─━═-]+$/;
             next unless $line =~ /[│|]/;
 
-            my @columns = split /\s*[│|]\s*/, $line;
-            @columns = grep { defined $_ && $_ =~ /\S/ } @columns;
+            # Keep empty fields: a stopped instance has an empty Up column.
+            my @columns = split /\s*[│|]\s*/, $line, -1;
+            shift @columns while @columns && $columns[0] !~ /\S/;
+            pop @columns while @columns && $columns[-1] !~ /\S/ && @columns > 6;
             next unless @columns >= 6;
 
-            my ($name,$friendly,$module,$ip,$port,$up) = @columns[0..5];
-            for ($name,$friendly,$module,$ip,$port,$up) {
-                $_ //= '';
-                s/^\s+|\s+$//g;
-            }
-
+            my $name   = clean_amp_value($columns[0]);
+            my $module = clean_amp_value($columns[2]);
+            my $up     = clean_amp_value($columns[-1]);
             next unless length $name;
-            next if uc($module) eq 'ADS';
+            next if uc($module) eq 'ADS' || uc($name) =~ /^ADS/;
 
             $total++;
-            $running++ if $up =~ /(?:✓|✔|YES|RUNNING|UP|TRUE|1)/i;
+            $running++ if $up =~ /^(?:✓|✔|YES|RUNNING|UP|TRUE|1)$/i;
         }
         return ($running,$total) if $total;
     }
 
+    # Safe fallback: count only non-ADS instance directories. Running remains
+    # unknown instead of guessing from unrelated Java or AMP processes.
     my @dirs=grep {-d $_ && $_ !~ m{/ADS[^/]*$}i} glob('/home/amp/.ampdata/instances/*');
     return (0,scalar @dirs);
+}
+
+sub update_count {
+    my $cache = '/tmp/memonetwork-update-count';
+    if (-e $cache && time - (stat($cache))[9] < 60) {
+        my $value = slurp_first($cache);
+        return 0 + $value if $value =~ /^\d+/;
+    }
+    my $count = line_count("apt list --upgradable 2>/dev/null | tail -n +2");
+    if (open my $fh, '>', $cache) { print {$fh} "$count\n"; close $fh; }
+    return $count;
 }
 
 my ($idle1,$total1)=cpu_sample();
@@ -116,9 +138,11 @@ my ($docker_running,$docker_total)=docker_stats();
 my ($amp_running,$amp_total)=amp_stats();
 my $rx=($rx2-$rx1)/1024/$sample; my $tx=($tx2-$tx1)/1024/$sample;
 $rx=0 if $rx<0; $tx=0 if $tx<0;
+my $updates = update_count();
+my $reboot_required = -e '/var/run/reboot-required' ? JSON::PP::true : JSON::PP::false;
 
 my $payload={
-    api_version => 3,
+    api_version => 3.3,
     cpu_percent => sprintf('%.1f',$cpu)+0,
     ram_used_gib => sprintf('%.2f',$ram_used/1048576)+0,
     ram_total_gib => sprintf('%.2f',$ram_total/1048576)+0,
@@ -127,9 +151,11 @@ my $payload={
     load_1 => sprintf('%.2f',$load1)+0,
     load_5 => sprintf('%.2f',$load5)+0,
     load_15 => sprintf('%.2f',$load15)+0,
+    updates_available => $updates,
+    reboot_required => $reboot_required,
     services => {
         docker => running('dockerd'),
-        amp => running('ampinstmgr|AMP_Linux'),
+        amp => ($amp_total > 0 ? JSON::PP::true : JSON::PP::false),
         minio => running('(?:^|/)minio(?:\s|$)'),
         wireguard => (-e '/sys/class/net/wg0' ? JSON::PP::true : JSON::PP::false),
     },
