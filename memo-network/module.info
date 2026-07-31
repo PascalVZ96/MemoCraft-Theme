@@ -1,0 +1,4 @@
+name=MemoNetwork Live API
+desc=MemoNetwork dashboard live statistics endpoint
+category=system
+hidden=1
