@@ -1,4 +1,4 @@
-/* MemoNetwork Core UI 5.0 */
+/* MemoNetwork Core UI 5.1 */
 
 body:not(.memonetwork-login) {
   color: #e7eef8 !important;
@@ -125,6 +125,67 @@ body:not(.memonetwork-login) .ui_tabs a.active {
 body:not(.memonetwork-login) hr {
   border: 0 !important;
   border-top: 1px solid #2b3b52 !important;
+}
+
+/* Final legacy package-updates override. This file is loaded last. */
+body:not(.memonetwork-login) table[bgcolor],
+body:not(.memonetwork-login) tbody[bgcolor],
+body:not(.memonetwork-login) tr[bgcolor],
+body:not(.memonetwork-login) td[bgcolor],
+body:not(.memonetwork-login) th[bgcolor],
+body:not(.memonetwork-login) table[style*="background"],
+body:not(.memonetwork-login) tbody[style*="background"],
+body:not(.memonetwork-login) tr[style*="background"],
+body:not(.memonetwork-login) td[style*="background"],
+body:not(.memonetwork-login) th[style*="background"] {
+  background: #111a27 !important;
+  background-color: #111a27 !important;
+  color: #e7eef8 !important;
+}
+
+body:not(.memonetwork-login) table[bgcolor] *,
+body:not(.memonetwork-login) tbody[bgcolor] *,
+body:not(.memonetwork-login) tr[bgcolor] *,
+body:not(.memonetwork-login) td[bgcolor] *,
+body:not(.memonetwork-login) th[bgcolor] *,
+body:not(.memonetwork-login) table[style*="background"] *,
+body:not(.memonetwork-login) tbody[style*="background"] *,
+body:not(.memonetwork-login) tr[style*="background"] *,
+body:not(.memonetwork-login) td[style*="background"] *,
+body:not(.memonetwork-login) th[style*="background"] * {
+  color: #e7eef8 !important;
+}
+
+body:not(.memonetwork-login) table[bgcolor] a,
+body:not(.memonetwork-login) tbody[bgcolor] a,
+body:not(.memonetwork-login) tr[bgcolor] a,
+body:not(.memonetwork-login) td[bgcolor] a,
+body:not(.memonetwork-login) th[bgcolor] a {
+  color: #7dc4ff !important;
+}
+
+body:not(.memonetwork-login) tr[bgcolor="#ccffcc"],
+body:not(.memonetwork-login) tr[bgcolor="#CCFFCC"],
+body:not(.memonetwork-login) tr[bgcolor="ccffcc"],
+body:not(.memonetwork-login) td[bgcolor="#ccffcc"],
+body:not(.memonetwork-login) td[bgcolor="#CCFFCC"],
+body:not(.memonetwork-login) td[bgcolor="ccffcc"],
+body:not(.memonetwork-login) tr[style*="rgb(204, 255, 204)"],
+body:not(.memonetwork-login) td[style*="rgb(204, 255, 204)"],
+body:not(.memonetwork-login) tr[style*="#ccffcc"],
+body:not(.memonetwork-login) td[style*="#ccffcc"] {
+  background: #173d2d !important;
+  background-color: #173d2d !important;
+  color: #ecfdf5 !important;
+}
+
+body:not(.memonetwork-login) tr[bgcolor="#ccffcc"] *,
+body:not(.memonetwork-login) tr[bgcolor="#CCFFCC"] *,
+body:not(.memonetwork-login) tr[bgcolor="ccffcc"] *,
+body:not(.memonetwork-login) td[bgcolor="#ccffcc"] *,
+body:not(.memonetwork-login) td[bgcolor="#CCFFCC"] *,
+body:not(.memonetwork-login) td[bgcolor="ccffcc"] * {
+  color: #ecfdf5 !important;
 }
 
 @media (max-width: 800px) {
