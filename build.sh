@@ -3,6 +3,7 @@ set -Eeuo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 THEME_DIR="$ROOT_DIR/memocraft-theme"
+API_DIR="$ROOT_DIR/memo-network"
 DIST_DIR="$ROOT_DIR/dist"
 OUTPUT="$DIST_DIR/memocraft-theme.wbt.gz"
 LISTING="$DIST_DIR/package-files.txt"
@@ -23,6 +24,7 @@ LEFT_CGI="$THEME_DIR/left.cgi"
 RIGHT_CGI="$THEME_DIR/right.cgi"
 LIVE_STATS_CGI="$THEME_DIR/live-stats.cgi"
 MEMO_DASHBOARD_CGI="$THEME_DIR/memo-dashboard.cgi"
+API_STATS_CGI="$API_DIR/live-stats.cgi"
 
 fail() {
   echo "FOUT: $*" >&2
@@ -31,6 +33,8 @@ fail() {
 
 for required in \
   "$THEME_DIR/theme.info" \
+  "$API_DIR/module.info" \
+  "$API_STATS_CGI" \
   "$SOURCE_CSS" \
   "$FORMS_TABLES_CSS" \
   "$CORE_UI_CSS" \
@@ -49,6 +53,7 @@ for required in \
 done
 
 grep -q '^desc=' "$THEME_DIR/theme.info" || fail "theme.info bevat geen desc="
+grep -q '^name=' "$API_DIR/module.info" || fail "memo-network/module.info bevat geen name="
 
 python3 - "$TARGET_CSS" "$SOURCE_CSS" "$FORMS_TABLES_CSS" "$CORE_UI_CSS" <<'PY'
 from pathlib import Path
@@ -158,44 +163,47 @@ else:
 left.write_text(text, encoding="utf-8")
 PY
 
-# Webmin behandelt /right.cgi als dashboardroute van het actieve theme.
+# Bouw Dashboard v2 rechtstreeks in de geldige Webmin-theme route.
 cp "$MEMO_DASHBOARD_CGI" "$RIGHT_CGI"
 
-# Gebruik QUERY_STRING rechtstreeks; Webmins ReadParse vult memo_stats op deze
-# theme-route niet op alle installaties betrouwbaar in.
+# Gebruik een echte verborgen Webmin-module voor live statistieken.
 python3 - "$RIGHT_CGI" <<'PY'
 from pathlib import Path
 import sys
 
 right = Path(sys.argv[1])
 text = right.read_text(encoding="utf-8")
-old = "output_stats() if $in{'memo_stats'};"
-new = "my $query_string = $ENV{'QUERY_STRING'} // '';\noutput_stats() if $query_string =~ /(?:^|&)memo_stats=1(?:&|$)/ || $in{'memo_stats'};"
-if old in text:
-    text = text.replace(old, new, 1)
-elif "QUERY_STRING" not in text:
-    raise SystemExit("FOUT: live-statistiekenblok in right.cgi niet gevonden")
-text = text.replace("fetch('/right.cgi?memo_stats=1&_='+Date.now()", "fetch((window.location.pathname || '/right.cgi')+'?memo_stats=1&_='+Date.now()")
+text = text.replace(
+    "fetch('/right.cgi?memo_stats=1&_='+Date.now()",
+    "fetch('/memo-network/live-stats.cgi?_='+Date.now()"
+)
+text = text.replace(
+    "fetch((window.location.pathname || '/right.cgi')+'?memo_stats=1&_='+Date.now()",
+    "fetch('/memo-network/live-stats.cgi?_='+Date.now()"
+)
+if "/memo-network/live-stats.cgi" not in text:
+    raise SystemExit("FOUT: live API URL kon niet in right.cgi worden ingesteld")
 right.write_text(text, encoding="utf-8")
 PY
 
-chmod 755 "$LEFT_CGI" "$RIGHT_CGI" "$LIVE_STATS_CGI" "$MEMO_DASHBOARD_CGI"
+chmod 755 "$LEFT_CGI" "$RIGHT_CGI" "$LIVE_STATS_CGI" "$MEMO_DASHBOARD_CGI" "$API_STATS_CGI"
 
 rm -rf "$DIST_DIR"
 mkdir -p "$DIST_DIR"
-tar --create --gzip --file "$OUTPUT" --directory="$ROOT_DIR" --owner=0 --group=0 --numeric-owner memocraft-theme
+tar --create --gzip --file "$OUTPUT" --directory="$ROOT_DIR" --owner=0 --group=0 --numeric-owner memocraft-theme memo-network
 gzip -t "$OUTPUT"
 tar -tzf "$OUTPUT" > "$LISTING"
 
 grep -Fxq 'memocraft-theme/theme.info' "$LISTING" || fail "Pakket mist theme.info"
 grep -Fxq 'memocraft-theme/right.cgi' "$LISTING" || fail "Pakket mist right.cgi"
-grep -Fxq 'memocraft-theme/memo-dashboard.cgi' "$LISTING" || fail "Pakket mist memo-dashboard.cgi"
-grep -q 'QUERY_STRING' "$RIGHT_CGI" || fail "right.cgi mist directe live-querydetectie"
+grep -Fxq 'memo-network/module.info' "$LISTING" || fail "Pakket mist memo-network/module.info"
+grep -Fxq 'memo-network/live-stats.cgi' "$LISTING" || fail "Pakket mist memo-network/live-stats.cgi"
+grep -q '/memo-network/live-stats.cgi' "$RIGHT_CGI" || fail "right.cgi gebruikt niet de live API-module"
 
 if grep -Eq '(^|/)\.\.?(/|$)' "$LISTING"; then
   fail "Pakket bevat een ongeldig pad"
 fi
 
 echo "Gereed: $OUTPUT"
-echo "Dashboard v2 en live API zijn ingebouwd in memocraft-theme/right.cgi"
+echo "Dashboard v2 gebruikt /memo-network/live-stats.cgi"
 echo "Aantal bestanden: $(wc -l < "$LISTING")"
