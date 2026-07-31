@@ -2,6 +2,7 @@
 use strict;
 use warnings;
 use JSON::PP;
+use File::Basename qw(basename);
 
 sub slurp_first {
     my ($path) = @_;
@@ -68,48 +69,25 @@ sub docker_stats {
     );
 }
 
-sub clean_amp_value {
-    my ($value)=@_;
-    $value //= '';
-    $value =~ s/\e\[[0-9;?]*[ -\/]*[@-~]//g;
-    $value =~ s/^\s+|\s+$//g;
-    return $value;
-}
-
 sub amp_stats {
-    my $output = `sudo -n -u amp -H env TERM=dumb NO_COLOR=1 ampinstmgr -t 2>/dev/null`;
-    $output = `su -s /bin/sh amp -c 'env TERM=dumb NO_COLOR=1 ampinstmgr -t' 2>/dev/null`
-        unless $output =~ /Instance Name/;
+    my @dirs = grep {
+        -d $_ && basename($_) !~ /^ADS/i
+    } glob('/home/amp/.ampdata/instances/*');
 
-    if ($output =~ /Instance Name/) {
-        my ($running,$total)=(0,0);
-        for my $line (split /\n/, $output) {
-            $line =~ s/\e\[[0-9;?]*[ -\/]*[@-~]//g;
-            next if $line =~ /Instance Name|^[\s─━═-]+$/;
-            next unless $line =~ /[│|]/;
+    my $total = scalar @dirs;
+    return (0, 0) unless $total;
 
-            # Keep empty fields: a stopped instance has an empty Up column.
-            my @columns = split /\s*[│|]\s*/, $line, -1;
-            shift @columns while @columns && $columns[0] !~ /\S/;
-            pop @columns while @columns && $columns[-1] !~ /\S/ && @columns > 6;
-            next unless @columns >= 6;
+    my $processes = `ps -eo args= 2>/dev/null`;
+    my $running = 0;
 
-            my $name   = clean_amp_value($columns[0]);
-            my $module = clean_amp_value($columns[2]);
-            my $up     = clean_amp_value($columns[-1]);
-            next unless length $name;
-            next if uc($module) eq 'ADS' || uc($name) =~ /^ADS/;
-
-            $total++;
-            $running++ if $up =~ /^(?:✓|✔|YES|RUNNING|UP|TRUE|1)$/i;
-        }
-        return ($running,$total) if $total;
+    for my $dir (@dirs) {
+        my $name = basename($dir);
+        my $active = index($processes, $dir) >= 0;
+        $active ||= $processes =~ /(?:^|[\s\/])\Q$name\E(?:[\s\/]|$)/m;
+        $running++ if $active;
     }
 
-    # Safe fallback: count only non-ADS instance directories. Running remains
-    # unknown instead of guessing from unrelated Java or AMP processes.
-    my @dirs=grep {-d $_ && $_ !~ m{/ADS[^/]*$}i} glob('/home/amp/.ampdata/instances/*');
-    return (0,scalar @dirs);
+    return ($running, $total);
 }
 
 sub update_count {
@@ -142,7 +120,7 @@ my $updates = update_count();
 my $reboot_required = -e '/var/run/reboot-required' ? JSON::PP::true : JSON::PP::false;
 
 my $payload={
-    api_version => 3.3,
+    api_version => 3.4,
     cpu_percent => sprintf('%.1f',$cpu)+0,
     ram_used_gib => sprintf('%.2f',$ram_used/1048576)+0,
     ram_total_gib => sprintf('%.2f',$ram_total/1048576)+0,
