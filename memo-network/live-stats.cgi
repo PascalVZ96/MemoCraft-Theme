@@ -9,6 +9,7 @@ sub slurp_first {
     open my $fh, '<', $path or return '';
     my $line = <$fh> // '';
     close $fh;
+    chomp $line;
     return $line;
 }
 
@@ -16,8 +17,7 @@ sub cpu_sample {
     my @v = split /\s+/, slurp_first('/proc/stat');
     shift @v if @v && $v[0] eq 'cpu';
     my $idle = ($v[3] // 0) + ($v[4] // 0);
-    my $total = 0;
-    $total += $_ for @v;
+    my $total = 0; $total += $_ for @v;
     return ($idle, $total);
 }
 
@@ -62,32 +62,50 @@ sub line_count {
 }
 
 sub docker_stats {
-    return (0,0) if system('command -v docker >/dev/null 2>&1') != 0;
-    return (
-        line_count('docker ps --format "{{.ID}}"'),
-        line_count('docker ps -a --format "{{.ID}}"')
-    );
+    return (0,0,[]) if system('command -v docker >/dev/null 2>&1') != 0;
+    my @items;
+    for my $line (`docker ps -a --format '{{.Names}}\t{{.Status}}\t{{.Image}}' 2>/dev/null`) {
+        chomp $line;
+        my ($name,$status,$image)=split /\t/, $line, 3;
+        next unless $name;
+        push @items, { name=>$name, status=>($status||''), image=>($image||''), running=>(($status||'') =~ /^Up\b/ ? JSON::PP::true : JSON::PP::false) };
+    }
+    my $running = scalar grep { $_->{running} } @items;
+    return ($running,scalar(@items),\@items);
 }
 
 sub amp_stats {
-    my @dirs = grep {
-        -d $_ && basename($_) !~ /^ADS/i
-    } glob('/home/amp/.ampdata/instances/*');
-
-    my $total = scalar @dirs;
-    return (0, 0) unless $total;
-
+    my @dirs = grep { -d $_ && basename($_) !~ /^ADS/i } glob('/home/amp/.ampdata/instances/*');
     my $processes = `ps -eo args= 2>/dev/null`;
-    my $running = 0;
-
+    my @items;
     for my $dir (@dirs) {
         my $name = basename($dir);
         my $active = index($processes, $dir) >= 0;
         $active ||= $processes =~ /(?:^|[\s\/])\Q$name\E(?:[\s\/]|$)/m;
-        $running++ if $active;
+        push @items, { name=>$name, running=>($active ? JSON::PP::true : JSON::PP::false) };
     }
+    my $running = scalar grep { $_->{running} } @items;
+    return ($running,scalar(@items),\@items);
+}
 
-    return ($running, $total);
+sub os_name {
+    open my $fh, '<', '/etc/os-release' or return '';
+    while (<$fh>) { if (/^PRETTY_NAME="?(.*?)"?\s*$/) { close $fh; return $1; } }
+    close $fh; return '';
+}
+
+sub cpu_name {
+    open my $fh, '<', '/proc/cpuinfo' or return '';
+    while (<$fh>) { if (/^model name\s*:\s*(.+)$/) { close $fh; return $1; } }
+    close $fh; return '';
+}
+
+sub temperature {
+    for my $file (glob('/sys/class/thermal/thermal_zone*/temp')) {
+        my $v=slurp_first($file);
+        return sprintf('%.0f', $v/1000)+0 if $v =~ /^\d+$/ && $v > 0;
+    }
+    return undef;
 }
 
 sub update_count {
@@ -112,15 +130,18 @@ my $cpu=$delta>0 ? 100*(1-(($idle2-$idle1)/$delta)) : 0;
 $cpu=0 if $cpu<0; $cpu=100 if $cpu>100;
 my ($ram_used,$ram_total)=memory_stats();
 my ($load1,$load5,$load15)=load_stats();
-my ($docker_running,$docker_total)=docker_stats();
-my ($amp_running,$amp_total)=amp_stats();
+my ($docker_running,$docker_total,$docker_items)=docker_stats();
+my ($amp_running,$amp_total,$amp_items)=amp_stats();
 my $rx=($rx2-$rx1)/1024/$sample; my $tx=($tx2-$tx1)/1024/$sample;
 $rx=0 if $rx<0; $tx=0 if $tx<0;
 my $updates = update_count();
 my $reboot_required = -e '/var/run/reboot-required' ? JSON::PP::true : JSON::PP::false;
+my $uptime_seconds = 0 + (split /\s+/, slurp_first('/proc/uptime'))[0];
+my $processes = line_count('ps -e --no-headers');
+my $temp = temperature();
 
 my $payload={
-    api_version => 3.4,
+    api_version => 3.5,
     cpu_percent => sprintf('%.1f',$cpu)+0,
     ram_used_gib => sprintf('%.2f',$ram_used/1048576)+0,
     ram_total_gib => sprintf('%.2f',$ram_total/1048576)+0,
@@ -131,14 +152,23 @@ my $payload={
     load_15 => sprintf('%.2f',$load15)+0,
     updates_available => $updates,
     reboot_required => $reboot_required,
+    system => {
+        hostname => slurp_first('/etc/hostname'),
+        os => os_name(),
+        kernel => slurp_first('/proc/sys/kernel/osrelease'),
+        cpu => cpu_name(),
+        uptime_seconds => $uptime_seconds,
+        processes => $processes,
+        temperature_c => defined($temp) ? $temp : JSON::PP::null,
+    },
     services => {
         docker => running('dockerd'),
         amp => ($amp_total > 0 ? JSON::PP::true : JSON::PP::false),
         minio => running('(?:^|/)minio(?:\s|$)'),
         wireguard => (-e '/sys/class/net/wg0' ? JSON::PP::true : JSON::PP::false),
     },
-    docker => { running=>$docker_running, total=>$docker_total },
-    amp => { running=>$amp_running, total=>$amp_total },
+    docker => { running=>$docker_running, total=>$docker_total, items=>$docker_items },
+    amp => { running=>$amp_running, total=>$amp_total, items=>$amp_items },
     timestamp => time,
 };
 
