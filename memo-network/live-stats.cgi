@@ -2,6 +2,7 @@
 use strict;
 use warnings;
 use JSON::PP;
+use File::Basename qw(basename);
 
 sub read_cpu {
     open my $fh, '<', '/proc/stat' or die "Cannot read /proc/stat: $!";
@@ -57,6 +58,33 @@ sub process_running {
     return system("pgrep -f '$pattern' >/dev/null 2>&1") == 0 ? JSON::PP::true : JSON::PP::false;
 }
 
+sub command_count {
+    my ($command) = @_;
+    my $output = `$command 2>/dev/null`;
+    return scalar grep { length $_ } split /\n/, $output;
+}
+
+sub docker_details {
+    return (0, 0) if system('command -v docker >/dev/null 2>&1') != 0;
+    my $running = command_count('docker ps -q');
+    my $total = command_count('docker ps -aq');
+    return ($running, $total);
+}
+
+sub amp_details {
+    my @dirs = grep { -d $_ } glob('/home/amp/.ampdata/instances/*');
+    my $total = scalar @dirs;
+    my $running = 0;
+
+    for my $dir (@dirs) {
+        my $name = basename($dir);
+        next unless $name =~ /^[A-Za-z0-9_.-]+$/;
+        $running++ if system("pgrep -f '(?:^|/)$name(?:/|\\s|$)' >/dev/null 2>&1") == 0;
+    }
+
+    return ($running, $total);
+}
+
 my ($idle1, $total1) = read_cpu();
 my ($rx1, $tx1) = read_network();
 my $sample = 0.30;
@@ -72,6 +100,8 @@ $cpu = 100 if $cpu > 100;
 
 my ($ram_used, $ram_total) = read_memory();
 my ($load1, $load5, $load15) = read_load();
+my ($docker_running, $docker_total) = docker_details();
+my ($amp_running, $amp_total) = amp_details();
 my $rx = ($rx2 - $rx1) / 1024 / $sample;
 my $tx = ($tx2 - $tx1) / 1024 / $sample;
 $rx = 0 if $rx < 0;
@@ -91,6 +121,14 @@ my $payload = {
         amp => process_running('ampinstmgr|AMP_Linux'),
         minio => process_running('minio'),
         wireguard => (-e '/sys/class/net/wg0' ? JSON::PP::true : JSON::PP::false),
+    },
+    docker => {
+        running => $docker_running,
+        total => $docker_total,
+    },
+    amp => {
+        running => $amp_running,
+        total => $amp_total,
     },
     timestamp => time,
 };
