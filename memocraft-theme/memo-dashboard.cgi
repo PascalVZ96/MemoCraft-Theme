@@ -8,51 +8,60 @@ require "gray-theme/theme.pl";
 &ReadParse();
 &load_theme_library();
 
-&popup_header("MemoNetwork Dashboard");
+&popup_header("MemoNetwork Dashboard v3");
 print <<'HTML';
 <style>
-:root{--mn-bg:#0b111b;--mn-card:#131e2e;--mn-card2:#172438;--mn-border:#2a3b53;--mn-text:#f5f8ff;--mn-muted:#8ca0ba;--mn-blue:#38bdf8;--mn-purple:#a78bfa;--mn-green:#34d399;--mn-orange:#f59e0b}
-html,body{background:var(--mn-bg)!important;color:var(--mn-text)!important}.mn-wrap{max-width:1600px;margin:0 auto;padding:20px}.mn-head{display:flex;justify-content:space-between;align-items:center;padding:24px;border:1px solid var(--mn-border);border-radius:16px;background:linear-gradient(145deg,#162236,#101827);margin-bottom:16px}.mn-head h1{margin:0;font-size:28px;color:#fff}.mn-head p{margin:7px 0 0;color:var(--mn-muted)}.mn-badge{padding:9px 13px;border:1px solid #315783;border-radius:999px;color:#7dc4ff;background:#10213a}.mn-grid4,.mn-grid2,.mn-services{display:grid;gap:14px;margin-bottom:14px}.mn-grid4{grid-template-columns:repeat(4,minmax(0,1fr))}.mn-grid2{grid-template-columns:2fr 1fr}.mn-services{grid-template-columns:repeat(4,minmax(0,1fr))}.mn-card{position:relative;min-height:130px;padding:18px;border:1px solid var(--mn-border);border-radius:15px;background:linear-gradient(145deg,var(--mn-card2),var(--mn-card));overflow:hidden}.mn-label{display:flex;justify-content:space-between;align-items:center;color:#b8c7da;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em}.mn-value{display:block;margin-top:16px;color:#fff;font-size:29px;font-weight:800}.mn-sub{display:block;margin-top:6px;color:var(--mn-muted);font-size:12px}.mn-meter{position:absolute;left:18px;right:18px;bottom:14px;height:6px;border-radius:999px;background:#0a1220;overflow:hidden}.mn-meter i{display:block;height:100%;width:0;border-radius:999px;transition:width .35s ease}.cpu i{background:linear-gradient(90deg,#38bdf8,#3b82f6)}.ram i{background:linear-gradient(90deg,#8b5cf6,#c084fc)}.disk i{background:linear-gradient(90deg,#22c55e,#2dd4bf)}.mn-network-values{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:15px}.mn-network-values span{display:block;color:var(--mn-muted);font-size:12px}.mn-network-values strong{display:block;margin-top:5px;font-size:25px}.mn-chart{position:absolute;left:18px;right:18px;bottom:12px;height:42px}.mn-chart svg{width:100%;height:100%;overflow:visible}.mn-line{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.rx{stroke:var(--mn-blue)}.tx{stroke:var(--mn-purple)}.load{stroke:var(--mn-orange)}.mn-load-main{font-size:38px;font-weight:800;margin-top:10px}.mn-load-sub{display:flex;gap:14px;color:var(--mn-muted);font-size:12px}.mn-service{min-height:105px}.mn-service-name{font-weight:800}.mn-status{display:flex;align-items:center;gap:8px;margin-top:17px;color:#cbd7e7}.mn-detail{display:block;margin:9px 0 0 17px;color:var(--mn-muted);font-size:12px}.mn-detail strong{color:#fff}.mn-dot{width:9px;height:9px;border-radius:50%;background:#64748b;box-shadow:0 0 0 4px rgba(100,116,139,.12)}.mn-dot.ok{background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.12),0 0 10px rgba(34,197,94,.45)}.mn-dot.off{background:#ef4444;box-shadow:0 0 0 4px rgba(239,68,68,.12)}.mn-section-title{margin:22px 2px 10px;font-size:17px}.mn-live{color:#86efac;font-size:11px;font-weight:700}.mn-live:before{content:"";display:inline-block;width:7px;height:7px;margin-right:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 9px #22c55e}
-@media(max-width:1100px){.mn-grid4,.mn-services{grid-template-columns:repeat(2,1fr)}.mn-grid2{grid-template-columns:1fr}}@media(max-width:650px){.mn-wrap{padding:12px}.mn-grid4,.mn-services{grid-template-columns:1fr}.mn-head{align-items:flex-start}.mn-badge{display:none}}
+:root{--bg:#0a111b;--panel:#121e2e;--panel2:#17253a;--border:#2a3d57;--text:#f7f9ff;--muted:#8fa5bf;--blue:#38bdf8;--purple:#a78bfa;--green:#34d399;--orange:#f59e0b;--red:#ef4444}
+html,body{background:var(--bg)!important;color:var(--text)!important}.v3{max-width:1640px;margin:auto;padding:20px}.head,.card{border:1px solid var(--border);background:linear-gradient(145deg,var(--panel2),var(--panel));border-radius:16px}.head{display:flex;align-items:center;justify-content:space-between;padding:22px 24px;margin-bottom:16px}.head h1{margin:0;font-size:28px}.head p{margin:6px 0 0;color:var(--muted)}.badge{border:1px solid #315d8a;background:#0e2038;color:#7dc4ff;padding:9px 13px;border-radius:999px}.grid4,.grid2,.services{display:grid;gap:14px;margin-bottom:14px}.grid4,.services{grid-template-columns:repeat(4,minmax(0,1fr))}.grid2{grid-template-columns:2fr 1fr}.card{position:relative;min-height:130px;padding:18px;overflow:hidden}.label{display:flex;align-items:center;justify-content:space-between;color:#b9c9dc;font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.07em}.value{display:block;margin-top:14px;font-size:30px;font-weight:800}.sub,.detail{display:block;color:var(--muted);font-size:12px;margin-top:5px}.meter{position:absolute;left:18px;right:18px;bottom:14px;height:6px;background:#091220;border-radius:999px;overflow:hidden}.meter i{display:block;height:100%;width:0;border-radius:999px;transition:width .3s}.cpu i{background:linear-gradient(90deg,#38bdf8,#3b82f6)}.ram i{background:linear-gradient(90deg,#8b5cf6,#c084fc)}.storage i{background:linear-gradient(90deg,#22c55e,#2dd4bf)}.live{color:#86efac;font-size:11px}.live:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 9px #22c55e;margin-right:6px}.traffic{display:grid;grid-template-columns:1fr 1fr;margin-top:14px}.traffic strong{font-size:24px}.chart{position:absolute;left:18px;right:18px;bottom:10px;height:42px}.chart svg{width:100%;height:100%}.line{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.rx{stroke:var(--blue)}.tx{stroke:var(--purple)}.load{stroke:var(--orange)}.section{margin:22px 3px 10px;font-size:17px}.service{min-height:120px}.service-title{font-size:15px;font-weight:800}.status{display:flex;align-items:center;gap:9px;margin-top:16px}.dot{width:9px;height:9px;border-radius:50%;background:#64748b}.dot.ok{background:#22c55e;box-shadow:0 0 10px rgba(34,197,94,.7)}.dot.off{background:var(--red)}.count{margin-top:10px;color:var(--muted);font-size:12px}.count strong{color:#fff;font-size:19px}.api-state{margin-top:8px;color:var(--muted);font-size:11px}.api-state.error{color:#fca5a5}
+@media(max-width:1100px){.grid4,.services{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}@media(max-width:650px){.v3{padding:12px}.grid4,.services{grid-template-columns:1fr}.badge{display:none}}
 </style>
-<div class="mn-wrap">
- <div class="mn-head"><div><h1>MemoNetwork Dashboard v2.1</h1><p>Live serverstatus en services</p></div><div class="mn-badge">Webmin 2.653</div></div>
- <div class="mn-grid4">
-  <div class="mn-card cpu"><div class="mn-label">CPU <span class="mn-live">Live</span></div><strong class="mn-value" id="mn-cpu">--</strong><span class="mn-sub">Actuele belasting</span><div class="mn-meter"><i id="mn-cpu-bar"></i></div></div>
-  <div class="mn-card ram"><div class="mn-label">Geheugen <span class="mn-live">Live</span></div><strong class="mn-value" id="mn-ram">--</strong><span class="mn-sub" id="mn-ram-total">Totaal geheugen</span><div class="mn-meter"><i id="mn-ram-bar"></i></div></div>
-  <div class="mn-card disk"><div class="mn-label">Opslag</div><strong class="mn-value">1.85 TiB</strong><span class="mn-sub">4.47 TiB totaal</span><div class="mn-meter"><i style="width:41%"></i></div></div>
-  <div class="mn-card"><div class="mn-label">Uptime</div><strong class="mn-value">18 dagen</strong><span class="mn-sub">Server online</span></div>
+<div class="v3">
+ <div class="head"><div><h1>MemoNetwork Dashboard v3</h1><p>Live serverstatus en service-informatie</p><div class="api-state" id="api-state">Live API verbinden…</div></div><div class="badge">Webmin 2.653</div></div>
+ <div class="grid4">
+  <div class="card cpu"><div class="label">CPU <span class="live">Live</span></div><strong class="value" id="cpu">--</strong><span class="sub">Actuele belasting</span><div class="meter"><i id="cpu-bar"></i></div></div>
+  <div class="card ram"><div class="label">Geheugen <span class="live">Live</span></div><strong class="value" id="ram">--</strong><span class="sub" id="ram-total">Totaal geheugen</span><div class="meter"><i id="ram-bar"></i></div></div>
+  <div class="card storage"><div class="label">Opslag</div><strong class="value">1.85 TiB</strong><span class="sub">4.47 TiB totaal</span><div class="meter"><i style="width:41%"></i></div></div>
+  <div class="card"><div class="label">Uptime</div><strong class="value">18 dagen</strong><span class="sub">Server online</span></div>
  </div>
- <div class="mn-grid2">
-  <div class="mn-card"><div class="mn-label">Netwerkverkeer <span class="mn-live">Live</span></div><div class="mn-network-values"><div><span>Download</span><strong id="mn-rx">--</strong></div><div><span>Upload</span><strong id="mn-tx">--</strong></div></div><div class="mn-chart" id="mn-network-chart"></div></div>
-  <div class="mn-card"><div class="mn-label">Load average <span>1 / 5 / 15 min</span></div><div class="mn-load-main" id="mn-load1">--</div><div class="mn-load-sub"><span id="mn-load5">5 min: --</span><span id="mn-load15">15 min: --</span></div><div class="mn-chart" id="mn-load-chart"></div></div>
+ <div class="grid2">
+  <div class="card"><div class="label">Netwerkverkeer <span class="live">Live</span></div><div class="traffic"><div><span class="sub">Download</span><strong id="rx">--</strong></div><div><span class="sub">Upload</span><strong id="tx">--</strong></div></div><div class="chart" id="network-chart"></div></div>
+  <div class="card"><div class="label">Load average <span>1 / 5 / 15 min</span></div><strong class="value" id="load1">--</strong><span class="sub"><span id="load5">5 min: --</span> &nbsp; <span id="load15">15 min: --</span></span><div class="chart" id="load-chart"></div></div>
  </div>
- <h2 class="mn-section-title">Services</h2>
- <div class="mn-services">
-  <div class="mn-card mn-service"><div class="mn-service-name">Docker</div><div class="mn-status"><span class="mn-dot" id="mn-docker-dot"></span><span id="mn-docker">Controleren…</span></div><span class="mn-detail" id="mn-docker-detail">Containers laden…</span></div>
-  <div class="mn-card mn-service"><div class="mn-service-name">AMP</div><div class="mn-status"><span class="mn-dot" id="mn-amp-dot"></span><span id="mn-amp">Controleren…</span></div><span class="mn-detail" id="mn-amp-detail">Instances laden…</span></div>
-  <div class="mn-card mn-service"><div class="mn-service-name">MinIO</div><div class="mn-status"><span class="mn-dot" id="mn-minio-dot"></span><span id="mn-minio">Controleren…</span></div></div>
-  <div class="mn-card mn-service"><div class="mn-service-name">WireGuard</div><div class="mn-status"><span class="mn-dot" id="mn-wireguard-dot"></span><span id="mn-wireguard">Controleren…</span></div></div>
+ <h2 class="section">Services</h2>
+ <div class="services">
+  <div class="card service"><div class="service-title">Docker</div><div class="status"><span class="dot" id="docker-dot"></span><span id="docker-status">Controleren…</span></div><div class="count"><strong id="docker-running">--</strong> actief van <strong id="docker-total">--</strong> containers</div></div>
+  <div class="card service"><div class="service-title">AMP</div><div class="status"><span class="dot" id="amp-dot"></span><span id="amp-status">Controleren…</span></div><div class="count"><strong id="amp-running">--</strong> actief van <strong id="amp-total">--</strong> instances</div></div>
+  <div class="card service"><div class="service-title">MinIO</div><div class="status"><span class="dot" id="minio-dot"></span><span id="minio-status">Controleren…</span></div><div class="count">S3-opslagservice</div></div>
+  <div class="card service"><div class="service-title">WireGuard</div><div class="status"><span class="dot" id="wireguard-dot"></span><span id="wireguard-status">Controleren…</span></div><div class="count">VPN-interface wg0</div></div>
  </div>
 </div>
 <script>
-(function(){
- const hist={rx:[],tx:[],load:[]},limit=40;
- function push(a,v){a.push(Math.max(0,Number(v)||0));if(a.length>limit)a.shift()}
- function rate(v){v=Number(v)||0;return v>=1024?(v/1024).toFixed(v>=10240?0:1)+' MiB/s':v.toFixed(v>=100?0:1)+' KiB/s'}
- function path(a,max){if(!a.length)return'';max=max||Math.max(...a,1);return'M '+a.map((v,i)=>{const x=a.length>1?i*100/(a.length-1):0,y=40-Math.min(1,v/max)*38;return x.toFixed(2)+' '+y.toFixed(2)}).join(' L ')}
- function chart(id,series){const el=document.getElementById(id);if(!el)return;el.innerHTML='<svg viewBox="0 0 100 40" preserveAspectRatio="none">'+series.map(s=>'<path class="mn-line '+s.c+'" d="'+path(s.a,s.m)+'"></path>').join('')+'</svg>'}
- function setService(name,value){const text=document.getElementById('mn-'+name),dot=document.getElementById('mn-'+name+'-dot');if(!text||!dot)return;text.textContent=value?'Online':'Offline';dot.classList.toggle('ok',!!value);dot.classList.toggle('off',!value)}
- function setCount(name,data,noun){const el=document.getElementById('mn-'+name+'-detail');if(!el)return;const running=Number(data&&data.running)||0,total=Number(data&&data.total)||0;el.innerHTML='<strong>'+running+'</strong> van <strong>'+total+'</strong> '+noun+' actief'}
- function update(){fetch('/memo-network/live-stats.cgi?_='+Date.now(),{credentials:'same-origin',cache:'no-store'}).then(r=>{if(!r.ok)throw Error(r.status);return r.json()}).then(d=>{
-  const cpu=Number(d.cpu_percent)||0,ru=Number(d.ram_used_gib)||0,rt=Number(d.ram_total_gib)||0,rx=Number(d.network_rx_kib_s)||0,tx=Number(d.network_tx_kib_s)||0,l1=Number(d.load_1)||0;
-  document.getElementById('mn-cpu').textContent=cpu.toFixed(1).replace('.0','')+'%';document.getElementById('mn-cpu-bar').style.width=Math.min(100,cpu)+'%';
-  document.getElementById('mn-ram').textContent=ru.toFixed(2)+' GiB';document.getElementById('mn-ram-total').textContent=rt.toFixed(2)+' GiB totaal';document.getElementById('mn-ram-bar').style.width=(rt?ru/rt*100:0)+'%';
-  document.getElementById('mn-rx').textContent=rate(rx);document.getElementById('mn-tx').textContent=rate(tx);document.getElementById('mn-load1').textContent=l1.toFixed(2);document.getElementById('mn-load5').textContent='5 min: '+Number(d.load_5||0).toFixed(2);document.getElementById('mn-load15').textContent='15 min: '+Number(d.load_15||0).toFixed(2);
-  push(hist.rx,rx);push(hist.tx,tx);push(hist.load,l1);const nm=Math.max(...hist.rx,...hist.tx,1);chart('mn-network-chart',[{a:hist.rx,m:nm,c:'rx'},{a:hist.tx,m:nm,c:'tx'}]);chart('mn-load-chart',[{a:hist.load,m:Math.max(...hist.load,1),c:'load'}]);
-  const s=d.services||{};setService('docker',s.docker);setService('amp',s.amp);setService('minio',s.minio);setService('wireguard',s.wireguard);setCount('docker',d.docker,'containers');setCount('amp',d.amp,'instances');
- }).catch(()=>{});}
- update();setInterval(update,2000);
+(()=>{
+ const history={rx:[],tx:[],load:[]},limit=40;
+ const byId=id=>document.getElementById(id);
+ const num=v=>Number(v)||0;
+ const push=(a,v)=>{a.push(Math.max(0,num(v)));if(a.length>limit)a.shift()};
+ const rate=v=>{v=num(v);return v>=1024?(v/1024).toFixed(v>=10240?0:1)+' MiB/s':v.toFixed(v>=100?0:1)+' KiB/s'};
+ const path=(a,max)=>a.length?'M '+a.map((v,i)=>`${(a.length>1?i*100/(a.length-1):0).toFixed(2)} ${(40-Math.min(1,v/(max||1))*38).toFixed(2)}`).join(' L '):'';
+ const chart=(id,sets)=>{const el=byId(id);if(el)el.innerHTML='<svg viewBox="0 0 100 40" preserveAspectRatio="none">'+sets.map(s=>`<path class="line ${s.cls}" d="${path(s.data,s.max)}"></path>`).join('')+'</svg>'};
+ const service=(name,online)=>{byId(name+'-status').textContent=online?'Online':'Offline';byId(name+'-dot').classList.toggle('ok',!!online);byId(name+'-dot').classList.toggle('off',!online)};
+ async function refresh(){
+  try{
+   const response=await fetch('/memo-network/live-stats.cgi?v=3&_='+Date.now(),{credentials:'same-origin',cache:'no-store'});
+   if(!response.ok)throw new Error('HTTP '+response.status);
+   const d=await response.json();
+   const cpu=num(d.cpu_percent),used=num(d.ram_used_gib),total=num(d.ram_total_gib),rx=num(d.network_rx_kib_s),tx=num(d.network_tx_kib_s),load=num(d.load_1);
+   byId('cpu').textContent=cpu.toFixed(1).replace('.0','')+'%';byId('cpu-bar').style.width=Math.min(100,cpu)+'%';
+   byId('ram').textContent=used.toFixed(2)+' GiB';byId('ram-total').textContent=total.toFixed(2)+' GiB totaal';byId('ram-bar').style.width=(total?used/total*100:0)+'%';
+   byId('rx').textContent=rate(rx);byId('tx').textContent=rate(tx);byId('load1').textContent=load.toFixed(2);byId('load5').textContent='5 min: '+num(d.load_5).toFixed(2);byId('load15').textContent='15 min: '+num(d.load_15).toFixed(2);
+   push(history.rx,rx);push(history.tx,tx);push(history.load,load);const maxNet=Math.max(...history.rx,...history.tx,1);chart('network-chart',[{data:history.rx,max:maxNet,cls:'rx'},{data:history.tx,max:maxNet,cls:'tx'}]);chart('load-chart',[{data:history.load,max:Math.max(...history.load,1),cls:'load'}]);
+   const s=d.services||{};service('docker',s.docker);service('amp',s.amp);service('minio',s.minio);service('wireguard',s.wireguard);
+   byId('docker-running').textContent=num(d.docker&&d.docker.running);byId('docker-total').textContent=num(d.docker&&d.docker.total);
+   byId('amp-running').textContent=num(d.amp&&d.amp.running);byId('amp-total').textContent=num(d.amp&&d.amp.total);
+   byId('api-state').textContent='Live API actief · Dashboard v3';byId('api-state').classList.remove('error');
+  }catch(error){byId('api-state').textContent='Live API fout: '+error.message;byId('api-state').classList.add('error')}
+ }
+ refresh();setInterval(refresh,2000);
 })();
 </script>
 HTML
