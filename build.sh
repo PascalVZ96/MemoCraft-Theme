@@ -23,6 +23,7 @@ THEME_PL="$THEME_DIR/theme.pl"
 LEFT_CGI="$THEME_DIR/left.cgi"
 RIGHT_CGI="$THEME_DIR/right.cgi"
 LIVE_STATS_CGI="$THEME_DIR/live-stats.cgi"
+MEMO_DASHBOARD_CGI="$THEME_DIR/memo-dashboard.cgi"
 
 fail() {
   echo "FOUT: $*" >&2
@@ -48,12 +49,13 @@ for required in \
   "$THEME_PL" \
   "$LEFT_CGI" \
   "$RIGHT_CGI" \
-  "$LIVE_STATS_CGI"; do
+  "$LIVE_STATS_CGI" \
+  "$MEMO_DASHBOARD_CGI"; do
   [[ -e "$required" ]] || fail "Ontbreekt: $required"
 done
 
 grep -q '^desc=' "$THEME_DIR/theme.info" || fail "theme.info bevat geen desc="
-chmod 755 "$LIVE_STATS_CGI"
+chmod 755 "$LIVE_STATS_CGI" "$MEMO_DASHBOARD_CGI" "$RIGHT_CGI" "$LEFT_CGI"
 
 python3 - "$TARGET_CSS" "$SOURCE_CSS" "$FORMS_TABLES_CSS" "$CORE_UI_CSS" <<'PY'
 from pathlib import Path
@@ -124,6 +126,7 @@ css = "\n\n".join(Path(path).read_text(encoding="utf-8").strip() for path in sys
 js = Path(sys.argv[5]).read_text(encoding="utf-8").strip()
 text = left.read_text(encoding="utf-8")
 text = text.replace("<strong>MemoCraft</strong>", "<strong>MemoNetwork</strong>")
+text = text.replace("'link' => '/right.cgi'", "'link' => '/memocraft-theme/memo-dashboard.cgi'")
 old_brand = '''print "<div class='memo-brand'>\\n";
 print "<div class='memo-brand-icon'>M</div>\\n";
 print "<div class='memo-brand-copy'>\\n";
@@ -131,7 +134,7 @@ print "<strong>MemoNetwork</strong>\\n";
 print "<span>Server Management</span>\\n";
 print "</div>\\n";
 print "</div>\\n";'''
-new_brand = '''print "<a class='memo-brand' href='/right.cgi' target='right' title='Terug naar dashboard' aria-label='Terug naar dashboard' style='text-decoration:none;color:inherit'>\\n";
+new_brand = '''print "<a class='memo-brand' href='/memocraft-theme/memo-dashboard.cgi' target='right' title='Terug naar dashboard' aria-label='Terug naar dashboard' style='text-decoration:none;color:inherit'>\\n";
 print "<div class='memo-brand-icon'>M</div>\\n";
 print "<div class='memo-brand-copy'>\\n";
 print "<strong>MemoNetwork</strong>\\n";
@@ -140,8 +143,10 @@ print "</div>\\n";
 print "</a>\\n";'''
 if old_brand in text:
     text = text.replace(old_brand, new_brand, 1)
-elif "class='memo-brand'" not in text:
-    raise SystemExit("FOUT: MemoNetwork-logoblok in left.cgi niet gevonden")
+else:
+    text = text.replace("href='/right.cgi' target='right'", "href='/memocraft-theme/memo-dashboard.cgi' target='right'")
+    if "class='memo-brand'" not in text:
+        raise SystemExit("FOUT: MemoNetwork-logoblok in left.cgi niet gevonden")
 start = "<!-- MEMOCRAFT-SIDEBAR-STYLE-START -->"
 end = "<!-- MEMOCRAFT-SIDEBAR-STYLE-END -->"
 block = (
@@ -159,30 +164,19 @@ else:
 left.write_text(text, encoding="utf-8")
 PY
 
-python3 - "$RIGHT_CGI" "$DASHBOARD_CSS" "$DASHBOARD_EXTRA_CSS" "$DASHBOARD_HTML" <<'PY'
+python3 - "$RIGHT_CGI" <<'PY'
 from pathlib import Path
-import re
 import sys
 
 right = Path(sys.argv[1])
-css = "\n\n".join(Path(path).read_text(encoding="utf-8").strip() for path in sys.argv[2:4])
-html = Path(sys.argv[4]).read_text(encoding="utf-8").strip()
-text = right.read_text(encoding="utf-8")
-start = "<!-- MEMOCRAFT-DASHBOARD-STYLE-START -->"
-end = "<!-- MEMOCRAFT-DASHBOARD-STYLE-END -->"
-block = (
-    "print <<'MEMOCRAFT_DASHBOARD_STYLE';\n" + start + "\n<style>\n" + css + "\n</style>\n"
-    + html + "\n" + end + "\nMEMOCRAFT_DASHBOARD_STYLE\n"
-)
-pattern = re.compile(r"print <<'MEMOCRAFT_DASHBOARD_STYLE';\n" + re.escape(start) + r".*?" + re.escape(end) + r"\nMEMOCRAFT_DASHBOARD_STYLE\n", re.S)
-if pattern.search(text):
-    text = pattern.sub(lambda _m: block, text, count=1)
-else:
-    needle = "&popup_header(undef, $prehead);\n"
-    if needle not in text:
-        raise SystemExit("FOUT: popup_header in right.cgi niet gevonden")
-    text = text.replace(needle, needle + block, 1)
-right.write_text(text, encoding="utf-8")
+right.write_text('''#!/usr/bin/perl
+use strict;
+use warnings;
+print "Status: 302 Found\\r\\n";
+print "Location: /memocraft-theme/memo-dashboard.cgi\\r\\n";
+print "Cache-Control: no-store\\r\\n\\r\\n";
+exit;
+''', encoding='utf-8')
 PY
 
 rm -rf "$DIST_DIR"
