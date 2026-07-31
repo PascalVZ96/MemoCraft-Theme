@@ -25,6 +25,8 @@ RIGHT_CGI="$THEME_DIR/right.cgi"
 LIVE_STATS_CGI="$THEME_DIR/live-stats.cgi"
 MEMO_DASHBOARD_CGI="$THEME_DIR/memo-dashboard.cgi"
 API_STATS_CGI="$API_DIR/live-stats.cgi"
+API_SYSTEM_CGI="$API_DIR/system-info.cgi"
+API_PROCESSES_CGI="$API_DIR/processes.cgi"
 
 fail() {
   echo "FOUT: $*" >&2
@@ -35,6 +37,8 @@ for required in \
   "$THEME_DIR/theme.info" \
   "$API_DIR/module.info" \
   "$API_STATS_CGI" \
+  "$API_SYSTEM_CGI" \
+  "$API_PROCESSES_CGI" \
   "$SOURCE_CSS" \
   "$FORMS_TABLES_CSS" \
   "$CORE_UI_CSS" \
@@ -163,8 +167,6 @@ else:
 left.write_text(text, encoding="utf-8")
 PY
 
-# Dashboard v3 bevat zelf de volledige weergave. De build kopieert het bestand
-# alleen naar de geldige Webmin-dashboardroute en injecteert geen oude v2-code.
 cp "$MEMO_DASHBOARD_CGI" "$RIGHT_CGI"
 
 python3 - "$RIGHT_CGI" <<'PY'
@@ -173,19 +175,18 @@ import sys
 
 right = Path(sys.argv[1])
 text = right.read_text(encoding="utf-8")
-
-text = text.replace(
-    "fetch('/right.cgi?memo_stats=1&_='+Date.now()",
-    "fetch('/memo-network/live-stats.cgi?_='+Date.now()"
-)
-text = text.replace(
-    "fetch((window.location.pathname || '/right.cgi')+'?memo_stats=1&_='+Date.now()",
-    "fetch('/memo-network/live-stats.cgi?_='+Date.now()"
-)
+text = text.replace("/system-status/index.cgi", "/memo-network/system-info.cgi")
+text = text.replace("/sysinfo/index.cgi", "/memo-network/system-info.cgi")
+text = text.replace("/proc/index.cgi", "/memo-network/processes.cgi")
+text = text.replace(' target="_top"', '')
+text = text.replace("fetch('/right.cgi?memo_stats=1&_='+Date.now()", "fetch('/memo-network/live-stats.cgi?_='+Date.now()")
+text = text.replace("fetch((window.location.pathname || '/right.cgi')+'?memo_stats=1&_='+Date.now()", "fetch('/memo-network/live-stats.cgi?_='+Date.now()")
 
 required = (
     "MemoNetwork Dashboard v3",
     "/memo-network/live-stats.cgi",
+    "/memo-network/system-info.cgi",
+    "/memo-network/processes.cgi",
     "docker-running",
     "docker-total",
     "amp-running",
@@ -194,11 +195,10 @@ required = (
 missing = [item for item in required if item not in text]
 if missing:
     raise SystemExit("FOUT: Dashboard v3 mist: " + ", ".join(missing))
-
 right.write_text(text, encoding="utf-8")
 PY
 
-chmod 755 "$LEFT_CGI" "$RIGHT_CGI" "$LIVE_STATS_CGI" "$MEMO_DASHBOARD_CGI" "$API_STATS_CGI"
+chmod 755 "$LEFT_CGI" "$RIGHT_CGI" "$LIVE_STATS_CGI" "$MEMO_DASHBOARD_CGI" "$API_STATS_CGI" "$API_SYSTEM_CGI" "$API_PROCESSES_CGI"
 
 rm -rf "$DIST_DIR"
 mkdir -p "$DIST_DIR"
@@ -210,17 +210,15 @@ grep -Fxq 'memocraft-theme/theme.info' "$LISTING" || fail "Pakket mist theme.inf
 grep -Fxq 'memocraft-theme/right.cgi' "$LISTING" || fail "Pakket mist right.cgi"
 grep -Fxq 'memo-network/module.info' "$LISTING" || fail "Pakket mist memo-network/module.info"
 grep -Fxq 'memo-network/live-stats.cgi' "$LISTING" || fail "Pakket mist memo-network/live-stats.cgi"
-grep -q 'MemoNetwork Dashboard v3' "$RIGHT_CGI" || fail "right.cgi bevat Dashboard v3 niet"
-grep -q '/memo-network/live-stats.cgi' "$RIGHT_CGI" || fail "right.cgi gebruikt niet de live API-module"
-grep -q 'docker-running' "$RIGHT_CGI" || fail "right.cgi mist Docker actief-teller"
-grep -q 'docker-total' "$RIGHT_CGI" || fail "right.cgi mist Docker totaalteller"
-grep -q 'amp-running' "$RIGHT_CGI" || fail "right.cgi mist AMP actief-teller"
-grep -q 'amp-total' "$RIGHT_CGI" || fail "right.cgi mist AMP totaalteller"
+grep -Fxq 'memo-network/system-info.cgi' "$LISTING" || fail "Pakket mist memo-network/system-info.cgi"
+grep -Fxq 'memo-network/processes.cgi' "$LISTING" || fail "Pakket mist memo-network/processes.cgi"
+grep -q '/memo-network/system-info.cgi' "$RIGHT_CGI" || fail "right.cgi gebruikt niet de veilige systeeminformatiepagina"
+grep -q '/memo-network/processes.cgi' "$RIGHT_CGI" || fail "right.cgi gebruikt niet de veilige processenpagina"
 
 if grep -Eq '(^|/)\.\.?(/|$)' "$LISTING"; then
   fail "Pakket bevat een ongeldig pad"
 fi
 
 echo "Gereed: $OUTPUT"
-echo "Dashboard v3 is ingebouwd in memocraft-theme/right.cgi"
+echo "Dashboard v3 gebruikt veilige MemoNetwork beheerpagina's"
 echo "Aantal bestanden: $(wc -l < "$LISTING")"
