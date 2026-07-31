@@ -62,7 +62,9 @@ sub line_count {
 
 sub docker_stats {
     return (0,0) if system('command -v docker >/dev/null 2>&1') != 0;
-    return (line_count('docker ps --format "{{.ID}}"'), line_count('docker ps -a --format "{{.ID}}"'));
+    my $running=line_count('docker ps --format "{{.ID}}"');
+    my $total=line_count('docker ps -a --format "{{.ID}}"');
+    return ($running,$total);
 }
 
 sub amp_stats {
@@ -72,23 +74,31 @@ sub amp_stats {
     if ($output =~ /Instance Name/) {
         my ($running,$total)=(0,0);
         for my $line (split /\n/, $output) {
+            $line =~ s/\e\[[0-9;?]*[ -\/]*[@-~]//g;
             next if $line =~ /Instance Name|^[\s─━═-]+$/;
             next unless $line =~ /[│|]/;
-            my @c = split /\s*[│|]\s*/, $line;
-            next unless @c >= 6;
-            $_ //= '' for @c;
-            s/^\s+|\s+$//g for @c;
-            my ($name,$module,$up)=($c[0],$c[2],$c[-1]);
+
+            my @columns = split /\s*[│|]\s*/, $line;
+            @columns = grep { defined $_ && $_ =~ /\S/ } @columns;
+            next unless @columns >= 6;
+
+            my ($name,$friendly,$module,$ip,$port,$up) = @columns[0..5];
+            for ($name,$friendly,$module,$ip,$port,$up) {
+                $_ //= '';
+                s/^\s+|\s+$//g;
+            }
+
             next unless length $name;
             next if uc($module) eq 'ADS';
+
             $total++;
-            $running++ if $up =~ /^(?:✓|✔|Yes|Running|Up)$/i;
+            $running++ if $up =~ /(?:✓|✔|YES|RUNNING|UP|TRUE|1)/i;
         }
         return ($running,$total) if $total;
     }
 
     my @dirs=grep {-d $_ && $_ !~ m{/ADS[^/]*$}i} glob('/home/amp/.ampdata/instances/*');
-    return (0, scalar @dirs);
+    return (0,scalar @dirs);
 }
 
 my ($idle1,$total1)=cpu_sample();
