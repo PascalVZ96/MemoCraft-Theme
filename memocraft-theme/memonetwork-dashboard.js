@@ -2,42 +2,20 @@
   'use strict';
 
   var refreshBusy = false;
+  var historyLimit = 40;
   var cpuHistory = [];
   var ramHistory = [];
-  var historyLimit = 40;
-
-  function injectStyles() {
-    if (document.getElementById('memo-live-meter-styles')) return;
-    var style = document.createElement('style');
-    style.id = 'memo-live-meter-styles';
-    style.textContent = [
-      '.memo-stat-card{padding-bottom:58px!important;overflow:hidden!important;}',
-      '.memo-meter{position:absolute;left:18px;right:18px;bottom:13px;height:6px;border-radius:999px;background:#0b1220;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(148,163,184,.12);z-index:2;}',
-      '.memo-meter span{display:block;width:0;height:100%;border-radius:inherit;transition:width .4s ease;}',
-      '.memo-meter-cpu span{background:linear-gradient(90deg,#38bdf8,#3b82f6);}',
-      '.memo-meter-ram span{background:linear-gradient(90deg,#8b5cf6,#c084fc);}',
-      '.memo-meter-disk span{background:linear-gradient(90deg,#22c55e,#2dd4bf);}',
-      '.memo-sparkline{position:absolute;left:18px;right:18px;bottom:23px;height:28px;opacity:.88;pointer-events:none;}',
-      '.memo-sparkline svg{display:block;width:100%;height:100%;overflow:visible;}',
-      '.memo-sparkline path.memo-line{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}',
-      '.memo-sparkline path.memo-fill{stroke:none;opacity:.16;}',
-      '.memo-sparkline-cpu path.memo-line{stroke:#38bdf8;}',
-      '.memo-sparkline-cpu path.memo-fill{fill:#38bdf8;}',
-      '.memo-sparkline-ram path.memo-line{stroke:#a78bfa;}',
-      '.memo-sparkline-ram path.memo-fill{fill:#8b5cf6;}',
-      '.memo-online-dot,.memo-live-dot{display:inline-block;width:8px;height:8px;margin-right:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.12),0 0 10px rgba(34,197,94,.65);vertical-align:middle;}',
-      '.memo-live-dot{width:7px;height:7px;margin-right:6px;animation:memoPulse 1.4s ease-in-out infinite;}',
-      '.memo-live-label{display:inline-flex;align-items:center;margin-left:10px;color:#86efac!important;font-size:11px;font-weight:700;}',
-      '@keyframes memoPulse{0%,100%{opacity:.4}50%{opacity:1}}',
-      '.memo-stat-card:nth-child(4){border-color:rgba(34,197,94,.28)!important;}',
-      '.memo-stat-card:nth-child(4) .memo-stat-hint{color:#86efac!important;}',
-      '@media(max-width:760px){.memo-stat-card{padding-bottom:54px!important}.memo-sparkline{left:16px;right:16px;}}'
-    ].join('');
-    document.head.appendChild(style);
-  }
+  var rxHistory = [];
+  var txHistory = [];
+  var loadHistory = [];
 
   function clean(value) {
     return (value || '').replace(/\s+/g, ' ').trim();
+  }
+
+  function setText(id, value, fallback) {
+    var node = document.getElementById(id);
+    if (node) node.textContent = value || fallback || 'Onbekend';
   }
 
   function findValue(root, labels) {
@@ -52,11 +30,6 @@
       if (index >= 0 && rowCells[index + 1]) return clean(rowCells[index + 1].textContent);
     }
     return '';
-  }
-
-  function setText(id, value, fallback) {
-    var node = document.getElementById(id);
-    if (node) node.textContent = value || fallback || 'Onbekend';
   }
 
   function firstAmount(value) {
@@ -81,6 +54,75 @@
     return total ? Math.max(0, Math.min(100, Math.round((used / total) * 100))) : 0;
   }
 
+  function addHistory(history, value) {
+    history.push(Math.max(0, Number(value) || 0));
+    if (history.length > historyLimit) history.shift();
+  }
+
+  function formatRate(kib) {
+    var value = Number(kib) || 0;
+    if (value >= 1024) return (value / 1024).toFixed(value >= 10240 ? 0 : 1) + ' MiB/s';
+    return value.toFixed(value >= 100 ? 0 : 1) + ' KiB/s';
+  }
+
+  function injectStyles() {
+    if (document.getElementById('memo-live-meter-styles')) return;
+    var style = document.createElement('style');
+    style.id = 'memo-live-meter-styles';
+    style.textContent = [
+      '.memo-stat-card{padding-bottom:58px!important;overflow:hidden!important;}',
+      '.memo-meter{position:absolute;left:18px;right:18px;bottom:13px;height:6px;border-radius:999px;background:#0b1220;overflow:hidden;z-index:2;}',
+      '.memo-meter span{display:block;width:0;height:100%;border-radius:inherit;transition:width .4s ease;}',
+      '.memo-meter-cpu span{background:linear-gradient(90deg,#38bdf8,#3b82f6);}',
+      '.memo-meter-ram span{background:linear-gradient(90deg,#8b5cf6,#c084fc);}',
+      '.memo-meter-disk span{background:linear-gradient(90deg,#22c55e,#2dd4bf);}',
+      '.memo-sparkline{position:absolute;left:18px;right:18px;bottom:23px;height:28px;opacity:.88;pointer-events:none;}',
+      '.memo-sparkline svg,.memo-wide-chart svg{display:block;width:100%;height:100%;overflow:visible;}',
+      '.memo-line{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}',
+      '.memo-fill{stroke:none;opacity:.14;}',
+      '.memo-sparkline-cpu .memo-line{stroke:#38bdf8}.memo-sparkline-cpu .memo-fill{fill:#38bdf8}',
+      '.memo-sparkline-ram .memo-line{stroke:#a78bfa}.memo-sparkline-ram .memo-fill{fill:#8b5cf6}',
+      '.memo-live-grid{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin:0 0 14px;}',
+      '.memo-live-card{position:relative;min-height:138px;padding:16px 18px;border:1px solid #2b3b52;border-radius:14px;background:linear-gradient(145deg,#162235,#111a27);overflow:hidden;}',
+      '.memo-live-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;color:#eef5ff;font-weight:800;}',
+      '.memo-live-card-head small{color:#7f93ac;font-size:11px;font-weight:600;}',
+      '.memo-network-values{display:grid;grid-template-columns:1fr 1fr;gap:16px;position:relative;z-index:2;}',
+      '.memo-network-values span{display:block;color:#89a0bc;font-size:11px;margin-bottom:4px;}',
+      '.memo-network-values strong{font-size:23px;color:#f8fbff;}',
+      '.memo-load-main{display:block;font-size:32px;color:#f8fbff;position:relative;z-index:2;}',
+      '.memo-load-secondary{display:flex;gap:12px;color:#8fa5c0;font-size:12px;position:relative;z-index:2;}',
+      '.memo-wide-chart{position:absolute;left:18px;right:18px;bottom:12px;height:48px;opacity:.9;}',
+      '.memo-network-rx{stroke:#38bdf8}.memo-network-tx{stroke:#a78bfa}.memo-load-line{stroke:#f59e0b}',
+      '.memo-online-dot,.memo-live-dot{display:inline-block;width:8px;height:8px;margin-right:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.12),0 0 10px rgba(34,197,94,.65);vertical-align:middle;}',
+      '.memo-live-dot{width:7px;height:7px;margin-right:6px;animation:memoPulse 1.4s ease-in-out infinite;}',
+      '.memo-live-label{display:inline-flex;align-items:center;margin-left:10px;color:#86efac!important;font-size:11px;font-weight:700;}',
+      '@keyframes memoPulse{0%,100%{opacity:.4}50%{opacity:1}}',
+      '@media(max-width:900px){.memo-live-grid{grid-template-columns:1fr}}'
+    ].join('');
+    document.head.appendChild(style);
+  }
+
+  function svgPath(history, maxValue, width, height) {
+    if (!history.length) return '';
+    var max = maxValue || Math.max.apply(null, history.concat([1]));
+    var step = history.length > 1 ? width / (history.length - 1) : width;
+    return 'M ' + history.map(function (value, index) {
+      var x = index * step;
+      var y = height - Math.min(1, value / max) * (height - 2) - 1;
+      return x.toFixed(2) + ' ' + y.toFixed(2);
+    }).join(' L ');
+  }
+
+  function renderMiniChart(container, paths) {
+    if (!container) return;
+    var html = '<svg viewBox="0 0 100 48" preserveAspectRatio="none" aria-hidden="true">';
+    paths.forEach(function (item) {
+      html += '<path class="memo-line ' + item.className + '" d="' + svgPath(item.history, item.max, 100, 48) + '"></path>';
+    });
+    html += '</svg>';
+    container.innerHTML = html;
+  }
+
   function ensureMeter(card, kind) {
     var meter = card.querySelector('.memo-meter');
     if (!meter) {
@@ -97,44 +139,30 @@
     if (!chart) {
       chart = document.createElement('div');
       chart.className = 'memo-sparkline memo-sparkline-' + kind;
-      chart.innerHTML = '<svg viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><path class="memo-fill"></path><path class="memo-line"></path></svg>';
+      chart.innerHTML = '<svg viewBox="0 0 100 28" preserveAspectRatio="none"><path class="memo-fill"></path><path class="memo-line"></path></svg>';
       card.appendChild(chart);
     }
     return chart;
   }
 
-  function addHistory(history, value) {
-    history.push(Math.max(0, Math.min(100, Number(value) || 0)));
-    if (history.length > historyLimit) history.shift();
-  }
-
   function renderSparkline(card, kind, history) {
     if (!history.length) return;
     var chart = ensureSparkline(card, kind);
-    var width = 100;
-    var height = 28;
-    var step = history.length > 1 ? width / (history.length - 1) : width;
-    var points = history.map(function (value, index) {
-      var x = index * step;
-      var y = height - (value / 100) * (height - 2) - 1;
-      return [x, y];
-    });
-    var line = 'M ' + points.map(function (p) { return p[0].toFixed(2) + ' ' + p[1].toFixed(2); }).join(' L ');
-    var fill = line + ' L ' + width + ' ' + height + ' L 0 ' + height + ' Z';
+    var line = svgPath(history, 100, 100, 28);
     chart.querySelector('.memo-line').setAttribute('d', line);
-    chart.querySelector('.memo-fill').setAttribute('d', fill);
+    chart.querySelector('.memo-fill').setAttribute('d', line + ' L 100 28 L 0 28 Z');
   }
 
   function updateMeters() {
     var cards = document.querySelectorAll('.memo-stat-card');
     if (cards.length < 4) return;
     var cpu = parseFloat(clean(document.getElementById('memo-cpu').textContent)) || 0;
-    ensureMeter(cards[0], 'cpu').style.width = Math.max(0, Math.min(100, cpu)) + '%';
     var ramUsed = toBytes(document.getElementById('memo-ram').textContent);
     var ramTotal = toBytes(document.getElementById('memo-ram-total').textContent);
-    ensureMeter(cards[1], 'ram').style.width = percent(ramUsed, ramTotal) + '%';
     var diskUsed = toBytes(document.getElementById('memo-disk').textContent);
     var diskTotal = toBytes(document.getElementById('memo-disk-total').textContent);
+    ensureMeter(cards[0], 'cpu').style.width = Math.min(100, cpu) + '%';
+    ensureMeter(cards[1], 'ram').style.width = percent(ramUsed, ramTotal) + '%';
     ensureMeter(cards[2], 'disk').style.width = percent(diskUsed, diskTotal) + '%';
     var hint = cards[3].querySelector('.memo-stat-hint');
     if (hint && !hint.querySelector('.memo-online-dot')) hint.insertAdjacentHTML('afterbegin', '<span class="memo-online-dot"></span>');
@@ -144,8 +172,9 @@
 
   function ensureLiveLabel() {
     var heading = document.querySelector('.memo-system-heading span');
-    if (!heading || heading.querySelector('.memo-live-label')) return;
-    heading.insertAdjacentHTML('beforeend', '<span class="memo-live-label"><span class="memo-live-dot"></span>Live · 2 sec</span>');
+    if (heading && !heading.querySelector('.memo-live-label')) {
+      heading.insertAdjacentHTML('beforeend', '<span class="memo-live-label"><span class="memo-live-dot"></span>Live · 2 sec</span>');
+    }
   }
 
   function applyInitialValues(root) {
@@ -177,25 +206,37 @@
   function refreshLiveStats() {
     if (refreshBusy || document.hidden) return;
     refreshBusy = true;
-    fetch('/memocraft-theme/live-stats.cgi?_=' + Date.now(), {
-      credentials: 'same-origin',
-      cache: 'no-store',
-      headers: { 'Accept': 'application/json' }
-    })
-      .then(function (response) {
-        if (!response.ok) throw new Error('HTTP ' + response.status);
-        return response.json();
-      })
+    fetch('/memocraft-theme/live-stats.cgi?_=' + Date.now(), { credentials: 'same-origin', cache: 'no-store', headers: { 'Accept': 'application/json' } })
+      .then(function (response) { if (!response.ok) throw new Error('HTTP ' + response.status); return response.json(); })
       .then(function (data) {
         var cpu = Number(data.cpu_percent) || 0;
         var ramUsed = Number(data.ram_used_gib) || 0;
         var ramTotal = Number(data.ram_total_gib) || 0;
+        var rx = Number(data.network_rx_kib_s) || 0;
+        var tx = Number(data.network_tx_kib_s) || 0;
+        var load1 = Number(data.load_1) || 0;
         setText('memo-cpu', cpu.toFixed(1).replace('.0', '') + '%');
         setText('memo-ram', ramUsed.toFixed(2) + ' GiB');
         setText('memo-ram-total', ramTotal.toFixed(2) + ' GiB totaal');
+        setText('memo-network-rx', formatRate(rx));
+        setText('memo-network-tx', formatRate(tx));
+        setText('memo-load-1', load1.toFixed(2));
+        setText('memo-load-5', '5 min: ' + Number(data.load_5 || 0).toFixed(2));
+        setText('memo-load-15', '15 min: ' + Number(data.load_15 || 0).toFixed(2));
         addHistory(cpuHistory, cpu);
         addHistory(ramHistory, ramTotal ? (ramUsed / ramTotal) * 100 : 0);
+        addHistory(rxHistory, rx);
+        addHistory(txHistory, tx);
+        addHistory(loadHistory, load1);
         updateMeters();
+        var networkMax = Math.max.apply(null, rxHistory.concat(txHistory).concat([1]));
+        renderMiniChart(document.getElementById('memo-network-chart'), [
+          { history: rxHistory, max: networkMax, className: 'memo-network-rx' },
+          { history: txHistory, max: networkMax, className: 'memo-network-tx' }
+        ]);
+        renderMiniChart(document.getElementById('memo-load-chart'), [
+          { history: loadHistory, max: Math.max.apply(null, loadHistory.concat([1])), className: 'memo-load-line' }
+        ]);
       })
       .catch(function () {})
       .then(function () { refreshBusy = false; });
