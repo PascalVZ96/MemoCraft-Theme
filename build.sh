@@ -158,9 +158,27 @@ else:
 left.write_text(text, encoding="utf-8")
 PY
 
-# Webmin behandelt /right.cgi als de geldige dashboardroute van het actieve theme.
-# Daarom bouwen we het zelfstandige Dashboard v2 rechtstreeks in right.cgi.
+# Webmin behandelt /right.cgi als dashboardroute van het actieve theme.
 cp "$MEMO_DASHBOARD_CGI" "$RIGHT_CGI"
+
+# Gebruik QUERY_STRING rechtstreeks; Webmins ReadParse vult memo_stats op deze
+# theme-route niet op alle installaties betrouwbaar in.
+python3 - "$RIGHT_CGI" <<'PY'
+from pathlib import Path
+import sys
+
+right = Path(sys.argv[1])
+text = right.read_text(encoding="utf-8")
+old = "output_stats() if $in{'memo_stats'};"
+new = "my $query_string = $ENV{'QUERY_STRING'} // '';\noutput_stats() if $query_string =~ /(?:^|&)memo_stats=1(?:&|$)/ || $in{'memo_stats'};"
+if old in text:
+    text = text.replace(old, new, 1)
+elif "QUERY_STRING" not in text:
+    raise SystemExit("FOUT: live-statistiekenblok in right.cgi niet gevonden")
+text = text.replace("fetch('/right.cgi?memo_stats=1&_='+Date.now()", "fetch((window.location.pathname || '/right.cgi')+'?memo_stats=1&_='+Date.now()")
+right.write_text(text, encoding="utf-8")
+PY
+
 chmod 755 "$LEFT_CGI" "$RIGHT_CGI" "$LIVE_STATS_CGI" "$MEMO_DASHBOARD_CGI"
 
 rm -rf "$DIST_DIR"
@@ -172,15 +190,12 @@ tar -tzf "$OUTPUT" > "$LISTING"
 grep -Fxq 'memocraft-theme/theme.info' "$LISTING" || fail "Pakket mist theme.info"
 grep -Fxq 'memocraft-theme/right.cgi' "$LISTING" || fail "Pakket mist right.cgi"
 grep -Fxq 'memocraft-theme/memo-dashboard.cgi' "$LISTING" || fail "Pakket mist memo-dashboard.cgi"
-
-if ! cmp -s "$RIGHT_CGI" "$MEMO_DASHBOARD_CGI"; then
-  fail "right.cgi bevat niet Dashboard v2"
-fi
+grep -q 'QUERY_STRING' "$RIGHT_CGI" || fail "right.cgi mist directe live-querydetectie"
 
 if grep -Eq '(^|/)\.\.?(/|$)' "$LISTING"; then
   fail "Pakket bevat een ongeldig pad"
 fi
 
 echo "Gereed: $OUTPUT"
-echo "Dashboard v2 is ingebouwd in memocraft-theme/right.cgi"
+echo "Dashboard v2 en live API zijn ingebouwd in memocraft-theme/right.cgi"
 echo "Aantal bestanden: $(wc -l < "$LISTING")"
