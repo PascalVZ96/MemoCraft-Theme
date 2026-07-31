@@ -11,7 +11,8 @@
 .leftmenu a.memo-brand,
 .leftmenu a.memo-brand:visited,
 .leftmenu a.memo-brand:hover,
-.leftmenu a.memo-brand:focus {
+.leftmenu a.memo-brand:focus,
+.leftmenu a.memo-brand.memo-active {
     position: sticky !important;
     top: 0 !important;
     z-index: 20 !important;
@@ -56,7 +57,7 @@
     filter: brightness(1.28) saturate(1.08) !important;
 }
 
-.leftmenu a.memo-active,
+.leftmenu a.memo-active:not(.memo-brand),
 .leftmenu .memo-active-row a {
     background: transparent !important;
     color: #ffffff !important;
