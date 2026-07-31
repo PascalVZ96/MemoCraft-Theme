@@ -1,101 +1,113 @@
-/* MemoNetwork Forms, Tables & Modules 3.0 */
+/* MemoNetwork Forms, Tables & Legacy Modules 4.0 */
 
+body:not(.memonetwork-login) {
+  color: #e5edf7 !important;
+}
+
+body:not(.memonetwork-login) table,
+body:not(.memonetwork-login) tbody,
+body:not(.memonetwork-login) thead,
+body:not(.memonetwork-login) tfoot,
+body:not(.memonetwork-login) tr,
+body:not(.memonetwork-login) td,
+body:not(.memonetwork-login) th {
+  border-color: #2b3b52 !important;
+}
+
+body:not(.memonetwork-login) table.wrapper,
+body:not(.memonetwork-login) table.shrinkwrapper,
 body:not(.memonetwork-login) .ui_table,
 body:not(.memonetwork-login) .formsection,
-body:not(.memonetwork-login) .sortable,
-body:not(.memonetwork-login) table.wrapper,
-body:not(.memonetwork-login) table.shrinkwrapper {
+body:not(.memonetwork-login) .sortable {
+  background: #101925 !important;
+  color: #e5edf7 !important;
   border: 1px solid #2b3b52 !important;
-  border-radius: 14px !important;
+  border-radius: 12px !important;
   border-collapse: separate !important;
   border-spacing: 0 !important;
   overflow: hidden !important;
-  background: #111a27 !important;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, .18) !important;
 }
 
-body:not(.memonetwork-login) .ui_table thead,
-body:not(.memonetwork-login) .formsection thead,
-body:not(.memonetwork-login) .sortable thead,
-body:not(.memonetwork-login) tr.ui_table_head,
+body:not(.memonetwork-login) table.wrapper td,
+body:not(.memonetwork-login) table.wrapper th,
+body:not(.memonetwork-login) table.shrinkwrapper td,
+body:not(.memonetwork-login) table.shrinkwrapper th,
+body:not(.memonetwork-login) .ui_table td,
+body:not(.memonetwork-login) .ui_table th,
+body:not(.memonetwork-login) .formsection td,
+body:not(.memonetwork-login) .formsection th,
+body:not(.memonetwork-login) .sortable td,
+body:not(.memonetwork-login) .sortable th {
+  background: #111a27 !important;
+  color: #e5edf7 !important;
+  border-color: #2b3b52 !important;
+  padding: 9px 12px !important;
+}
+
+body:not(.memonetwork-login) thead td,
+body:not(.memonetwork-login) thead th,
+body:not(.memonetwork-login) tr.ui_table_head td,
 body:not(.memonetwork-login) td.ui_table_head {
-  background: linear-gradient(90deg, #1d2a3d, #192536) !important;
-  color: #f8fafc !important;
-  border: 0 !important;
-}
-
-body:not(.memonetwork-login) .ui_table thead td,
-body:not(.memonetwork-login) .ui_table thead th,
-body:not(.memonetwork-login) .formsection thead td,
-body:not(.memonetwork-login) .formsection thead th,
-body:not(.memonetwork-login) .sortable thead td,
-body:not(.memonetwork-login) .sortable thead th {
-  padding: 12px 14px !important;
-  color: #f8fafc !important;
-  font-size: 12px !important;
-  font-weight: 750 !important;
-  letter-spacing: .02em !important;
-  border-bottom: 1px solid #34465f !important;
-}
-
-body:not(.memonetwork-login) .ui_table tbody,
-body:not(.memonetwork-login) .formsection tbody,
-body:not(.memonetwork-login) .sortable tbody,
-body:not(.memonetwork-login) .ui_table_body,
-body:not(.memonetwork-login) .ui_table_body > td,
-body:not(.memonetwork-login) .ui_table_body > td > table,
-body:not(.memonetwork-login) .formsection > tbody > tr > td,
-body:not(.memonetwork-login) .shrinkwrapper > tbody,
-body:not(.memonetwork-login) .shrinkwrapper > tbody > tr,
-body:not(.memonetwork-login) .shrinkwrapper > tbody > tr > td {
-  background: #111a27 !important;
-  color: #d8e2ef !important;
-}
-
-body:not(.memonetwork-login) .ui_table tbody tr,
-body:not(.memonetwork-login) .formsection tbody tr,
-body:not(.memonetwork-login) .sortable tbody tr,
-body:not(.memonetwork-login) tr.row0,
-body:not(.memonetwork-login) tr.row1 {
-  background: #111a27 !important;
-  transition: background .16s ease !important;
-}
-
-body:not(.memonetwork-login) .ui_table tbody tr:nth-child(even),
-body:not(.memonetwork-login) .sortable tbody tr:nth-child(even) {
-  background: #141f2e !important;
-}
-
-body:not(.memonetwork-login) .ui_table tbody tr:hover,
-body:not(.memonetwork-login) .sortable tbody tr:hover {
-  background: #1a2a40 !important;
-}
-
-body:not(.memonetwork-login) .ui_table tbody td,
-body:not(.memonetwork-login) .ui_table tbody th,
-body:not(.memonetwork-login) .formsection tbody td,
-body:not(.memonetwork-login) .formsection tbody th,
-body:not(.memonetwork-login) .sortable tbody td,
-body:not(.memonetwork-login) .sortable tbody th {
-  padding: 10px 13px !important;
-  color: #d8e2ef !important;
-  border: 0 !important;
-  border-bottom: 1px solid rgba(51, 65, 85, .56) !important;
-  vertical-align: middle !important;
-}
-
-body:not(.memonetwork-login) .ui_form_label,
-body:not(.memonetwork-login) .ui_form_label b,
-body:not(.memonetwork-login) .ui_form_label label {
-  color: #aebdd0 !important;
-  font-size: 12px !important;
+  background: #1c293b !important;
+  color: #bfdbfe !important;
   font-weight: 700 !important;
 }
 
-body:not(.memonetwork-login) .ui_form_value,
-body:not(.memonetwork-login) .ui_form_value b,
-body:not(.memonetwork-login) .ui_form_value label {
-  color: #d8e2ef !important;
+/* Force legacy inline and bgcolor styling into the dark theme. */
+body:not(.memonetwork-login) table[bgcolor],
+body:not(.memonetwork-login) tbody[bgcolor],
+body:not(.memonetwork-login) tr[bgcolor],
+body:not(.memonetwork-login) td[bgcolor],
+body:not(.memonetwork-login) th[bgcolor],
+body:not(.memonetwork-login) table[style*="background"],
+body:not(.memonetwork-login) tr[style*="background"],
+body:not(.memonetwork-login) td[style*="background"],
+body:not(.memonetwork-login) th[style*="background"] {
+  background: #111a27 !important;
+  background-color: #111a27 !important;
+  color: #e5edf7 !important;
+}
+
+body:not(.memonetwork-login) table[bgcolor] *,
+body:not(.memonetwork-login) tr[bgcolor] *,
+body:not(.memonetwork-login) td[bgcolor] *,
+body:not(.memonetwork-login) th[bgcolor] *,
+body:not(.memonetwork-login) table[style*="background"] *,
+body:not(.memonetwork-login) tr[style*="background"] *,
+body:not(.memonetwork-login) td[style*="background"] *,
+body:not(.memonetwork-login) th[style*="background"] * {
+  color: inherit !important;
+}
+
+/* Selected/update rows: dark green instead of bright green. */
+body:not(.memonetwork-login) tr[bgcolor="#ccffcc"],
+body:not(.memonetwork-login) tr[bgcolor="#CCFFCC"],
+body:not(.memonetwork-login) td[bgcolor="#ccffcc"],
+body:not(.memonetwork-login) td[bgcolor="#CCFFCC"],
+body:not(.memonetwork-login) tr[style*="ccffcc"],
+body:not(.memonetwork-login) td[style*="ccffcc"] {
+  background: #173d2d !important;
+  background-color: #173d2d !important;
+  color: #ecfdf5 !important;
+}
+
+body:not(.memonetwork-login) tr[bgcolor="#ccffcc"] *,
+body:not(.memonetwork-login) tr[bgcolor="#CCFFCC"] *,
+body:not(.memonetwork-login) td[bgcolor="#ccffcc"] *,
+body:not(.memonetwork-login) td[bgcolor="#CCFFCC"] *,
+body:not(.memonetwork-login) tr[style*="ccffcc"] *,
+body:not(.memonetwork-login) td[style*="ccffcc"] * {
+  color: #ecfdf5 !important;
+}
+
+body:not(.memonetwork-login) a,
+body:not(.memonetwork-login) a:visited {
+  color: #60a5fa !important;
+  text-decoration: none !important;
+}
+
+body:not(.memonetwork-login) a:hover {
+  color: #93c5fd !important;
 }
 
 body:not(.memonetwork-login) input[type="text"],
@@ -103,120 +115,33 @@ body:not(.memonetwork-login) input[type="password"],
 body:not(.memonetwork-login) input[type="email"],
 body:not(.memonetwork-login) input[type="number"],
 body:not(.memonetwork-login) input[type="search"],
-body:not(.memonetwork-login) input[type="url"],
 body:not(.memonetwork-login) textarea,
 body:not(.memonetwork-login) select {
   box-sizing: border-box !important;
-  min-height: 38px !important;
-  padding: 7px 11px !important;
-  border: 1px solid #3a4d68 !important;
-  border-radius: 9px !important;
+  min-height: 36px !important;
+  padding: 7px 10px !important;
   background: #0b1523 !important;
   color: #f8fafc !important;
-  outline: none !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .025) !important;
-  transition: border-color .16s ease, box-shadow .16s ease, background .16s ease !important;
-}
-
-body:not(.memonetwork-login) textarea {
-  min-height: 110px !important;
-  line-height: 1.5 !important;
-}
-
-body:not(.memonetwork-login) input:focus,
-body:not(.memonetwork-login) textarea:focus,
-body:not(.memonetwork-login) select:focus {
-  border-color: #3b82f6 !important;
-  background: #0d1b2c !important;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, .15) !important;
-}
-
-body:not(.memonetwork-login) input[type="checkbox"],
-body:not(.memonetwork-login) input[type="radio"] {
-  accent-color: #3b82f6 !important;
+  border: 1px solid #3a4d68 !important;
+  border-radius: 8px !important;
 }
 
 body:not(.memonetwork-login) input[type="submit"],
 body:not(.memonetwork-login) input[type="button"],
 body:not(.memonetwork-login) button,
 body:not(.memonetwork-login) .ui_submit {
-  min-height: 38px !important;
-  padding: 0 15px !important;
-  border: 1px solid #3b82f6 !important;
-  border-radius: 9px !important;
-  background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
+  min-height: 36px !important;
+  padding: 0 13px !important;
+  background: #2563eb !important;
   color: #ffffff !important;
+  border: 1px solid #3b82f6 !important;
+  border-radius: 8px !important;
   font-weight: 700 !important;
-  box-shadow: 0 8px 18px rgba(37, 99, 235, .20) !important;
-  transition: transform .16s ease, filter .16s ease, box-shadow .16s ease !important;
 }
 
-body:not(.memonetwork-login) input[type="submit"]:hover,
-body:not(.memonetwork-login) input[type="button"]:hover,
-body:not(.memonetwork-login) button:hover,
-body:not(.memonetwork-login) .ui_submit:hover {
-  transform: translateY(-1px) !important;
-  filter: brightness(1.08) !important;
-  box-shadow: 0 11px 24px rgba(37, 99, 235, .28) !important;
-}
-
-body:not(.memonetwork-login) input[type="reset"],
-body:not(.memonetwork-login) .ui_reset {
-  min-height: 38px !important;
-  padding: 0 15px !important;
-  border: 1px solid #42546d !important;
-  border-radius: 9px !important;
-  background: #182437 !important;
-  color: #dbe7f5 !important;
-}
-
-body:not(.memonetwork-login) .ui_form_end_buttons,
-body:not(.memonetwork-login) table.ui_form_end_buttons td {
-  padding: 14px 8px !important;
-  background: transparent !important;
-}
-
-/* Legacy Webmin module overview -> modern card grid */
-body:not(.memonetwork-login) table.icons_table {
-  width: 100% !important;
-  border: 0 !important;
-  border-collapse: separate !important;
-  border-spacing: 12px !important;
-  background: transparent !important;
-}
-
-body:not(.memonetwork-login) table.icons_table > tbody > tr {
-  background: transparent !important;
-}
-
-body:not(.memonetwork-login) table.icons_table > tbody > tr > td {
-  min-width: 170px !important;
-  padding: 16px 12px !important;
-  border: 1px solid #2b3b52 !important;
-  border-radius: 13px !important;
-  background: linear-gradient(145deg, #172234, #121b29) !important;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, .17) !important;
-  transition: transform .16s ease, border-color .16s ease, background .16s ease !important;
-}
-
-body:not(.memonetwork-login) table.icons_table > tbody > tr > td:hover {
-  transform: translateY(-2px) !important;
-  border-color: #3d5a7d !important;
-  background: linear-gradient(145deg, #1b2b41, #142033) !important;
-}
-
-body:not(.memonetwork-login) table.icons_table img {
-  width: 42px !important;
-  height: 42px !important;
-  object-fit: contain !important;
-  margin-bottom: 7px !important;
-}
-
-body:not(.memonetwork-login) table.icons_table a {
-  color: #8fc1ff !important;
-  font-size: 12px !important;
-  font-weight: 650 !important;
-  text-decoration: none !important;
+body:not(.memonetwork-login) input[type="checkbox"],
+body:not(.memonetwork-login) input[type="radio"] {
+  accent-color: #3b82f6 !important;
 }
 
 body:not(.memonetwork-login) code,
@@ -225,59 +150,22 @@ body:not(.memonetwork-login) tt {
   color: #bfdbfe !important;
 }
 
-/* Legacy package-updates module uses hard-coded white table cells. */
-body:not(.memonetwork-login) table[bgcolor],
-body:not(.memonetwork-login) td[bgcolor="#ffffff"],
-body:not(.memonetwork-login) td[bgcolor="white"],
-body:not(.memonetwork-login) tr[bgcolor="#ffffff"],
-body:not(.memonetwork-login) tr[bgcolor="white"] {
-  background: #111a27 !important;
-  color: #d8e2ef !important;
+/* Legacy module icon grids. */
+body:not(.memonetwork-login) table.icons_table {
+  width: 100% !important;
+  border: 0 !important;
+  border-spacing: 12px !important;
+  background: transparent !important;
 }
 
-body:not(.memonetwork-login) table[bgcolor] td,
-body:not(.memonetwork-login) table[bgcolor] th {
-  color: #d8e2ef !important;
-  border-color: #2b3b52 !important;
+body:not(.memonetwork-login) table.icons_table > tbody > tr,
+body:not(.memonetwork-login) table.icons_table > tbody > tr > td {
+  background: transparent !important;
 }
 
-body:not(.memonetwork-login) table[bgcolor] a {
-  color: #7dc4ff !important;
-}
-
-body:not(.memonetwork-login) tr[bgcolor="#ccffcc"],
-body:not(.memonetwork-login) tr[bgcolor="#CCFFCC"],
-body:not(.memonetwork-login) td[bgcolor="#ccffcc"],
-body:not(.memonetwork-login) td[bgcolor="#CCFFCC"] {
-  background: #163b2d !important;
-  color: #d1fae5 !important;
-}
-
-body:not(.memonetwork-login) tr[bgcolor="#ccffcc"] a,
-body:not(.memonetwork-login) tr[bgcolor="#CCFFCC"] a,
-body:not(.memonetwork-login) td[bgcolor="#ccffcc"] a,
-body:not(.memonetwork-login) td[bgcolor="#CCFFCC"] a {
-  color: #86efac !important;
-}
-
-@media (max-width: 900px) {
-  body:not(.memonetwork-login) table.icons_table,
-  body:not(.memonetwork-login) table.icons_table tbody,
-  body:not(.memonetwork-login) table.icons_table tr {
-    display: block !important;
-  }
-
-  body:not(.memonetwork-login) table.icons_table > tbody > tr > td {
-    display: inline-block !important;
-    box-sizing: border-box !important;
-    width: calc(50% - 12px) !important;
-    margin: 6px !important;
-    vertical-align: top !important;
-  }
-}
-
-@media (max-width: 560px) {
-  body:not(.memonetwork-login) table.icons_table > tbody > tr > td {
-    width: calc(100% - 12px) !important;
-  }
+body:not(.memonetwork-login) table.icons_table > tbody > tr > td {
+  padding: 16px 12px !important;
+  border: 1px solid #2b3b52 !important;
+  border-radius: 12px !important;
+  background: #142033 !important;
 }
