@@ -1,4 +1,4 @@
-/* MemoNetwork Core UI 5.1 */
+/* MemoNetwork Core UI 5.2 */
 
 body:not(.memonetwork-login) {
   color: #e7eef8 !important;
@@ -186,6 +186,24 @@ body:not(.memonetwork-login) td[bgcolor="#ccffcc"] *,
 body:not(.memonetwork-login) td[bgcolor="#CCFFCC"] *,
 body:not(.memonetwork-login) td[bgcolor="ccffcc"] * {
   color: #ecfdf5 !important;
+}
+
+/* Dashboard header contrast and broken module cleanup */
+body:not(.memonetwork-login) .v3 .head h1 {
+  color: #ffffff !important;
+  text-shadow: 0 1px 1px rgba(0,0,0,.35) !important;
+}
+
+body:not(.memonetwork-login) .v3 .head p {
+  color: #9fc4eb !important;
+}
+
+body:not(.memonetwork-login) .v3 .head .api-state {
+  color: #7dc4ff !important;
+}
+
+body:not(.memonetwork-login) .v3 a.admin-link[href="/servers-link/index.cgi"] {
+  display: none !important;
 }
 
 @media (max-width: 800px) {
