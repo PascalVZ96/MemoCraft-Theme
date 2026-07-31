@@ -1,0 +1,68 @@
+/* MemoNetwork package-updates contrast fix */
+body:not(.memonetwork-login) table,
+body:not(.memonetwork-login) tbody,
+body:not(.memonetwork-login) tr,
+body:not(.memonetwork-login) td,
+body:not(.memonetwork-login) th {
+  border-color: #2b3b52 !important;
+}
+
+body:not(.memonetwork-login) table[width="100%"] > tbody > tr > td,
+body:not(.memonetwork-login) table[width="100%"] > tbody > tr > th,
+body:not(.memonetwork-login) td[style*="background"],
+body:not(.memonetwork-login) tr[style*="background"] > td {
+  background-color: #111a27 !important;
+  color: #e5edf7 !important;
+}
+
+body:not(.memonetwork-login) td[bgcolor],
+body:not(.memonetwork-login) tr[bgcolor] > td {
+  color: #e5edf7 !important;
+}
+
+body:not(.memonetwork-login) tr[bgcolor="#ccffcc"] > td,
+body:not(.memonetwork-login) tr[bgcolor="#CCFFCC"] > td,
+body:not(.memonetwork-login) td[bgcolor="#ccffcc"],
+body:not(.memonetwork-login) td[bgcolor="#CCFFCC"] {
+  background: #173d2d !important;
+  color: #ecfdf5 !important;
+}
+
+body:not(.memonetwork-login) tr[bgcolor="#ccffcc"] > td *,
+body:not(.memonetwork-login) tr[bgcolor="#CCFFCC"] > td *,
+body:not(.memonetwork-login) td[bgcolor="#ccffcc"] *,
+body:not(.memonetwork-login) td[bgcolor="#CCFFCC"] * {
+  color: #ecfdf5 !important;
+}
+
+body:not(.memonetwork-login) a,
+body:not(.memonetwork-login) a:visited {
+  color: #60a5fa !important;
+}
+
+body:not(.memonetwork-login) b,
+body:not(.memonetwork-login) strong,
+body:not(.memonetwork-login) label,
+body:not(.memonetwork-login) span,
+body:not(.memonetwork-login) div {
+  text-shadow: none !important;
+}
+
+body:not(.memonetwork-login) input[type="text"],
+body:not(.memonetwork-login) select {
+  background: #0b1523 !important;
+  color: #f8fafc !important;
+  border-color: #3a4d68 !important;
+}
+
+body:not(.memonetwork-login) input[type="submit"],
+body:not(.memonetwork-login) input[type="button"] {
+  background: #2563eb !important;
+  color: #fff !important;
+  border-color: #3b82f6 !important;
+}
+
+body:not(.memonetwork-login) table tbody tr:first-child td,
+body:not(.memonetwork-login) table tbody tr:first-child th {
+  color: #bfdbfe !important;
+}
