@@ -70,21 +70,30 @@ sub docker_stats {
 sub amp_stats {
     my $output = `sudo -n -u amp -H ampinstmgr -t 2>/dev/null`;
     $output = `su -s /bin/sh amp -c 'ampinstmgr -t' 2>/dev/null` unless $output =~ /Instance Name/;
+
     if ($output =~ /Instance Name/) {
         my ($running,$total)=(0,0);
         for my $line (split /\n/, $output) {
-            next unless $line =~ /\|/;
-            next if $line =~ /Instance Name|^[\s─-]+$/;
+            next if $line =~ /Instance Name|^[\s─━═-]+$/;
+            next unless $line =~ /[│|]/;
+
+            my @columns = split /\s*[│|]\s*/, $line;
+            next unless @columns >= 6;
+            my $name = $columns[0] // '';
+            $name =~ s/^\s+|\s+$//g;
+            next unless length $name;
+
+            my $up = $columns[-1] // '';
+            $up =~ s/^\s+|\s+$//g;
             $total++;
-            $running++ if $line =~ /(?:✓|Yes|Running)\s*$/i;
+            $running++ if $up =~ /^(?:✓|✔|Yes|Running|Up)$/i;
         }
         return ($running,$total) if $total;
     }
+
     my @dirs=grep {-d $_} glob('/home/amp/.ampdata/instances/*');
     my $total=scalar @dirs;
-    my $running=line_count("pgrep -af 'AMP_Linux|Minecraft|srcds|garrysmod' ");
-    $running=$total if $running>$total;
-    return ($running,$total);
+    return (0,$total);
 }
 
 my ($idle1,$total1)=cpu_sample();
