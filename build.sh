@@ -6,6 +6,7 @@ THEME_DIR="$ROOT_DIR/memocraft-theme"
 DIST_DIR="$ROOT_DIR/dist"
 OUTPUT="$DIST_DIR/memocraft-theme.wbt.gz"
 LISTING="$DIST_DIR/package-files.txt"
+
 SOURCE_CSS="$ROOT_DIR/src/memocraft.css"
 FORMS_TABLES_CSS="$ROOT_DIR/src/forms-tables-20.css"
 CORE_UI_CSS="$ROOT_DIR/src/core-ui-50.css"
@@ -15,9 +16,7 @@ SIDEBAR_CSS="$ROOT_DIR/src/sidebar.css"
 SIDEBAR_EXTRA_CSS="$ROOT_DIR/src/sidebar-31.css"
 SIDEBAR_PHASE_CSS="$ROOT_DIR/src/sidebar-32.css"
 SIDEBAR_JS="$ROOT_DIR/src/sidebar-active.js"
-DASHBOARD_CSS="$ROOT_DIR/src/dashboard-inline.css"
-DASHBOARD_EXTRA_CSS="$ROOT_DIR/src/dashboard-cards-20.css"
-DASHBOARD_HTML="$ROOT_DIR/src/dashboard-inline.html"
+
 TARGET_CSS="$THEME_DIR/unauthenticated/gray-theme.css"
 THEME_PL="$THEME_DIR/theme.pl"
 LEFT_CGI="$THEME_DIR/left.cgi"
@@ -31,7 +30,6 @@ fail() {
 }
 
 for required in \
-  "$THEME_DIR" \
   "$THEME_DIR/theme.info" \
   "$SOURCE_CSS" \
   "$FORMS_TABLES_CSS" \
@@ -42,20 +40,15 @@ for required in \
   "$SIDEBAR_EXTRA_CSS" \
   "$SIDEBAR_PHASE_CSS" \
   "$SIDEBAR_JS" \
-  "$DASHBOARD_CSS" \
-  "$DASHBOARD_EXTRA_CSS" \
-  "$DASHBOARD_HTML" \
   "$TARGET_CSS" \
   "$THEME_PL" \
   "$LEFT_CGI" \
-  "$RIGHT_CGI" \
   "$LIVE_STATS_CGI" \
   "$MEMO_DASHBOARD_CGI"; do
   [[ -e "$required" ]] || fail "Ontbreekt: $required"
 done
 
 grep -q '^desc=' "$THEME_DIR/theme.info" || fail "theme.info bevat geen desc="
-chmod 755 "$LIVE_STATS_CGI" "$MEMO_DASHBOARD_CGI" "$RIGHT_CGI" "$LEFT_CGI"
 
 python3 - "$TARGET_CSS" "$SOURCE_CSS" "$FORMS_TABLES_CSS" "$CORE_UI_CSS" <<'PY'
 from pathlib import Path
@@ -101,7 +94,7 @@ js = Path(sys.argv[2]).read_text(encoding="utf-8").strip()
 text = theme.read_text(encoding="utf-8")
 start = "# MEMONETWORK-LOGIN-MARKER-START"
 end = "# MEMONETWORK-LOGIN-MARKER-END"
-perl_block = (
+block = (
     f"\t{start}\n"
     "\tprint <<'MEMONETWORK_LOGIN_MARKER';\n"
     "<script>\n" + js + "\n</script>\n"
@@ -112,7 +105,7 @@ text = re.sub(r"\t# MEMONETWORK-LOGIN-MARKER-START.*?\t# MEMONETWORK-LOGIN-MARKE
 needle = "if ($script_name =~ /session_login.cgi/) {\n"
 if needle not in text:
     raise SystemExit("FOUT: loginblok in theme.pl niet gevonden")
-text = text.replace(needle, needle + perl_block, 1)
+text = text.replace(needle, needle + block, 1)
 theme.write_text(text, encoding="utf-8")
 PY
 
@@ -126,7 +119,9 @@ css = "\n\n".join(Path(path).read_text(encoding="utf-8").strip() for path in sys
 js = Path(sys.argv[5]).read_text(encoding="utf-8").strip()
 text = left.read_text(encoding="utf-8")
 text = text.replace("<strong>MemoCraft</strong>", "<strong>MemoNetwork</strong>")
-text = text.replace("'link' => '/right.cgi'", "'link' => '/memocraft-theme/memo-dashboard.cgi'")
+text = text.replace("'link' => '/memocraft-theme/memo-dashboard.cgi'", "'link' => '/right.cgi'")
+text = text.replace("href='/memocraft-theme/memo-dashboard.cgi' target='right'", "href='/right.cgi' target='right'")
+
 old_brand = '''print "<div class='memo-brand'>\\n";
 print "<div class='memo-brand-icon'>M</div>\\n";
 print "<div class='memo-brand-copy'>\\n";
@@ -134,7 +129,7 @@ print "<strong>MemoNetwork</strong>\\n";
 print "<span>Server Management</span>\\n";
 print "</div>\\n";
 print "</div>\\n";'''
-new_brand = '''print "<a class='memo-brand' href='/memocraft-theme/memo-dashboard.cgi' target='right' title='Terug naar dashboard' aria-label='Terug naar dashboard' style='text-decoration:none;color:inherit'>\\n";
+new_brand = '''print "<a class='memo-brand' href='/right.cgi' target='right' title='Terug naar dashboard' aria-label='Terug naar dashboard' style='text-decoration:none;color:inherit'>\\n";
 print "<div class='memo-brand-icon'>M</div>\\n";
 print "<div class='memo-brand-copy'>\\n";
 print "<strong>MemoNetwork</strong>\\n";
@@ -143,10 +138,9 @@ print "</div>\\n";
 print "</a>\\n";'''
 if old_brand in text:
     text = text.replace(old_brand, new_brand, 1)
-else:
-    text = text.replace("href='/right.cgi' target='right'", "href='/memocraft-theme/memo-dashboard.cgi' target='right'")
-    if "class='memo-brand'" not in text:
-        raise SystemExit("FOUT: MemoNetwork-logoblok in left.cgi niet gevonden")
+elif "class='memo-brand'" not in text:
+    raise SystemExit("FOUT: MemoNetwork-logoblok in left.cgi niet gevonden")
+
 start = "<!-- MEMOCRAFT-SIDEBAR-STYLE-START -->"
 end = "<!-- MEMOCRAFT-SIDEBAR-STYLE-END -->"
 block = (
@@ -164,32 +158,29 @@ else:
 left.write_text(text, encoding="utf-8")
 PY
 
-python3 - "$RIGHT_CGI" <<'PY'
-from pathlib import Path
-import sys
-
-right = Path(sys.argv[1])
-right.write_text('''#!/usr/bin/perl
-use strict;
-use warnings;
-print "Status: 302 Found\\r\\n";
-print "Location: /memocraft-theme/memo-dashboard.cgi\\r\\n";
-print "Cache-Control: no-store\\r\\n\\r\\n";
-exit;
-''', encoding='utf-8')
-PY
+# Webmin behandelt /right.cgi als de geldige dashboardroute van het actieve theme.
+# Daarom bouwen we het zelfstandige Dashboard v2 rechtstreeks in right.cgi.
+cp "$MEMO_DASHBOARD_CGI" "$RIGHT_CGI"
+chmod 755 "$LEFT_CGI" "$RIGHT_CGI" "$LIVE_STATS_CGI" "$MEMO_DASHBOARD_CGI"
 
 rm -rf "$DIST_DIR"
 mkdir -p "$DIST_DIR"
 tar --create --gzip --file "$OUTPUT" --directory="$ROOT_DIR" --owner=0 --group=0 --numeric-owner memocraft-theme
 gzip -t "$OUTPUT"
 tar -tzf "$OUTPUT" > "$LISTING"
+
 grep -Fxq 'memocraft-theme/theme.info' "$LISTING" || fail "Pakket mist theme.info"
+grep -Fxq 'memocraft-theme/right.cgi' "$LISTING" || fail "Pakket mist right.cgi"
+grep -Fxq 'memocraft-theme/memo-dashboard.cgi' "$LISTING" || fail "Pakket mist memo-dashboard.cgi"
+
+if ! cmp -s "$RIGHT_CGI" "$MEMO_DASHBOARD_CGI"; then
+  fail "right.cgi bevat niet Dashboard v2"
+fi
+
 if grep -Eq '(^|/)\.\.?(/|$)' "$LISTING"; then
   fail "Pakket bevat een ongeldig pad"
 fi
 
 echo "Gereed: $OUTPUT"
+echo "Dashboard v2 is ingebouwd in memocraft-theme/right.cgi"
 echo "Aantal bestanden: $(wc -l < "$LISTING")"
-echo "Eerste 30 onderdelen:"
-head -30 "$LISTING"
