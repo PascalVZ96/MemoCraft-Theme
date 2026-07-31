@@ -1,0 +1,35 @@
+name: Fix Dashboard v4 build check
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-dashboard-v4-build.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Update v3 build checks to v4
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('build.sh')
+          text = path.read_text(encoding='utf-8')
+          text = text.replace('"MemoNetwork Dashboard v3",', '"MemoNetwork Dashboard v4",')
+          text = text.replace('FOUT: Dashboard v3 mist:', 'FOUT: Dashboard v4 mist:')
+          text = text.replace("Dashboard v3 gebruikt veilige MemoNetwork beheerpagina's", "Dashboard v4 gebruikt veilige MemoNetwork beheerpagina's")
+          path.write_text(text, encoding='utf-8')
+          PY
+      - name: Commit fix
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add build.sh
+          git diff --cached --quiet || git commit -m 'Fix Dashboard v4 build validation'
+          git push
