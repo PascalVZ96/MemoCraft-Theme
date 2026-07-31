@@ -24,32 +24,12 @@
   color: #fbbf24 !important;
   font-size: 22px;
 }
-.memo-reboot-copy h2 {
-  margin: 0 0 5px;
-  color: #fff7ed !important;
-  font-size: 16px;
-}
-.memo-reboot-copy p {
-  margin: 0;
-  color: #fdba74 !important;
-  font-size: 13px;
-  line-height: 1.45;
-}
-.memo-reboot-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  white-space: nowrap;
-}
+.memo-reboot-copy h2 { margin: 0 0 5px; color: #fff7ed !important; font-size: 16px; }
+.memo-reboot-copy p { margin: 0; color: #fdba74 !important; font-size: 13px; line-height: 1.45; }
+.memo-reboot-actions { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
 .memo-reboot-actions input { margin: 0 !important; }
-.memo-reboot-actions input[value="Reboot Now"] {
-  background: #ea580c !important;
-  border-color: #fb923c !important;
-}
-.memo-reboot-actions input[value="Hide Alert"] {
-  background: #273449 !important;
-  border-color: #475569 !important;
-}
+.memo-reboot-actions input[value="Reboot Now"] { background: #ea580c !important; border-color: #fb923c !important; }
+.memo-reboot-actions input[value="Hide Alert"] { background: #273449 !important; border-color: #475569 !important; }
 .memo-original-reboot { display: none !important; }
 @media (max-width: 760px) {
   .memo-reboot-alert { grid-template-columns: 42px minmax(0,1fr); }
@@ -83,6 +63,22 @@
     <div class="memo-stat-top"><span class="memo-stat-icon">◷</span><span class="memo-stat-label">Uptime</span></div>
     <strong class="memo-stat-value" id="memo-uptime">--</strong>
     <small class="memo-stat-hint">Server online</small>
+  </div>
+</div>
+<div class="memo-live-grid">
+  <div class="memo-live-card memo-network-card">
+    <div class="memo-live-card-head"><span>Netwerkverkeer</span><small>Live · 2 sec</small></div>
+    <div class="memo-network-values">
+      <div><span>↓ Download</span><strong id="memo-network-rx">--</strong></div>
+      <div><span>↑ Upload</span><strong id="memo-network-tx">--</strong></div>
+    </div>
+    <div class="memo-wide-chart" id="memo-network-chart"></div>
+  </div>
+  <div class="memo-live-card memo-load-card">
+    <div class="memo-live-card-head"><span>Load average</span><small>1 / 5 / 15 min</small></div>
+    <strong class="memo-load-main" id="memo-load-1">--</strong>
+    <div class="memo-load-secondary"><span id="memo-load-5">--</span><span id="memo-load-15">--</span></div>
+    <div class="memo-wide-chart" id="memo-load-chart"></div>
   </div>
 </div>
 <div class="memo-system-panel" id="memo-system-panel">
