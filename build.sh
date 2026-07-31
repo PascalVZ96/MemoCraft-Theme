@@ -203,7 +203,7 @@ text = text.replace("fetch('/right.cgi?memo_stats=1&_='+Date.now()", "fetch('/me
 text = text.replace("fetch((window.location.pathname || '/right.cgi')+'?memo_stats=1&_='+Date.now()", "fetch('/memo-network/live-stats.cgi?_='+Date.now()")
 
 required = (
-    "MemoNetwork Dashboard v3",
+    "MemoNetwork Dashboard v4",
     "/memo-network/live-stats.cgi",
     "/memo-network/system-info.cgi",
     "/memo-network/processes.cgi",
@@ -214,7 +214,7 @@ required = (
 )
 missing = [item for item in required if item not in text]
 if missing:
-    raise SystemExit("FOUT: Dashboard v3 mist: " + ", ".join(missing))
+    raise SystemExit("FOUT: Dashboard v4 mist: " + ", ".join(missing))
 right.write_text(text, encoding="utf-8")
 PY
 
@@ -241,6 +241,6 @@ if grep -Eq '(^|/)\.\.?(/|$)' "$LISTING"; then
 fi
 
 echo "Gereed: $OUTPUT"
-echo "Dashboard v3 gebruikt veilige MemoNetwork beheerpagina's"
+echo "Dashboard v4 gebruikt veilige MemoNetwork beheerpagina's"
 echo "Package-updates runtime contrastfix toegevoegd"
 echo "Aantal bestanden: $(wc -l < "$LISTING")"
