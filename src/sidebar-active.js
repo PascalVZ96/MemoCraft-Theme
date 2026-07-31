@@ -1,4 +1,6 @@
 (() => {
+  const dashboardUrl = "/memocraft-theme/memo-dashboard.cgi";
+
   const normalize = (value) => {
     try {
       const url = new URL(value, window.location.href);
@@ -21,15 +23,16 @@
     return "";
   };
 
-  const openDashboard = () => {
+  const openDashboard = (event) => {
+    if (event) event.preventDefault();
     try {
       if (parent && parent.frames && parent.frames.length > 1) {
-        parent.frames[1].location.href = "/right.cgi";
+        parent.frames[1].location.href = dashboardUrl;
       } else {
-        window.top.location.href = "/right.cgi";
+        window.top.location.href = dashboardUrl;
       }
     } catch (_error) {
-      window.top.location.href = "/right.cgi";
+      window.top.location.href = dashboardUrl;
     }
   };
 
@@ -37,6 +40,8 @@
     const brand = document.querySelector('.memo-brand');
     if (!brand || brand.dataset.memoReady === '1') return;
     brand.dataset.memoReady = '1';
+    brand.setAttribute('href', dashboardUrl);
+    brand.setAttribute('target', 'right');
     brand.setAttribute('role', 'link');
     brand.setAttribute('tabindex', '0');
     brand.setAttribute('aria-label', 'Ga naar MemoNetwork Dashboard');
@@ -46,6 +51,11 @@
         event.preventDefault();
         openDashboard();
       }
+    });
+
+    document.querySelectorAll('.leftmenu a[href="/right.cgi"], .leftmenu a[href$="/right.cgi"]').forEach((link) => {
+      link.setAttribute('href', dashboardUrl);
+      link.setAttribute('target', 'right');
     });
   };
 
