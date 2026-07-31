@@ -174,7 +174,6 @@ import sys
 right = Path(sys.argv[1])
 text = right.read_text(encoding="utf-8")
 
-# Oude routes eventueel normaliseren, maar verder niets in Dashboard v3 injecteren.
 text = text.replace(
     "fetch('/right.cgi?memo_stats=1&_='+Date.now()",
     "fetch('/memo-network/live-stats.cgi?_='+Date.now()"
@@ -187,8 +186,10 @@ text = text.replace(
 required = (
     "MemoNetwork Dashboard v3",
     "/memo-network/live-stats.cgi",
-    "mn-docker-detail",
-    "mn-amp-detail",
+    "docker-running",
+    "docker-total",
+    "amp-running",
+    "amp-total",
 )
 missing = [item for item in required if item not in text]
 if missing:
@@ -211,8 +212,10 @@ grep -Fxq 'memo-network/module.info' "$LISTING" || fail "Pakket mist memo-networ
 grep -Fxq 'memo-network/live-stats.cgi' "$LISTING" || fail "Pakket mist memo-network/live-stats.cgi"
 grep -q 'MemoNetwork Dashboard v3' "$RIGHT_CGI" || fail "right.cgi bevat Dashboard v3 niet"
 grep -q '/memo-network/live-stats.cgi' "$RIGHT_CGI" || fail "right.cgi gebruikt niet de live API-module"
-grep -q 'mn-docker-detail' "$RIGHT_CGI" || fail "right.cgi mist Docker-detailveld"
-grep -q 'mn-amp-detail' "$RIGHT_CGI" || fail "right.cgi mist AMP-detailveld"
+grep -q 'docker-running' "$RIGHT_CGI" || fail "right.cgi mist Docker actief-teller"
+grep -q 'docker-total' "$RIGHT_CGI" || fail "right.cgi mist Docker totaalteller"
+grep -q 'amp-running' "$RIGHT_CGI" || fail "right.cgi mist AMP actief-teller"
+grep -q 'amp-total' "$RIGHT_CGI" || fail "right.cgi mist AMP totaalteller"
 
 if grep -Eq '(^|/)\.\.?(/|$)' "$LISTING"; then
   fail "Pakket bevat een ongeldig pad"
