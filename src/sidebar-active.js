@@ -1,5 +1,5 @@
 (() => {
-  const dashboardUrl = "/memocraft-theme/memo-dashboard.cgi";
+  const dashboardUrl = "/right.cgi";
 
   const normalize = (value) => {
     try {
@@ -53,7 +53,7 @@
       }
     });
 
-    document.querySelectorAll('.leftmenu a[href="/right.cgi"], .leftmenu a[href$="/right.cgi"]').forEach((link) => {
+    document.querySelectorAll('.leftmenu a[href*="memo-dashboard.cgi"], .leftmenu a[href="/right.cgi"], .leftmenu a[href$="/right.cgi"]').forEach((link) => {
       link.setAttribute('href', dashboardUrl);
       link.setAttribute('target', 'right');
     });
