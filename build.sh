@@ -166,7 +166,8 @@ PY
 # Bouw Dashboard v2 rechtstreeks in de geldige Webmin-theme route.
 cp "$MEMO_DASHBOARD_CGI" "$RIGHT_CGI"
 
-# Gebruik een echte verborgen Webmin-module voor live statistieken.
+# Gebruik een echte verborgen Webmin-module voor live statistieken en toon
+# aantallen voor Docker-containers en AMP-instances.
 python3 - "$RIGHT_CGI" <<'PY'
 from pathlib import Path
 import sys
@@ -181,8 +182,18 @@ text = text.replace(
     "fetch((window.location.pathname || '/right.cgi')+'?memo_stats=1&_='+Date.now()",
     "fetch('/memo-network/live-stats.cgi?_='+Date.now()"
 )
+text = text.replace(
+    "function setService(name,value){const text=document.getElementById('mn-'+name),dot=document.getElementById('mn-'+name+'-dot');if(!text||!dot)return;text.textContent=value?'Online':'Offline';dot.classList.toggle('ok',!!value);dot.classList.toggle('off',!value)}",
+    "function setService(name,value,detail){const text=document.getElementById('mn-'+name),dot=document.getElementById('mn-'+name+'-dot');if(!text||!dot)return;text.textContent=(value?'Online':'Offline')+(detail?' · '+detail:'');dot.classList.toggle('ok',!!value);dot.classList.toggle('off',!value)}"
+)
+text = text.replace(
+    "const s=d.services||{};setService('docker',s.docker);setService('amp',s.amp);setService('minio',s.minio);setService('wireguard',s.wireguard);",
+    "const s=d.services||{},dc=d.docker||{},am=d.amp||{};setService('docker',s.docker,dc.total!==undefined?dc.running+' van '+dc.total+' containers actief':'');setService('amp',s.amp,am.total!==undefined?am.running+' van '+am.total+' instances actief':'');setService('minio',s.minio);setService('wireguard',s.wireguard);"
+)
 if "/memo-network/live-stats.cgi" not in text:
     raise SystemExit("FOUT: live API URL kon niet in right.cgi worden ingesteld")
+if "containers actief" not in text or "instances actief" not in text:
+    raise SystemExit("FOUT: Docker/AMP detailweergave kon niet worden toegevoegd")
 right.write_text(text, encoding="utf-8")
 PY
 
@@ -190,7 +201,7 @@ chmod 755 "$LEFT_CGI" "$RIGHT_CGI" "$LIVE_STATS_CGI" "$MEMO_DASHBOARD_CGI" "$API
 
 rm -rf "$DIST_DIR"
 mkdir -p "$DIST_DIR"
-tar --create --gzip --file "$OUTPUT" --directory="$ROOT_DIR" --owner=0 --group=0 --numeric-owner memocraft-theme memo-network
+tar --create --gzip --file="$OUTPUT" --directory="$ROOT_DIR" --owner=0 --group=0 --numeric-owner memocraft-theme memo-network
 gzip -t "$OUTPUT"
 tar -tzf "$OUTPUT" > "$LISTING"
 
@@ -199,11 +210,13 @@ grep -Fxq 'memocraft-theme/right.cgi' "$LISTING" || fail "Pakket mist right.cgi"
 grep -Fxq 'memo-network/module.info' "$LISTING" || fail "Pakket mist memo-network/module.info"
 grep -Fxq 'memo-network/live-stats.cgi' "$LISTING" || fail "Pakket mist memo-network/live-stats.cgi"
 grep -q '/memo-network/live-stats.cgi' "$RIGHT_CGI" || fail "right.cgi gebruikt niet de live API-module"
+grep -q 'containers actief' "$RIGHT_CGI" || fail "right.cgi mist Docker-details"
+grep -q 'instances actief' "$RIGHT_CGI" || fail "right.cgi mist AMP-details"
 
 if grep -Eq '(^|/)\.\.?(/|$)' "$LISTING"; then
   fail "Pakket bevat een ongeldig pad"
 fi
 
 echo "Gereed: $OUTPUT"
-echo "Dashboard v2 gebruikt /memo-network/live-stats.cgi"
+echo "Dashboard v2.1 toont live Docker- en AMP-aantallen"
 echo "Aantal bestanden: $(wc -l < "$LISTING")"
