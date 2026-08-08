@@ -1,6 +1,6 @@
 (() => {
   const dashboardUrl = "/right.cgi";
-  const installedVersion = "4.1.1";
+  const installedVersion = "4.1.2";
   const releaseDate = "08-08-2026";
   const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
 
@@ -60,26 +60,6 @@
       link.setAttribute('href', dashboardUrl);
       link.setAttribute('target', 'right');
     });
-  };
-
-  const setupRebootButton = () => {
-    try {
-      if (!parent || !parent.frames || parent.frames.length < 2) return;
-      const contentFrame = parent.frames[1];
-      const doc = contentFrame.document;
-      if (!doc) return;
-      const button = doc.querySelector('a.reboot-now');
-      if (!button || button.dataset.memoTopReboot === '1') return;
-      button.dataset.memoTopReboot = '1';
-      button.setAttribute('target', '_top');
-      button.addEventListener('click', (event) => {
-        event.preventDefault();
-        const confirmed = window.top.confirm('Server nu herstarten? De verbinding met Webmin wordt tijdelijk verbroken.');
-        if (confirmed) window.top.location.href = button.href;
-      });
-    } catch (_error) {
-      // De content-frame kan tijdens navigatie tijdelijk niet beschikbaar zijn.
-    }
   };
 
   const setupVersionFooter = () => {
@@ -161,7 +141,6 @@
   const updateActiveLink = () => {
     setupBrand();
     setupVersionFooter();
-    setupRebootButton();
     const current = normalize(currentContentUrl());
     if (!current) return;
 
