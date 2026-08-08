@@ -1,6 +1,43 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
+use POSIX qw(setsid);
+
+# Direct reboot endpoint used by the MemoNetwork dashboard.
+# Keeping it in this already-installed CGI avoids Webmin's :10000 redirect
+# when Webmin is served through a reverse proxy.
+if (($ENV{'REQUEST_METHOD'} || '') eq 'POST' && ($ENV{'QUERY_STRING'} || '') =~ /(?:^|&)action=reboot(?:&|$)/) {
+    print "Content-Type: application/json; charset=UTF-8\r\n";
+    print "Cache-Control: no-store\r\n\r\n";
+
+    my $pid = fork();
+    if (!defined $pid) {
+        print '{"ok":false,"error":"Could not schedule reboot"}';
+        exit 0;
+    }
+
+    if ($pid == 0) {
+        setsid();
+        open STDIN,  '<', '/dev/null';
+        open STDOUT, '>', '/dev/null';
+        open STDERR, '>', '/dev/null';
+        sleep 2;
+
+        if (-x '/usr/bin/systemctl') {
+            exec '/usr/bin/systemctl', 'reboot';
+        }
+        elsif (-x '/bin/systemctl') {
+            exec '/bin/systemctl', 'reboot';
+        }
+        elsif (-x '/sbin/reboot') {
+            exec '/sbin/reboot';
+        }
+        exit 1;
+    }
+
+    print '{"ok":true,"message":"Reboot scheduled"}';
+    exit 0;
+}
 
 sub first_line {
     my ($path)=@_;
