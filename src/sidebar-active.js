@@ -1,5 +1,8 @@
 (() => {
   const dashboardUrl = "/right.cgi";
+  const installedVersion = "4.1.0";
+  const releaseDate = "08-08-2026";
+  const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
 
   const normalize = (value) => {
     try {
@@ -59,8 +62,85 @@
     });
   };
 
+  const setupVersionFooter = () => {
+    if (document.getElementById('memo-version-footer')) return;
+
+    const style = document.createElement('style');
+    style.textContent = `
+      .memo-menu-content { padding-bottom: 96px !important; }
+      #memo-version-footer {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 50;
+        box-sizing: border-box;
+        padding: 10px 10px 12px;
+        border-top: 1px solid rgba(96,165,250,.18);
+        background: linear-gradient(180deg, rgba(10,17,28,.94), #09111d 38%);
+        text-align: center;
+        box-shadow: 0 -8px 20px rgba(0,0,0,.24);
+      }
+      #memo-version-footer .memo-edition {
+        color: #38bdf8;
+        font-size: 12px;
+        font-weight: 800;
+        line-height: 16px;
+      }
+      #memo-version-footer .memo-version {
+        margin-top: 2px;
+        color: #8ec5ff;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 15px;
+      }
+      #memo-version-footer .memo-version-status {
+        margin-top: 2px;
+        color: #71839b;
+        font-size: 10px;
+        line-height: 14px;
+      }
+      #memo-version-footer .memo-version-status.ok { color: #4ade80; }
+      #memo-version-footer .memo-version-status.update { color: #fbbf24; }
+      #memo-version-footer .memo-version-status.error { color: #94a3b8; }
+    `;
+    document.head.appendChild(style);
+
+    const footer = document.createElement('div');
+    footer.id = 'memo-version-footer';
+    footer.innerHTML = `
+      <div class="memo-edition">MemoNetwork Edition</div>
+      <div class="memo-version">v${installedVersion}</div>
+      <div class="memo-version-status" id="memo-version-status">Versie controleren… · Built ${releaseDate}</div>
+    `;
+    document.body.appendChild(footer);
+
+    const status = document.getElementById('memo-version-status');
+    fetch(`${versionUrl}?_=${Date.now()}`, { cache: 'no-store' })
+      .then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+      })
+      .then((remote) => {
+        const latest = String(remote.version || '').trim();
+        if (!latest) throw new Error('Geen versie ontvangen');
+        if (latest === installedVersion) {
+          status.textContent = `Laatste versie · Built ${releaseDate}`;
+          status.className = 'memo-version-status ok';
+        } else {
+          status.textContent = `Update beschikbaar: v${latest}`;
+          status.className = 'memo-version-status update';
+        }
+      })
+      .catch(() => {
+        status.textContent = `Versiecontrole niet beschikbaar · Built ${releaseDate}`;
+        status.className = 'memo-version-status error';
+      });
+  };
+
   const updateActiveLink = () => {
     setupBrand();
+    setupVersionFooter();
     const current = normalize(currentContentUrl());
     if (!current) return;
 
