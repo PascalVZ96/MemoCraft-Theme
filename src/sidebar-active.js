@@ -1,6 +1,6 @@
 (() => {
   const dashboardUrl = "/right.cgi";
-  const installedVersion = "4.1.4";
+  const installedVersion = "4.1.5";
   const releaseDate = "09-08-2026";
   const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
   let storageLastUpdate = 0;
@@ -133,6 +133,97 @@
     }
   };
 
+  const escapeHtml = (value) => String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+
+  const enhanceServiceDetails = () => {
+    const dashboard = currentContentDocument();
+    if (!dashboard) return;
+
+    const detail = dashboard.getElementById('service-detail');
+    const dockerCard = dashboard.getElementById('docker-card');
+    const ampCard = dashboard.getElementById('amp-card');
+    if (!detail || !dockerCard || !ampCard) return;
+
+    if (!dashboard.getElementById('memo-service-detail-style')) {
+      const style = dashboard.createElement('style');
+      style.id = 'memo-service-detail-style';
+      style.textContent = `
+        .memo-service-list{margin-top:16px;border:1px solid #263a54;border-radius:12px;overflow:hidden;background:#0e1928}
+        .memo-service-row{display:grid;grid-template-columns:minmax(170px,1.15fr) minmax(220px,2fr) minmax(90px,.7fr);gap:14px;align-items:center;padding:12px 14px;border-top:1px solid #203249}
+        .memo-service-row:first-child{border-top:0}
+        .memo-service-head{background:#122238;color:#8fa5bf;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+        .memo-service-name{font-weight:800;color:#fff}
+        .memo-service-meta{color:#9db1ca;font-size:12px;overflow-wrap:anywhere}
+        .memo-service-state{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700}
+        .memo-service-state:before{content:'';width:8px;height:8px;border-radius:50%;background:#ef4444;box-shadow:0 0 8px rgba(239,68,68,.45)}
+        .memo-service-state.ok{color:#86efac}.memo-service-state.ok:before{background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,.6)}
+        .memo-service-empty{padding:16px;color:#8fa5bf;font-size:12px}
+        @media(max-width:760px){.memo-service-row{grid-template-columns:1fr;gap:5px}.memo-service-head{display:none}}
+      `;
+      dashboard.head.appendChild(style);
+    }
+
+    let list = dashboard.getElementById('memo-service-items');
+    if (!list) {
+      list = dashboard.createElement('div');
+      list.id = 'memo-service-items';
+      list.className = 'memo-service-list';
+      detail.insertBefore(list, detail.querySelector('.detail-actions'));
+    }
+
+    const loadItems = async (type) => {
+      list.innerHTML = '<div class="memo-service-empty">Live details laden…</div>';
+      try {
+        const response = await fetch(`/memo-network/live-stats.cgi?details=1&_=${Date.now()}`, {
+          credentials: 'same-origin',
+          cache: 'no-store'
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        const items = Array.isArray(data?.[type]?.items) ? data[type].items : [];
+
+        if (!items.length) {
+          list.innerHTML = `<div class="memo-service-empty">Geen ${type === 'docker' ? 'containers' : 'AMP-instances'} gevonden.</div>`;
+          return;
+        }
+
+        if (type === 'docker') {
+          list.innerHTML = '<div class="memo-service-row memo-service-head"><span>Container</span><span>Image / status</span><span>Status</span></div>' +
+            items.map((item) => `
+              <div class="memo-service-row">
+                <span class="memo-service-name">${escapeHtml(item.name || 'Onbekend')}</span>
+                <span class="memo-service-meta"><strong>${escapeHtml(item.image || 'Onbekend image')}</strong><br>${escapeHtml(item.status || '')}</span>
+                <span class="memo-service-state ${item.running ? 'ok' : ''}">${item.running ? 'Actief' : 'Gestopt'}</span>
+              </div>`).join('');
+        } else {
+          list.innerHTML = '<div class="memo-service-row memo-service-head"><span>Instance</span><span>Type</span><span>Status</span></div>' +
+            items.map((item) => `
+              <div class="memo-service-row">
+                <span class="memo-service-name">${escapeHtml(item.name || 'Onbekend')}</span>
+                <span class="memo-service-meta">AMP instance</span>
+                <span class="memo-service-state ${item.running ? 'ok' : ''}">${item.running ? 'Actief' : 'Gestopt'}</span>
+              </div>`).join('');
+        }
+      } catch (error) {
+        list.innerHTML = `<div class="memo-service-empty">Details konden niet worden geladen: ${escapeHtml(error.message)}</div>`;
+      }
+    };
+
+    if (dockerCard.dataset.memoDetails !== '1') {
+      dockerCard.dataset.memoDetails = '1';
+      dockerCard.addEventListener('click', () => loadItems('docker'));
+    }
+    if (ampCard.dataset.memoDetails !== '1') {
+      ampCard.dataset.memoDetails = '1';
+      ampCard.addEventListener('click', () => loadItems('amp'));
+    }
+  };
+
   const setupVersionFooter = () => {
     if (document.getElementById('memo-version-footer')) return;
 
@@ -213,6 +304,7 @@
     setupBrand();
     setupVersionFooter();
     updateLiveStorage();
+    enhanceServiceDetails();
     const current = normalize(currentContentUrl());
     if (!current) return;
 
