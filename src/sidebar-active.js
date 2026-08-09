@@ -1,7 +1,7 @@
 (() => {
   const dashboardUrl = "/right.cgi";
-  const installedVersion = "4.1.2";
-  const releaseDate = "08-08-2026";
+  const installedVersion = "4.1.3";
+  const releaseDate = "09-08-2026";
   const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
 
   const normalize = (value) => {
