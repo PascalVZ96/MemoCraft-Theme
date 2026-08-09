@@ -1,8 +1,10 @@
 (() => {
   const dashboardUrl = "/right.cgi";
-  const installedVersion = "4.1.3";
+  const installedVersion = "4.1.4";
   const releaseDate = "09-08-2026";
   const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
+  let storageLastUpdate = 0;
+  let storageBusy = false;
 
   const normalize = (value) => {
     try {
@@ -24,6 +26,18 @@
       return "";
     }
     return "";
+  };
+
+  const currentContentDocument = () => {
+    try {
+      for (const frame of Array.from(parent.frames)) {
+        if (frame === window) continue;
+        if (frame.document && frame.document.querySelector('.v3')) return frame.document;
+      }
+    } catch (_error) {
+      return null;
+    }
+    return null;
   };
 
   const openDashboard = (event) => {
@@ -60,6 +74,63 @@
       link.setAttribute('href', dashboardUrl);
       link.setAttribute('target', 'right');
     });
+  };
+
+  const formatStorage = (gib) => {
+    const value = Number(gib) || 0;
+    if (value >= 1024) return `${(value / 1024).toFixed(2)} TiB`;
+    return `${value.toFixed(value >= 100 ? 0 : 1)} GiB`;
+  };
+
+  const updateLiveStorage = async () => {
+    const dashboard = currentContentDocument();
+    if (!dashboard) return;
+
+    const card = dashboard.querySelector('.card.storage');
+    if (!card) return;
+
+    const now = Date.now();
+    if (storageBusy || now - storageLastUpdate < 5000) return;
+    storageBusy = true;
+    storageLastUpdate = now;
+
+    try {
+      const response = await fetch(`/memo-network/live-stats.cgi?storage=1&_=${now}`, {
+        credentials: 'same-origin',
+        cache: 'no-store'
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      const disks = Array.isArray(data.disks) ? data.disks : [];
+      if (!disks.length) return;
+
+      const total = disks.reduce((sum, disk) => sum + (Number(disk.total_gib) || 0), 0);
+      const used = disks.reduce((sum, disk) => sum + (Number(disk.used_gib) || 0), 0);
+      const percent = total > 0 ? Math.min(100, (used / total) * 100) : 0;
+
+      const value = card.querySelector('.value');
+      const sub = card.querySelector('.sub');
+      const meter = card.querySelector('.meter i');
+      const label = card.querySelector('.label');
+
+      if (value) value.textContent = formatStorage(used);
+      if (sub) sub.textContent = `${formatStorage(total)} totaal · ${formatStorage(Math.max(0, total - used))} vrij`;
+      if (meter) meter.style.width = `${percent.toFixed(1)}%`;
+
+      if (label && !label.querySelector('.live')) {
+        const live = dashboard.createElement('span');
+        live.className = 'live';
+        live.textContent = 'Live';
+        label.appendChild(live);
+      }
+
+      const details = disks.map((disk) => `${disk.path}: ${formatStorage(disk.used_gib)} / ${formatStorage(disk.total_gib)}`).join('\n');
+      card.title = details;
+    } catch (_error) {
+      // Laat de laatst bekende waarden staan als de API tijdelijk niet reageert.
+    } finally {
+      storageBusy = false;
+    }
   };
 
   const setupVersionFooter = () => {
@@ -141,6 +212,7 @@
   const updateActiveLink = () => {
     setupBrand();
     setupVersionFooter();
+    updateLiveStorage();
     const current = normalize(currentContentUrl());
     if (!current) return;
 
