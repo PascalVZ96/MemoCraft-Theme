@@ -80,8 +80,19 @@ sub line_count {
 }
 
 sub disk_stats {
-    my ($path) = @_;
+    my ($path, $require_exact_mount) = @_;
     return undef unless -d $path;
+
+    my $mount = `findmnt -T '$path' -n -o SOURCE,TARGET,FSTYPE 2>/dev/null`;
+    chomp $mount;
+    my ($source, $target, $fstype) = split /\s+/, $mount, 3;
+
+    # /mnt/backups must be a real, separate mount. If findmnt resolves it to /
+    # then the backup disk is not mounted and we must not report the root SSD
+    # a second time as if it were the backup HDD.
+    if ($require_exact_mount) {
+        return undef unless defined($target) && $target eq $path;
+    }
 
     my $line = `df -Pk '$path' 2>/dev/null | tail -n 1`;
     chomp $line;
@@ -93,6 +104,9 @@ sub disk_stats {
 
     return {
         path => $path,
+        device => ($source // $v[0] // ''),
+        mountpoint => ($target // $path),
+        fstype => ($fstype // ''),
         total_gib => sprintf('%.2f', $total_kib / 1048576) + 0,
         used_gib => sprintf('%.2f', $used_kib / 1048576) + 0,
         available_gib => sprintf('%.2f', $available_kib / 1048576) + 0,
@@ -174,9 +188,6 @@ sub update_count {
         return 0 + $value if $value =~ /^\d+$/;
     }
 
-    # Count only upgrades that APT would actually install right now.
-    # This avoids counting held/phased/non-actionable entries that can appear
-    # in `apt list --upgradable`, and therefore better matches Webmin's view.
     my $count = line_count("LC_ALL=C apt-get -s -o Debug::NoLocking=1 upgrade | grep '^Inst '");
     if (open my $fh, '>', $cache) {
         print {$fh} "$count\n";
@@ -212,10 +223,12 @@ my $reboot_required = -e '/var/run/reboot-required' ? JSON::PP::true : JSON::PP:
 my $uptime_seconds = 0 + (split /\s+/, slurp_first('/proc/uptime'))[0];
 my $processes = line_count('ps -e --no-headers');
 my $temp = temperature();
-my @disks = grep { defined $_ } (disk_stats('/'), disk_stats('/mnt/backups'));
+my $root_disk = disk_stats('/', 0);
+my $backup_disk = disk_stats('/mnt/backups', 1);
+my @disks = grep { defined $_ } ($root_disk, $backup_disk);
 
 my $payload = {
-    api_version => 3.7,
+    api_version => 3.8,
     cpu_percent => sprintf('%.1f', $cpu) + 0,
     ram_used_gib => sprintf('%.2f', $ram_used / 1048576) + 0,
     ram_total_gib => sprintf('%.2f', $ram_total / 1048576) + 0,
@@ -235,6 +248,10 @@ my $payload = {
         uptime_seconds => $uptime_seconds,
         processes => $processes,
         temperature_c => defined($temp) ? $temp : JSON::PP::null,
+    },
+    storage => {
+        backup_path => '/mnt/backups',
+        backup_mount_ok => (defined($backup_disk) ? JSON::PP::true : JSON::PP::false),
     },
     services => {
         docker => running($process_list, qr/(?:^|\/)dockerd(?:\s|$)/),
