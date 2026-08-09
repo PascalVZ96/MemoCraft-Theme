@@ -168,13 +168,16 @@ sub temperature {
 }
 
 sub update_count {
-    my $cache = '/tmp/memonetwork-update-count';
-    if (-e $cache && time - (stat($cache))[9] < 300) {
+    my $cache = '/tmp/memonetwork-update-count-v2';
+    if (-e $cache && time - (stat($cache))[9] < 60) {
         my $value = slurp_first($cache);
         return 0 + $value if $value =~ /^\d+$/;
     }
 
-    my $count = line_count('apt list --upgradable 2>/dev/null | tail -n +2');
+    # Count only upgrades that APT would actually install right now.
+    # This avoids counting held/phased/non-actionable entries that can appear
+    # in `apt list --upgradable`, and therefore better matches Webmin's view.
+    my $count = line_count("LC_ALL=C apt-get -s -o Debug::NoLocking=1 upgrade | grep '^Inst '");
     if (open my $fh, '>', $cache) {
         print {$fh} "$count\n";
         close $fh;
@@ -212,7 +215,7 @@ my $temp = temperature();
 my @disks = grep { defined $_ } (disk_stats('/'), disk_stats('/mnt/backups'));
 
 my $payload = {
-    api_version => 3.6,
+    api_version => 3.7,
     cpu_percent => sprintf('%.1f', $cpu) + 0,
     ram_used_gib => sprintf('%.2f', $ram_used / 1048576) + 0,
     ram_total_gib => sprintf('%.2f', $ram_total / 1048576) + 0,
