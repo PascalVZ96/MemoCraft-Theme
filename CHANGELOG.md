@@ -4,6 +4,17 @@
 
 De volgende grote MemoNetwork-release. Ontwikkeling vindt plaats op de aparte `v5` branch totdat de release stabiel genoeg is om naar `main` te gaan.
 
+### Alpha 2
+
+- v5-overzicht blijft standaard compact en rustiger dan het v4-dashboard.
+- Nieuwe knop **Meer details / Minder details** toegevoegd; de voorkeur blijft lokaal onthouden.
+- Uitgebreide status toont optioneel uptime, OS, kernel, processor, processen, backup-HDD, services en opslagdetails.
+- Beschikbare updates zijn direct klikbaar vanuit de samenvatting.
+- Meldingen met een beheerlink zijn volledig klikbaar en krijgen een duidelijke actieknop.
+- Update-acties gebruiken een beter leesbare knop met hoger contrast.
+- Vanuit het detailoverzicht kan direct naar alle Services of Infrastructuur worden gesprongen.
+- NL / DE / EN vertalingen uitgebreid voor de nieuwe detailmodus.
+
 ### Alpha 1
 
 - Nieuwe zelfstandige **MemoNetwork v5 Control Center** preview toegevoegd.
