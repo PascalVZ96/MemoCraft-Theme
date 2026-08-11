@@ -25,7 +25,9 @@ sub cpu_sample {
 sub cpu_cores {
     open my $fh, '<', '/proc/cpuinfo' or return 0;
     my $cores = 0;
-    $cores++ while grep { /^processor\s*:/ } <$fh>;
+    while (<$fh>) {
+        $cores++ if /^processor\s*:/;
+    }
     close $fh;
     return $cores;
 }
@@ -86,13 +88,7 @@ sub disk_stats {
     my $mount = `findmnt -T '$path' -n -o SOURCE,TARGET,FSTYPE 2>/dev/null`;
     chomp $mount;
     my ($source, $target, $fstype) = split /\s+/, $mount, 3;
-
-    # /mnt/backups must be a real, separate mount. If findmnt resolves it to /
-    # then the backup disk is not mounted and we must not report the root SSD
-    # a second time as if it were the backup HDD.
-    if ($require_exact_mount) {
-        return undef unless defined($target) && $target eq $path;
-    }
+    return undef if $require_exact_mount && (!defined($target) || $target ne $path);
 
     my $line = `df -Pk '$path' 2>/dev/null | tail -n 1`;
     chomp $line;
@@ -115,21 +111,29 @@ sub disk_stats {
 }
 
 sub docker_stats {
-    return (0, 0, []) if system('command -v docker >/dev/null 2>&1') != 0;
+    return (0, 0, [], undef) if system('command -v docker >/dev/null 2>&1') != 0;
     my @items;
-    for my $line (`docker ps -a --format '{{.Names}}\t{{.Status}}\t{{.Image}}' 2>/dev/null`) {
+    my $minio_container;
+    for my $line (`docker ps -a --format '{{.ID}}\t{{.Names}}\t{{.Image}}\t{{.State}}\t{{.Status}}\t{{.Ports}}' 2>/dev/null`) {
         chomp $line;
-        my ($name, $status, $image) = split /\t/, $line, 3;
+        my ($id, $name, $image, $state, $status, $ports) = split /\t/, $line, 6;
         next unless $name;
+        my $is_running = (($state || '') eq 'running' || ($status || '') =~ /^Up\b/) ? 1 : 0;
+        my $is_minio = (($name || '') =~ /minio/i || ($image || '') =~ /minio/i) ? 1 : 0;
+        $minio_container = $name if $is_minio && !defined $minio_container;
         push @items, {
+            id => ($id || ''),
             name => $name,
-            status => ($status || ''),
             image => ($image || ''),
-            running => (($status || '') =~ /^Up\b/ ? JSON::PP::true : JSON::PP::false),
+            state => ($state || ''),
+            status => ($status || ''),
+            ports => ($ports || ''),
+            running => ($is_running ? JSON::PP::true : JSON::PP::false),
+            minio => ($is_minio ? JSON::PP::true : JSON::PP::false),
         };
     }
     my $running = scalar grep { $_->{running} } @items;
-    return ($running, scalar(@items), \@items);
+    return ($running, scalar(@items), \@items, $minio_container);
 }
 
 sub amp_stats {
@@ -142,11 +146,37 @@ sub amp_stats {
         $active ||= $processes =~ /(?:^|[\s\/])\Q$name\E(?:[\s\/]|$)/m;
         push @items, {
             name => $name,
+            path => $dir,
             running => ($active ? JSON::PP::true : JSON::PP::false),
         };
     }
     my $running = scalar grep { $_->{running} } @items;
     return ($running, scalar(@items), \@items);
+}
+
+sub wireguard_stats {
+    return { interface => 'wg0', available => JSON::PP::false, peers => 0, latest_handshake_age_seconds => JSON::PP::null }
+        unless -e '/sys/class/net/wg0';
+
+    my $peers = 0;
+    my $latest = 0;
+    if (system('command -v wg >/dev/null 2>&1') == 0) {
+        my @peer_lines = grep { /\S/ } `wg show wg0 peers 2>/dev/null`;
+        $peers = scalar @peer_lines;
+        for my $line (`wg show wg0 latest-handshakes 2>/dev/null`) {
+            chomp $line;
+            my (undef, $stamp) = split /\s+/, $line, 2;
+            next unless defined $stamp && $stamp =~ /^\d+$/ && $stamp > 0;
+            $latest = $stamp if $stamp > $latest;
+        }
+    }
+    my $age = $latest > 0 ? time - $latest : undef;
+    return {
+        interface => 'wg0',
+        available => JSON::PP::true,
+        peers => $peers,
+        latest_handshake_age_seconds => defined($age) ? 0 + $age : JSON::PP::null,
+    };
 }
 
 sub os_name {
@@ -182,12 +212,11 @@ sub temperature {
 }
 
 sub update_count {
-    my $cache = '/tmp/memonetwork-update-count-v2';
+    my $cache = '/tmp/memonetwork-update-count-v3';
     if (-e $cache && time - (stat($cache))[9] < 60) {
         my $value = slurp_first($cache);
         return 0 + $value if $value =~ /^\d+$/;
     }
-
     my $count = line_count("LC_ALL=C apt-get -s -o Debug::NoLocking=1 upgrade | grep '^Inst '");
     if (open my $fh, '>', $cache) {
         print {$fh} "$count\n";
@@ -210,8 +239,9 @@ $cpu = 100 if $cpu > 100;
 
 my ($ram_used, $ram_total) = memory_stats();
 my ($load1, $load5, $load15) = load_stats();
-my ($docker_running, $docker_total, $docker_items) = docker_stats();
+my ($docker_running, $docker_total, $docker_items, $minio_container) = docker_stats();
 my ($amp_running, $amp_total, $amp_items) = amp_stats();
+my $wg = wireguard_stats();
 my $process_list = process_list();
 my $rx = ($rx2 - $rx1) / 1024 / $sample;
 my $tx = ($tx2 - $tx1) / 1024 / $sample;
@@ -227,8 +257,20 @@ my $root_disk = disk_stats('/', 0);
 my $backup_disk = disk_stats('/mnt/backups', 1);
 my @disks = grep { defined $_ } ($root_disk, $backup_disk);
 
+my $minio_process = running($process_list, qr/(?:^|\/)minio(?:\s|$)/);
+my $minio_docker_running = JSON::PP::false;
+if (defined $minio_container) {
+    for my $item (@$docker_items) {
+        if ($item->{name} eq $minio_container && $item->{running}) {
+            $minio_docker_running = JSON::PP::true;
+            last;
+        }
+    }
+}
+my $minio_online = ($minio_process || $minio_docker_running) ? JSON::PP::true : JSON::PP::false;
+
 my $payload = {
-    api_version => 3.8,
+    api_version => 4.0,
     cpu_percent => sprintf('%.1f', $cpu) + 0,
     ram_used_gib => sprintf('%.2f', $ram_used / 1048576) + 0,
     ram_total_gib => sprintf('%.2f', $ram_total / 1048576) + 0,
@@ -252,12 +294,13 @@ my $payload = {
     storage => {
         backup_path => '/mnt/backups',
         backup_mount_ok => (defined($backup_disk) ? JSON::PP::true : JSON::PP::false),
+        backup_device => defined($backup_disk) ? ($backup_disk->{device} || '') : '',
     },
     services => {
         docker => running($process_list, qr/(?:^|\/)dockerd(?:\s|$)/),
         amp => ($amp_total > 0 ? JSON::PP::true : JSON::PP::false),
-        minio => running($process_list, qr/(?:^|\/)minio(?:\s|$)/),
-        wireguard => (-e '/sys/class/net/wg0' ? JSON::PP::true : JSON::PP::false),
+        minio => $minio_online,
+        wireguard => $wg->{available},
     },
     disks => \@disks,
     docker => {
@@ -270,6 +313,12 @@ my $payload = {
         total => $amp_total,
         items => $amp_items,
     },
+    minio => {
+        running => $minio_online,
+        container => defined($minio_container) ? $minio_container : '',
+        mode => defined($minio_container) ? 'docker' : ($minio_process ? 'process' : 'unknown'),
+    },
+    wireguard => $wg,
     timestamp => time,
 };
 
