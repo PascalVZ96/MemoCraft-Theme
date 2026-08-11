@@ -1,6 +1,6 @@
 {
-  "version": "4.6.0-rc7",
+  "version": "4.6.0",
   "edition": "MemoNetwork Edition",
-  "channel": "release-candidate",
+  "channel": "main",
   "released": "11-08-2026"
 }
