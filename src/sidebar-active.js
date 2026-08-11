@@ -1,6 +1,6 @@
 (() => {
   const dashboardUrl = "/right.cgi";
-  const installedVersion = "5.0.0-dev";
+  const installedVersion = "5.0.0-alpha1";
   const releaseDate = "11-08-2026";
   const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
   const i18nUrl = "/memocraft-theme/memo-i18n.js";
@@ -176,6 +176,17 @@
       link.href = '/memo-network/system-info.cgi?view=insights';
       link.dataset.memoInsights = '1';
       link.textContent = 'Inzichten';
+      actions.appendChild(link);
+    }
+
+    if (actions && !actions.querySelector('[data-memo-v5="1"]')) {
+      const link = dashboard.createElement('a');
+      link.className = 'quick-btn';
+      link.href = '/memo-network/control-center.html';
+      link.dataset.memoV5 = '1';
+      link.textContent = 'Control Center v5';
+      link.style.borderColor = '#6d5ca8';
+      link.style.color = '#d8c8ff';
       actions.appendChild(link);
     }
 
