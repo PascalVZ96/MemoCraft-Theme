@@ -2,7 +2,7 @@
 
 MemoNetwork is een zelfstandig Webmin-thema met een eigen serverdashboard en MemoNetwork-beheerpagina's. Het thema is gebaseerd op Webmins Framed/Gray Theme-structuur, maar wordt als aparte theme package gebouwd zodat bestaande Webmin-thema's niet hoeven te worden aangepast.
 
-**Huidige stabiele versie: v4.6.0**  
+**Huidige stabiele versie: v4.6.3**  
 Getest met Webmin 2.653 op Ubuntu Server.
 
 ## Belangrijkste functies
@@ -34,6 +34,8 @@ Ondersteunde talen:
 - Engels (`EN`).
 
 De taal geldt voor het dashboard, dynamische statistieken, meldingen, service-details, opslaginformatie, systeeminformatie, Inzichten en de MemoNetwork-interface. Wisselen tussen Webmin-talen wordt automatisch overgenomen zonder een aparte MemoNetwork-taalinstelling.
+
+Vanaf v4.6.3 is de Duitse dashboardterminologie verder aangescherpt op natuurlijker beheer- en servergebruik.
 
 ### Servicebewaking
 
