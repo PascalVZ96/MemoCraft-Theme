@@ -1,6 +1,6 @@
 (() => {
   const dashboardUrl = "/right.cgi";
-  const installedVersion = "4.6.0-rc7";
+  const installedVersion = "4.6.0";
   const releaseDate = "11-08-2026";
   const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
   const i18nUrl = "/memocraft-theme/memo-i18n.js";
@@ -181,24 +181,11 @@
 
     const badge = dashboard.querySelector('.brandline .ver');
     if (badge) {
-      badge.textContent = 'Dashboard v4.6 RC7';
-      badge.title = 'MemoNetwork 4.6 release candidate 7';
+      badge.textContent = 'Dashboard v4.6';
+      badge.title = 'MemoNetwork 4.6';
     }
 
-    let rc = dashboard.querySelector('[data-memo-rc="1"]');
-    if (!rc) {
-      const meta = dashboard.querySelector('.topmeta');
-      if (meta) {
-        rc = dashboard.createElement('span');
-        rc.className = 'pill warn';
-        rc.dataset.memoRc = '1';
-        meta.appendChild(rc);
-      }
-    }
-    if (rc) {
-      const detected = syncLanguageHint();
-      rc.textContent = detected ? `RC7 · ${detected.toUpperCase()}` : 'RC7 · NL/DE/EN';
-    }
+    dashboard.querySelector('[data-memo-rc="1"]')?.remove();
   };
 
   const setupVersionFooter = () => {
