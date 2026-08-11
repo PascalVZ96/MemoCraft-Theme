@@ -1,6 +1,6 @@
 (() => {
   const dashboardUrl = "/right.cgi";
-  const installedVersion = "4.4.0";
+  const installedVersion = "4.5.0-rc1";
   const releaseDate = "11-08-2026";
   const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
 
@@ -13,6 +13,22 @@
     }
   };
 
+  const numericVersion = (value) => String(value || '')
+    .replace(/^v/i, '')
+    .split(/[.-]/)
+    .slice(0, 3)
+    .map((part) => Number.parseInt(part, 10) || 0);
+
+  const compareVersions = (left, right) => {
+    const a = numericVersion(left);
+    const b = numericVersion(right);
+    for (let i = 0; i < 3; i += 1) {
+      if ((a[i] || 0) > (b[i] || 0)) return 1;
+      if ((a[i] || 0) < (b[i] || 0)) return -1;
+    }
+    return 0;
+  };
+
   const currentContentUrl = () => {
     try {
       for (const frame of Array.from(parent.frames)) {
@@ -22,6 +38,16 @@
       }
     } catch (_error) {}
     return "";
+  };
+
+  const currentContentDocument = () => {
+    try {
+      for (const frame of Array.from(parent.frames)) {
+        if (frame === window) continue;
+        if (frame.document && frame.document.querySelector('.v3')) return frame.document;
+      }
+    } catch (_error) {}
+    return null;
   };
 
   const openDashboard = (event) => {
@@ -47,13 +73,26 @@
     brand.addEventListener('keydown', (event) => {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
-        openDashboard();
+        openDashboard(event);
       }
     });
     document.querySelectorAll('.leftmenu a[href*="memo-dashboard.cgi"], .leftmenu a[href="/right.cgi"], .leftmenu a[href$="/right.cgi"]').forEach((link) => {
       link.setAttribute('href', dashboardUrl);
       link.setAttribute('target', 'right');
     });
+  };
+
+  const setupDashboardLinks = () => {
+    const dashboard = currentContentDocument();
+    if (!dashboard) return;
+    const actions = dashboard.querySelector('.quick-actions');
+    if (!actions || actions.querySelector('[data-memo-insights="1"]')) return;
+    const link = dashboard.createElement('a');
+    link.className = 'quick-btn';
+    link.href = '/memo-network/system-info.cgi?view=insights';
+    link.dataset.memoInsights = '1';
+    link.textContent = 'Inzichten';
+    actions.appendChild(link);
   };
 
   const setupVersionFooter = () => {
@@ -67,6 +106,7 @@
       #memo-version-footer .memo-version-status{margin-top:2px;color:#71839b;font-size:10px;line-height:14px}
       #memo-version-footer .memo-version-status.ok{color:#4ade80}
       #memo-version-footer .memo-version-status.update{color:#fbbf24}
+      #memo-version-footer .memo-version-status.dev{color:#c4b5fd}
       #memo-version-footer .memo-version-status.error{color:#94a3b8}
     `;
     document.head.appendChild(style);
@@ -85,9 +125,13 @@
       .then((remote) => {
         const latest = String(remote.version || '').trim();
         if (!latest) throw new Error('Geen versie ontvangen');
-        if (latest === installedVersion) {
+        const comparison = compareVersions(installedVersion, latest);
+        if (comparison === 0) {
           status.textContent = `Laatste versie · Built ${releaseDate}`;
           status.className = 'memo-version-status ok';
+        } else if (comparison > 0) {
+          status.textContent = `Testversie · main v${latest}`;
+          status.className = 'memo-version-status dev';
         } else {
           status.textContent = `Update beschikbaar: v${latest}`;
           status.className = 'memo-version-status update';
@@ -102,6 +146,7 @@
   const updateActiveLink = () => {
     setupBrand();
     setupVersionFooter();
+    setupDashboardLinks();
     const current = normalize(currentContentUrl());
     if (!current) return;
 
