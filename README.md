@@ -2,7 +2,7 @@
 
 MemoNetwork is een zelfstandig Webmin-thema met een eigen serverdashboard en MemoNetwork-beheerpagina's. Het thema is gebaseerd op Webmins Framed/Gray Theme-structuur, maar wordt als aparte theme package gebouwd zodat bestaande Webmin-thema's niet hoeven te worden aangepast.
 
-**Huidige stabiele versie: v4.5.0**  
+**Huidige stabiele versie: v4.6.0**  
 Getest met Webmin 2.653 op Ubuntu Server.
 
 ## Belangrijkste functies
@@ -22,6 +22,18 @@ Het dashboard toont live informatie over de server, waaronder:
 - beschikbare pakketupdates;
 - waarschuwing wanneer een reboot nodig is;
 - instelbare automatische refresh.
+
+### Meertalig: NL / DE / EN
+
+Vanaf v4.6 volgt MemoNetwork automatisch de taal die de ingelogde gebruiker in Webmin heeft geselecteerd.
+
+Ondersteunde talen:
+
+- Nederlands (`NL`);
+- Duits (`DE`);
+- Engels (`EN`).
+
+De taal geldt voor het dashboard, dynamische statistieken, meldingen, service-details, opslaginformatie, systeeminformatie, Inzichten en de MemoNetwork-interface. Wisselen tussen Webmin-talen wordt automatisch overgenomen zonder een aparte MemoNetwork-taalinstelling.
 
 ### Servicebewaking
 
@@ -105,7 +117,7 @@ build.sh            bouwt het installabele Webmin-pakket
 version.json        huidige MemoNetwork-versie
 ```
 
-Tijdens `build.sh` worden de MemoNetwork-aanpassingen in de theme-bestanden verwerkt en wordt het volledige Webmin-theme-pakket gebouwd.
+Tijdens `build.sh` worden de MemoNetwork-aanpassingen in de theme-bestanden verwerkt, wordt de dashboard-taalruntime direct in `right.cgi` ingebed en wordt het volledige Webmin-theme-pakket gebouwd.
 
 ## Vereisten
 
