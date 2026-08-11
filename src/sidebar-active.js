@@ -1,6 +1,6 @@
 (() => {
   const dashboardUrl = "/right.cgi";
-  const installedVersion = "4.6.0-rc4";
+  const installedVersion = "4.6.0-rc5";
   const releaseDate = "11-08-2026";
   const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
   const i18nUrl = "/memocraft-theme/memo-i18n.js";
@@ -183,8 +183,8 @@
 
     const badge = dashboard.querySelector('.brandline .ver');
     if (badge) {
-      badge.textContent = 'Dashboard v4.6 RC4';
-      badge.title = 'MemoNetwork 4.6 release candidate 4';
+      badge.textContent = 'Dashboard v4.6 RC5';
+      badge.title = 'MemoNetwork 4.6 release candidate 5';
     }
 
     let rc = dashboard.querySelector('[data-memo-rc="1"]');
@@ -199,7 +199,7 @@
     }
     if (rc) {
       const detected = syncLanguageHint();
-      rc.textContent = detected ? `RC4 · ${detected.toUpperCase()}` : 'RC4 · NL/DE/EN';
+      rc.textContent = detected ? `RC5 · ${detected.toUpperCase()}` : 'RC5 · NL/DE/EN';
     }
   };
 
