@@ -19,6 +19,7 @@ SIDEBAR_EXTRA_CSS="$ROOT_DIR/src/sidebar-31.css"
 SIDEBAR_PHASE_CSS="$ROOT_DIR/src/sidebar-32.css"
 SIDEBAR_JS="$ROOT_DIR/src/sidebar-active.js"
 I18N_JS="$THEME_DIR/memo-i18n.js"
+DASHBOARD_I18N_JS="$THEME_DIR/dashboard-i18n.js"
 
 TARGET_CSS="$THEME_DIR/unauthenticated/gray-theme.css"
 THEME_PL="$THEME_DIR/theme.pl"
@@ -44,6 +45,7 @@ for required in \
   "$API_PROCESSES_CGI" \
   "$API_LANGUAGE_CGI" \
   "$I18N_JS" \
+  "$DASHBOARD_I18N_JS" \
   "$SOURCE_CSS" \
   "$FORMS_TABLES_CSS" \
   "$CORE_UI_CSS" \
@@ -193,11 +195,12 @@ PY
 
 cp "$MEMO_DASHBOARD_CGI" "$RIGHT_CGI"
 
-python3 - "$RIGHT_CGI" <<'PY'
+python3 - "$RIGHT_CGI" "$DASHBOARD_I18N_JS" <<'PY'
 from pathlib import Path
 import sys
 
 right = Path(sys.argv[1])
+dashboard_i18n = Path(sys.argv[2]).read_text(encoding="utf-8").strip()
 text = right.read_text(encoding="utf-8")
 text = text.replace("/system-status/index.cgi", "/memo-network/system-info.cgi")
 text = text.replace("/sysinfo/index.cgi", "/memo-network/system-info.cgi")
@@ -205,6 +208,15 @@ text = text.replace("/proc/index.cgi", "/memo-network/processes.cgi")
 text = text.replace(' target="_top"', '')
 text = text.replace("fetch('/right.cgi?memo_stats=1&_='+Date.now()", "fetch('/memo-network/live-stats.cgi?_='+Date.now()")
 text = text.replace("fetch((window.location.pathname || '/right.cgi')+'?memo_stats=1&_='+Date.now()", "fetch('/memo-network/live-stats.cgi?_='+Date.now()")
+
+needle = "</script>\nHTML\n&popup_footer();"
+if needle not in text:
+    raise SystemExit("FOUT: einde dashboardscript niet gevonden voor i18n-injectie")
+text = text.replace(
+    needle,
+    "</script>\n<script>\n" + dashboard_i18n + "\n</script>\nHTML\n&popup_footer();",
+    1,
+)
 
 required = (
     "MemoNetwork Dashboard v4",
@@ -215,6 +227,7 @@ required = (
     "docker-total",
     "amp-running",
     "amp-total",
+    "MemoDashboardI18n",
 )
 missing = [item for item in required if item not in text]
 if missing:
@@ -233,6 +246,7 @@ tar -tzf "$OUTPUT" > "$LISTING"
 grep -Fxq 'memocraft-theme/theme.info' "$LISTING" || fail "Pakket mist theme.info"
 grep -Fxq 'memocraft-theme/right.cgi' "$LISTING" || fail "Pakket mist right.cgi"
 grep -Fxq 'memocraft-theme/memo-i18n.js' "$LISTING" || fail "Pakket mist MemoNetwork i18n runtime"
+grep -Fxq 'memocraft-theme/dashboard-i18n.js' "$LISTING" || fail "Pakket mist dashboard i18n runtime"
 grep -Fxq 'memo-network/module.info' "$LISTING" || fail "Pakket mist memo-network/module.info"
 grep -Fxq 'memo-network/live-stats.cgi' "$LISTING" || fail "Pakket mist memo-network/live-stats.cgi"
 grep -Fxq 'memo-network/system-info.cgi' "$LISTING" || fail "Pakket mist memo-network/system-info.cgi"
@@ -240,6 +254,7 @@ grep -Fxq 'memo-network/processes.cgi' "$LISTING" || fail "Pakket mist memo-netw
 grep -Fxq 'memo-network/language.cgi' "$LISTING" || fail "Pakket mist Webmin-taaldetectie"
 grep -q '/memo-network/system-info.cgi' "$RIGHT_CGI" || fail "right.cgi gebruikt niet de veilige systeeminformatiepagina"
 grep -q '/memo-network/processes.cgi' "$RIGHT_CGI" || fail "right.cgi gebruikt niet de veilige processenpagina"
+grep -q 'MemoDashboardI18n' "$RIGHT_CGI" || fail "right.cgi mist frame-lokale dashboardvertaling"
 grep -q 'MEMONETWORK-PACKAGE-UPDATES-FIX-START' "$THEME_PL" || fail "theme.pl mist de package-updates runtime fix"
 
 if grep -Eq '(^|/)\.\.?(/|$)' "$LISTING"; then
@@ -249,5 +264,6 @@ fi
 echo "Gereed: $OUTPUT"
 echo "Dashboard v4 gebruikt veilige MemoNetwork beheerpagina's"
 echo "MemoNetwork taalruntime: NL / DE / EN"
+echo "Dashboard taalruntime direct ingebed in right.cgi"
 echo "Package-updates runtime contrastfix toegevoegd"
 echo "Aantal bestanden: $(wc -l < "$LISTING")"
