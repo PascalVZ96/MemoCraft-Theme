@@ -47,7 +47,7 @@
       'Opslag': 'Speicher',
       'Opslag laden…': 'Speicher wird geladen…',
       'Server online': 'Server online',
-      'Netwerkverkeer': 'Netzwerkverkehr',
+      'Netwerkverkeer': 'Netzwerkaktivität',
       'Besturingssysteem': 'Betriebssystem',
       'Temperatuur': 'Temperatur',
       'Processen': 'Prozesse',
