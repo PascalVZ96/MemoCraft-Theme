@@ -300,6 +300,14 @@ body:has(.leftmenu) {
     color: #111827 !important;
 }
 
+/* MemoNetwork dashboard header cleanup: version is already shown in the sidebar,
+   and health/hostname are available in the dashboard body. */
+body:not(:has(.leftmenu)) .brandline .ver,
+body:not(:has(.leftmenu)) #health-pill,
+body:not(:has(.leftmenu)) #host-pill {
+    display: none !important;
+}
+
 /* MemoNetwork lower dashboard panels */
 body:not(:has(.leftmenu)) details:not(.memo-original-system) {
     margin: 0 0 12px !important;
