@@ -1,9 +1,12 @@
 (() => {
   const dashboardUrl = "/right.cgi";
-  const installedVersion = "4.6.0-rc1";
+  const installedVersion = "4.6.0-rc2";
   const releaseDate = "11-08-2026";
   const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
   const i18nUrl = "/memocraft-theme/memo-i18n.js";
+  let i18nLoading = false;
+  let i18nLoaded = false;
+  let i18nLastAttempt = 0;
 
   const normalize = (value) => {
     try {
@@ -32,15 +35,41 @@
 
   const ensureI18n = () => {
     if (window.MemoNetworkI18n) {
+      i18nLoaded = true;
       window.MemoNetworkI18n.refresh?.();
       return;
     }
-    if (document.querySelector('script[data-memo-i18n="1"]')) return;
-    const script = document.createElement('script');
-    script.src = `${i18nUrl}?v=${encodeURIComponent(installedVersion)}`;
-    script.dataset.memoI18n = '1';
-    script.async = true;
-    document.head.appendChild(script);
+    const now = Date.now();
+    if (i18nLoading || (i18nLastAttempt && now - i18nLastAttempt < 5000)) return;
+    i18nLoading = true;
+    i18nLastAttempt = now;
+
+    fetch(`${i18nUrl}?v=${encodeURIComponent(installedVersion)}&_=${now}`, {
+      credentials: 'same-origin',
+      cache: 'no-store'
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.text();
+      })
+      .then((code) => {
+        if (!code || !code.includes('MemoNetworkI18n')) throw new Error('Ongeldige i18n-runtime');
+        const old = document.querySelector('script[data-memo-i18n-inline="1"]');
+        old?.remove();
+        const script = document.createElement('script');
+        script.dataset.memoI18nInline = '1';
+        script.textContent = `${code}\n//# sourceURL=/memocraft-theme/memo-i18n.js`;
+        document.head.appendChild(script);
+        i18nLoaded = !!window.MemoNetworkI18n;
+        window.MemoNetworkI18n?.refresh?.();
+      })
+      .catch((error) => {
+        i18nLoaded = false;
+        console.warn('MemoNetwork i18n kon niet worden geladen:', error);
+      })
+      .finally(() => {
+        i18nLoading = false;
+      });
   };
 
   const currentContentUrl = () => {
@@ -112,8 +141,8 @@
 
     const badge = dashboard.querySelector('.brandline .ver');
     if (badge) {
-      badge.textContent = 'Dashboard v4.6 RC1';
-      badge.title = 'MemoNetwork 4.6 release candidate 1';
+      badge.textContent = 'Dashboard v4.6 RC2';
+      badge.title = 'MemoNetwork 4.6 release candidate 2';
     }
 
     let rc = dashboard.querySelector('[data-memo-rc="1"]');
@@ -126,7 +155,7 @@
         meta.appendChild(rc);
       }
     }
-    if (rc) rc.textContent = 'RC1 · NL/DE/EN';
+    if (rc) rc.textContent = 'RC2 · NL/DE/EN';
   };
 
   const setupVersionFooter = () => {
@@ -184,7 +213,7 @@
     setupBrand();
     setupVersionFooter();
     setupDashboardLinks();
-    window.MemoNetworkI18n?.refresh?.();
+    if (i18nLoaded || window.MemoNetworkI18n) window.MemoNetworkI18n?.refresh?.();
     const current = normalize(currentContentUrl());
     if (!current) return;
 
