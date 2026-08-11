@@ -1,6 +1,6 @@
 (() => {
   const dashboardUrl = "/right.cgi";
-  const installedVersion = "4.6.0-rc3";
+  const installedVersion = "4.6.0-rc4";
   const releaseDate = "11-08-2026";
   const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
   const i18nUrl = "/memocraft-theme/memo-i18n.js";
@@ -34,21 +34,29 @@
   };
 
   const detectWebminLanguage = () => {
-    const htmlLang = String(document.documentElement?.lang || '').trim().toLowerCase();
-    if (/^de(?:[-_]|$)/.test(htmlLang)) return 'de';
-    if (/^nl(?:[-_]|$)/.test(htmlLang)) return 'nl';
-    if (/^en(?:[-_]|$)/.test(htmlLang)) return 'en';
-
     const text = String(document.body?.innerText || document.body?.textContent || '').toLowerCase();
+
+    // The visible Webmin sidebar is the source of truth. Some Webmin pages keep
+    // an old <html lang> value even after a per-user language has been selected.
+    if (text.includes('abmelden') || text.includes('module aktualisieren') || text.includes('systeminformationen')) return 'de';
+    if (text.includes('uitloggen') || text.includes('ververs modules') || text.includes('systeeminformatie')) return 'nl';
+    if (text.includes('logout') || text.includes('refresh modules') || text.includes('system information')) return 'en';
+
     const score = {de: 0, nl: 0, en: 0};
     const add = (lang, words) => words.forEach((word) => { if (text.includes(word)) score[lang] += 1; });
 
     add('de', ['abmelden', 'systeminformationen', 'module aktualisieren', 'werkzeuge', 'unbenutzte module', 'netzwerk', 'suche']);
-    add('nl', ['uitloggen', 'systeeminformatie', 'ververs modules', 'ongebruikte modules', 'netwerken', 'systeem', 'zoeken']);
+    add('nl', ['uitloggen', 'systeeminformatie', 'ververs modules', 'ongebruikte modules', 'netwerken', 'zoeken']);
     add('en', ['logout', 'system information', 'refresh modules', 'unused modules', 'networking', 'tools', 'search']);
 
     const ordered = Object.entries(score).sort((a, b) => b[1] - a[1]);
-    return ordered[0][1] > 0 && ordered[0][1] > ordered[1][1] ? ordered[0][0] : '';
+    if (ordered[0][1] > 0 && ordered[0][1] > ordered[1][1]) return ordered[0][0];
+
+    const htmlLang = String(document.documentElement?.lang || '').trim().toLowerCase();
+    if (/^de(?:[-_]|$)/.test(htmlLang)) return 'de';
+    if (/^nl(?:[-_]|$)/.test(htmlLang)) return 'nl';
+    if (/^en(?:[-_]|$)/.test(htmlLang)) return 'en';
+    return '';
   };
 
   const syncLanguageHint = () => {
@@ -175,8 +183,8 @@
 
     const badge = dashboard.querySelector('.brandline .ver');
     if (badge) {
-      badge.textContent = 'Dashboard v4.6 RC3';
-      badge.title = 'MemoNetwork 4.6 release candidate 3';
+      badge.textContent = 'Dashboard v4.6 RC4';
+      badge.title = 'MemoNetwork 4.6 release candidate 4';
     }
 
     let rc = dashboard.querySelector('[data-memo-rc="1"]');
@@ -191,7 +199,7 @@
     }
     if (rc) {
       const detected = syncLanguageHint();
-      rc.textContent = detected ? `RC3 · ${detected.toUpperCase()}` : 'RC3 · NL/DE/EN';
+      rc.textContent = detected ? `RC4 · ${detected.toUpperCase()}` : 'RC4 · NL/DE/EN';
     }
   };
 
