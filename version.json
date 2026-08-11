@@ -1,6 +1,6 @@
 {
-  "version": "4.5.0-rc2",
+  "version": "4.5.0",
   "edition": "MemoNetwork Edition",
-  "channel": "release-candidate",
+  "channel": "main",
   "released": "11-08-2026"
 }
