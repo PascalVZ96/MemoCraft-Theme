@@ -1,8 +1,9 @@
 (() => {
   const dashboardUrl = "/right.cgi";
-  const installedVersion = "4.5.0";
+  const installedVersion = "4.6.0-rc1";
   const releaseDate = "11-08-2026";
   const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
+  const i18nUrl = "/memocraft-theme/memo-i18n.js";
 
   const normalize = (value) => {
     try {
@@ -27,6 +28,19 @@
       if ((a[i] || 0) < (b[i] || 0)) return -1;
     }
     return 0;
+  };
+
+  const ensureI18n = () => {
+    if (window.MemoNetworkI18n) {
+      window.MemoNetworkI18n.refresh?.();
+      return;
+    }
+    if (document.querySelector('script[data-memo-i18n="1"]')) return;
+    const script = document.createElement('script');
+    script.src = `${i18nUrl}?v=${encodeURIComponent(installedVersion)}`;
+    script.dataset.memoI18n = '1';
+    script.async = true;
+    document.head.appendChild(script);
   };
 
   const currentContentUrl = () => {
@@ -98,11 +112,21 @@
 
     const badge = dashboard.querySelector('.brandline .ver');
     if (badge) {
-      badge.textContent = 'Dashboard v4.5';
-      badge.title = 'MemoNetwork 4.5';
+      badge.textContent = 'Dashboard v4.6 RC1';
+      badge.title = 'MemoNetwork 4.6 release candidate 1';
     }
 
-    dashboard.querySelector('[data-memo-rc="1"]')?.remove();
+    let rc = dashboard.querySelector('[data-memo-rc="1"]');
+    if (!rc) {
+      const meta = dashboard.querySelector('.topmeta');
+      if (meta) {
+        rc = dashboard.createElement('span');
+        rc.className = 'pill warn';
+        rc.dataset.memoRc = '1';
+        meta.appendChild(rc);
+      }
+    }
+    if (rc) rc.textContent = 'RC1 · NL/DE/EN';
   };
 
   const setupVersionFooter = () => {
@@ -146,17 +170,21 @@
           status.textContent = `Update beschikbaar: v${latest}`;
           status.className = 'memo-version-status update';
         }
+        window.MemoNetworkI18n?.refresh?.();
       })
       .catch(() => {
         status.textContent = `Versiecontrole niet beschikbaar · Built ${releaseDate}`;
         status.className = 'memo-version-status error';
+        window.MemoNetworkI18n?.refresh?.();
       });
   };
 
   const updateActiveLink = () => {
+    ensureI18n();
     setupBrand();
     setupVersionFooter();
     setupDashboardLinks();
+    window.MemoNetworkI18n?.refresh?.();
     const current = normalize(currentContentUrl());
     if (!current) return;
 
