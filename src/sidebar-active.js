@@ -1,6 +1,6 @@
 (() => {
   const dashboardUrl = "/right.cgi";
-  const installedVersion = "4.6.0-rc5";
+  const installedVersion = "4.6.0-rc6";
   const releaseDate = "11-08-2026";
   const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
   const i18nUrl = "/memocraft-theme/memo-i18n.js";
@@ -36,8 +36,6 @@
   const detectWebminLanguage = () => {
     const text = String(document.body?.innerText || document.body?.textContent || '').toLowerCase();
 
-    // The visible Webmin sidebar is the source of truth. Some Webmin pages keep
-    // an old <html lang> value even after a per-user language has been selected.
     if (text.includes('abmelden') || text.includes('module aktualisieren') || text.includes('systeminformationen')) return 'de';
     if (text.includes('uitloggen') || text.includes('ververs modules') || text.includes('systeeminformatie')) return 'nl';
     if (text.includes('logout') || text.includes('refresh modules') || text.includes('system information')) return 'en';
@@ -183,8 +181,8 @@
 
     const badge = dashboard.querySelector('.brandline .ver');
     if (badge) {
-      badge.textContent = 'Dashboard v4.6 RC5';
-      badge.title = 'MemoNetwork 4.6 release candidate 5';
+      badge.textContent = 'Dashboard v4.6 RC6';
+      badge.title = 'MemoNetwork 4.6 release candidate 6';
     }
 
     let rc = dashboard.querySelector('[data-memo-rc="1"]');
@@ -199,7 +197,7 @@
     }
     if (rc) {
       const detected = syncLanguageHint();
-      rc.textContent = detected ? `RC5 · ${detected.toUpperCase()}` : 'RC5 · NL/DE/EN';
+      rc.textContent = detected ? `RC6 · ${detected.toUpperCase()}` : 'RC6 · NL/DE/EN';
     }
   };
 
