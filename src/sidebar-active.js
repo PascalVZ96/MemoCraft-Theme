@@ -1,6 +1,6 @@
 (() => {
   const dashboardUrl = "/right.cgi";
-  const installedVersion = "4.6.1";
+  const installedVersion = "4.6.2";
   const releaseDate = "11-08-2026";
   const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
   const i18nUrl = "/memocraft-theme/memo-i18n.js";
@@ -179,11 +179,14 @@
       actions.appendChild(link);
     }
 
-    const badge = dashboard.querySelector('.brandline .ver');
-    if (badge) {
-      badge.textContent = 'Dashboard v4.6';
-      badge.title = 'MemoNetwork 4.6';
-    }
+    const redundantHeaderItems = [
+      dashboard.querySelector('.brandline .ver'),
+      dashboard.getElementById('health-pill'),
+      dashboard.getElementById('host-pill')
+    ];
+    redundantHeaderItems.forEach((item) => {
+      if (item) item.style.setProperty('display', 'none', 'important');
+    });
 
     dashboard.querySelector('[data-memo-rc="1"]')?.remove();
   };
