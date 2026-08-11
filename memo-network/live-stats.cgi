@@ -136,6 +136,26 @@ sub docker_stats {
     return ($running, scalar(@items), \@items, $minio_container);
 }
 
+sub config_value {
+    my ($dir, @keys) = @_;
+    for my $file ("$dir/AMPConfig.conf", "$dir/AMPConfig.json", "$dir/AMPConfig.kvp") {
+        next unless -f $file;
+        open my $fh, '<', $file or next;
+        while (my $line = <$fh>) {
+            for my $key (@keys) {
+                if ($line =~ /^\s*\Q$key\E\s*(?:=|:)\s*[\"']?([^\"',\r\n]+)[\"']?/) {
+                    my $value = $1;
+                    $value =~ s/^\s+|\s+$//g;
+                    close $fh;
+                    return $value;
+                }
+            }
+        }
+        close $fh;
+    }
+    return '';
+}
+
 sub amp_stats {
     my @dirs = grep { -d $_ && basename($_) !~ /^ADS/i } glob('/home/amp/.ampdata/instances/*');
     my $processes = process_list();
@@ -144,9 +164,14 @@ sub amp_stats {
         my $name = basename($dir);
         my $active = index($processes, $dir) >= 0;
         $active ||= $processes =~ /(?:^|[\s\/])\Q$name\E(?:[\s\/]|$)/m;
+        my $module = config_value($dir, 'Module', 'ModuleName', 'Application.Module');
+        my $port = config_value($dir, 'Webserver.Port', 'WebserverPort', 'Port');
+        $port = '' unless $port =~ /^\d{1,5}$/;
         push @items, {
             name => $name,
             path => $dir,
+            module => $module,
+            port => $port,
             running => ($active ? JSON::PP::true : JSON::PP::false),
         };
     }
@@ -155,27 +180,45 @@ sub amp_stats {
 }
 
 sub wireguard_stats {
-    return { interface => 'wg0', available => JSON::PP::false, peers => 0, latest_handshake_age_seconds => JSON::PP::null }
-        unless -e '/sys/class/net/wg0';
+    return {
+        interface => 'wg0',
+        available => JSON::PP::false,
+        peers => 0,
+        latest_handshake_age_seconds => JSON::PP::null,
+        items => [],
+    } unless -e '/sys/class/net/wg0';
 
-    my $peers = 0;
+    my @items;
     my $latest = 0;
     if (system('command -v wg >/dev/null 2>&1') == 0) {
-        my @peer_lines = grep { /\S/ } `wg show wg0 peers 2>/dev/null`;
-        $peers = scalar @peer_lines;
-        for my $line (`wg show wg0 latest-handshakes 2>/dev/null`) {
+        my @lines = `wg show wg0 dump 2>/dev/null`;
+        shift @lines if @lines;
+        for my $line (@lines) {
             chomp $line;
-            my (undef, $stamp) = split /\s+/, $line, 2;
-            next unless defined $stamp && $stamp =~ /^\d+$/ && $stamp > 0;
-            $latest = $stamp if $stamp > $latest;
+            my ($public_key, undef, $endpoint, $allowed_ips, $handshake, $rx, $tx, $keepalive) = split /\t/, $line, 8;
+            next unless $public_key;
+            $handshake = 0 unless defined($handshake) && $handshake =~ /^\d+$/;
+            $latest = $handshake if $handshake > $latest;
+            my $age = $handshake > 0 ? time - $handshake : undef;
+            push @items, {
+                public_key => $public_key,
+                endpoint => ($endpoint || ''),
+                allowed_ips => ($allowed_ips || ''),
+                latest_handshake => 0 + $handshake,
+                handshake_age_seconds => defined($age) ? 0 + $age : JSON::PP::null,
+                rx_bytes => 0 + ($rx || 0),
+                tx_bytes => 0 + ($tx || 0),
+                keepalive_seconds => 0 + ($keepalive || 0),
+            };
         }
     }
     my $age = $latest > 0 ? time - $latest : undef;
     return {
         interface => 'wg0',
         available => JSON::PP::true,
-        peers => $peers,
+        peers => scalar(@items),
         latest_handshake_age_seconds => defined($age) ? 0 + $age : JSON::PP::null,
+        items => \@items,
     };
 }
 
@@ -212,7 +255,7 @@ sub temperature {
 }
 
 sub update_count {
-    my $cache = '/tmp/memonetwork-update-count-v3';
+    my $cache = '/tmp/memonetwork-update-count-v4';
     if (-e $cache && time - (stat($cache))[9] < 60) {
         my $value = slurp_first($cache);
         return 0 + $value if $value =~ /^\d+$/;
@@ -223,6 +266,18 @@ sub update_count {
         close $fh;
     }
     return $count;
+}
+
+sub add_alert {
+    my ($alerts, $severity, $code, $title, $message, $link, $link_label) = @_;
+    push @$alerts, {
+        severity => $severity,
+        code => $code,
+        title => $title,
+        message => $message,
+        link => ($link || ''),
+        link_label => ($link_label || ''),
+    };
 }
 
 my ($idle1, $total1) = cpu_sample();
@@ -259,18 +314,43 @@ my @disks = grep { defined $_ } ($root_disk, $backup_disk);
 
 my $minio_process = running($process_list, qr/(?:^|\/)minio(?:\s|$)/);
 my $minio_docker_running = JSON::PP::false;
+my ($minio_id, $minio_status, $minio_ports) = ('', '', '');
 if (defined $minio_container) {
     for my $item (@$docker_items) {
-        if ($item->{name} eq $minio_container && $item->{running}) {
-            $minio_docker_running = JSON::PP::true;
-            last;
-        }
+        next unless $item->{name} eq $minio_container;
+        $minio_id = $item->{id} || '';
+        $minio_status = $item->{status} || '';
+        $minio_ports = $item->{ports} || '';
+        $minio_docker_running = JSON::PP::true if $item->{running};
+        last;
     }
 }
 my $minio_online = ($minio_process || $minio_docker_running) ? JSON::PP::true : JSON::PP::false;
+my $docker_online = running($process_list, qr/(?:^|\/)dockerd(?:\s|$)/);
+my $amp_online = $amp_total > 0 ? JSON::PP::true : JSON::PP::false;
+my $wireguard_online = $wg->{available};
+
+my $ram_percent = $ram_total > 0 ? ($ram_used / $ram_total) * 100 : 0;
+my $highest_disk = 0;
+for my $disk (@disks) {
+    $highest_disk = $disk->{used_percent} if ($disk->{used_percent} || 0) > $highest_disk;
+}
+
+my @alerts;
+add_alert(\@alerts, 'critical', 'backup_mount', 'Backup HDD niet gemount', '/mnt/backups staat niet op een apart bestandssysteem. Backups kunnen op de systeemschijf terechtkomen.', '/mount/index.cgi', 'Schijven controleren') unless defined $backup_disk;
+add_alert(\@alerts, 'warning', 'reboot', 'Herstart vereist', 'Ubuntu meldt dat een herstart nodig is om wijzigingen volledig toe te passen.', '/init/index.cgi', 'Herstartbeheer') if $reboot_required;
+add_alert(\@alerts, 'info', 'updates', "$updates pakketupdate" . ($updates == 1 ? '' : 's') . ' beschikbaar', 'Er zijn systeem- of beveiligingsupdates beschikbaar.', '/package-updates/index.cgi', 'Updates openen') if $updates > 0;
+add_alert(\@alerts, 'critical', 'cpu', 'CPU-belasting zeer hoog', sprintf('De actuele CPU-belasting is %.1f%%.', $cpu), '/memo-network/processes.cgi', 'Processen bekijken') if $cpu >= 90;
+add_alert(\@alerts, 'warning', 'ram', 'Geheugengebruik hoog', sprintf('Het geheugengebruik is %.1f%%.', $ram_percent), '/memo-network/system-info.cgi', 'Systeeminfo') if $ram_percent >= 90;
+add_alert(\@alerts, 'warning', 'disk', 'Opslag bijna vol', sprintf('Een bestandssysteem is %.1f%% gevuld.', $highest_disk), '/mount/index.cgi', 'Schijven bekijken') if $highest_disk >= 90;
+add_alert(\@alerts, 'warning', 'temperature', 'Temperatuur verhoogd', "De gemeten temperatuur is ${temp}°C.", '/memo-network/system-info.cgi', 'Systeeminfo') if defined($temp) && $temp >= 80;
+add_alert(\@alerts, 'warning', 'docker_offline', 'Docker offline', 'De Docker-service is niet actief.', '/memo-network/processes.cgi', 'Processen bekijken') unless $docker_online;
+add_alert(\@alerts, 'warning', 'amp_offline', 'AMP niet gedetecteerd', 'Er zijn geen actieve AMP-instances gedetecteerd.', 'https://amp.memocraft.nl', 'AMP openen') unless $amp_online;
+add_alert(\@alerts, 'warning', 'minio_offline', 'MinIO offline', 'De S3-opslagservice is niet actief.', '/memo-network/processes.cgi', 'Processen bekijken') unless $minio_online;
+add_alert(\@alerts, 'warning', 'wireguard_offline', 'WireGuard offline', 'De wg0-interface is niet beschikbaar.', '/net/index.cgi', 'Netwerk bekijken') unless $wireguard_online;
 
 my $payload = {
-    api_version => 4.0,
+    api_version => 4.1,
     cpu_percent => sprintf('%.1f', $cpu) + 0,
     ram_used_gib => sprintf('%.2f', $ram_used / 1048576) + 0,
     ram_total_gib => sprintf('%.2f', $ram_total / 1048576) + 0,
@@ -281,6 +361,7 @@ my $payload = {
     load_15 => sprintf('%.2f', $load15) + 0,
     updates_available => $updates,
     reboot_required => $reboot_required,
+    alerts => \@alerts,
     system => {
         hostname => slurp_first('/etc/hostname'),
         os => os_name(),
@@ -297,10 +378,10 @@ my $payload = {
         backup_device => defined($backup_disk) ? ($backup_disk->{device} || '') : '',
     },
     services => {
-        docker => running($process_list, qr/(?:^|\/)dockerd(?:\s|$)/),
-        amp => ($amp_total > 0 ? JSON::PP::true : JSON::PP::false),
+        docker => $docker_online,
+        amp => $amp_online,
         minio => $minio_online,
-        wireguard => $wg->{available},
+        wireguard => $wireguard_online,
     },
     disks => \@disks,
     docker => {
@@ -316,6 +397,9 @@ my $payload = {
     minio => {
         running => $minio_online,
         container => defined($minio_container) ? $minio_container : '',
+        container_id => $minio_id,
+        status => $minio_status,
+        ports => $minio_ports,
         mode => defined($minio_container) ? 'docker' : ($minio_process ? 'process' : 'unknown'),
     },
     wireguard => $wg,
