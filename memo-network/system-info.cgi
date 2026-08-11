@@ -193,10 +193,47 @@ sub network_interfaces {
 }
 
 sub recent_warnings {
-    my @rows = `journalctl -p warning -n 12 --no-pager -o short-iso 2>/dev/null`;
+    my @rows = `journalctl -p warning -n 16 --no-pager -o short-iso 2>/dev/null`;
     chomp @rows;
     @rows = grep { /\S/ && $_ !~ /^-- No entries --/ } @rows;
     return @rows;
+}
+
+sub failed_units {
+    my @rows = `systemctl --failed --no-legend --plain 2>/dev/null`;
+    chomp @rows;
+    @rows = grep { /\S/ } @rows;
+    return @rows;
+}
+
+sub listening_sockets {
+    my @items;
+    my $ss = -x '/usr/sbin/ss' ? '/usr/sbin/ss' : -x '/usr/bin/ss' ? '/usr/bin/ss' : -x '/bin/ss' ? '/bin/ss' : '';
+    return @items unless $ss;
+    for my $line (`$ss -H -lntu 2>/dev/null | head -n 30`) {
+        chomp $line;
+        my @v = split /\s+/, $line;
+        next unless @v >= 5;
+        push @items, {
+            protocol => ($v[0] || ''),
+            state => ($v[1] || ''),
+            local => ($v[4] || ''),
+        };
+    }
+    return @items;
+}
+
+sub user_sessions {
+    my @rows = `who 2>/dev/null`;
+    chomp @rows;
+    @rows = grep { /\S/ } @rows;
+    return @rows;
+}
+
+sub boot_time {
+    my $value = `uptime -s 2>/dev/null`;
+    chomp $value;
+    return $value || 'Onbekend';
 }
 
 if (($query{'view'} || '') eq 'insights') {
@@ -204,18 +241,32 @@ if (($query{'view'} || '') eq 'insights') {
     my @mem = top_processes('mem');
     my @net = network_interfaces();
     my @warnings = recent_warnings();
+    my @failed = failed_units();
+    my @sockets = listening_sockets();
+    my @sessions = user_sessions();
+    my $boot = boot_time();
+    my $active_interfaces = scalar grep { ($_->{state} || '') eq 'up' } @net;
+    my $load = first_line('/proc/loadavg');
+    my ($load1, $load5, $load15) = split /\s+/, $load;
 
     print "Content-Type: text/html; charset=UTF-8\r\n";
     print "Cache-Control: no-store\r\n\r\n";
     print <<'INSIGHTS_HEAD';
 <!doctype html><html lang="nl"><head><meta charset="utf-8"><title>MemoNetwork Inzichten</title>
 <style>
-:root{--bg:#08111c;--panel:#121e2e;--panel2:#17253a;--border:#2a3d57;--text:#f7f9ff;--muted:#8fa5bf;--blue:#38bdf8;--green:#34d399;--red:#ef4444}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px Arial,sans-serif;padding:22px}.wrap{max-width:1280px;margin:auto}.head,.panel{border:1px solid var(--border);background:linear-gradient(145deg,var(--panel2),var(--panel));border-radius:14px}.head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 20px;margin-bottom:12px}.head h1{margin:0;font-size:22px}.head a{color:#8fd3ff;text-decoration:none}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.panel{padding:16px;margin-bottom:12px}.panel h2{margin:0 0 12px;font-size:16px}.muted{color:var(--muted)}table{width:100%;border-collapse:collapse}th,td{padding:9px 8px;border-top:1px solid #24364e;text-align:left;font-size:12px}th{border-top:0;color:#8fa5bf;text-transform:uppercase;font-size:9px;letter-spacing:.05em}.state{display:inline-flex;align-items:center;gap:6px}.state:before{content:'';width:7px;height:7px;border-radius:50%;background:#64748b}.state.up:before{background:#22c55e;box-shadow:0 0 7px rgba(34,197,94,.55)}.warning{padding:9px 0;border-top:1px solid #24364e;color:#d6e2f2;font:12px/1.45 monospace;overflow-wrap:anywhere}.warning:first-of-type{border-top:0}.empty{color:var(--muted);font-size:12px}.badge{border:1px solid #315d8a;background:#0e2038;color:#8fd3ff;padding:7px 10px;border-radius:999px;font-size:10px;font-weight:700}@media(max-width:850px){.grid{grid-template-columns:1fr}}@media(max-width:600px){body{padding:10px}.head{align-items:flex-start;flex-direction:column}}
-</style></head><body><div class="wrap"><div class="head"><div><h1>MemoNetwork Inzichten</h1><div class="muted">Live diagnostiek voor processen, netwerk en systeemmeldingen</div></div><div><span class="badge">v4.5</span> &nbsp; <a href="/right.cgi">← Dashboard</a></div></div>
+:root{--bg:#08111c;--panel:#121e2e;--panel2:#17253a;--border:#2a3d57;--text:#f7f9ff;--muted:#8fa5bf;--blue:#38bdf8;--green:#34d399;--red:#ef4444;--orange:#f59e0b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px Arial,sans-serif;padding:22px}.wrap{max-width:1320px;margin:auto}.head,.panel,.stat{border:1px solid var(--border);background:linear-gradient(145deg,var(--panel2),var(--panel));border-radius:14px}.head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 20px;margin-bottom:12px}.head h1{margin:0;font-size:22px}.head a{color:#8fd3ff;text-decoration:none}.head-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:12px}.stat{padding:14px}.stat small{display:block;color:var(--muted);font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}.stat strong{display:block;margin-top:7px;font-size:16px}.stat span{display:block;margin-top:4px;color:var(--muted);font-size:10px}.panel{padding:16px;margin-bottom:12px}.panel h2{margin:0 0 12px;font-size:16px}.muted{color:var(--muted)}table{width:100%;border-collapse:collapse}th,td{padding:9px 8px;border-top:1px solid #24364e;text-align:left;font-size:12px}th{border-top:0;color:#8fa5bf;text-transform:uppercase;font-size:9px;letter-spacing:.05em}.state{display:inline-flex;align-items:center;gap:6px}.state:before{content:'';width:7px;height:7px;border-radius:50%;background:#64748b}.state.up:before{background:#22c55e;box-shadow:0 0 7px rgba(34,197,94,.55)}.logline{padding:9px 0;border-top:1px solid #24364e;color:#d6e2f2;font:12px/1.45 monospace;overflow-wrap:anywhere}.logline:first-of-type{border-top:0}.empty{color:var(--muted);font-size:12px}.badge,.button{border:1px solid #315d8a;background:#0e2038;color:#8fd3ff;padding:7px 10px;border-radius:999px;font-size:10px;font-weight:700;text-decoration:none!important}.button{border-radius:8px}.failed{color:#fca5a5}.ok{color:#86efac}.socket{font-family:monospace}.scroll{overflow-x:auto}@media(max-width:950px){.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:850px){.grid{grid-template-columns:1fr}}@media(max-width:600px){body{padding:10px}.head{align-items:flex-start;flex-direction:column}.stats{grid-template-columns:1fr}}
+</style></head><body><div class="wrap"><div class="head"><div><h1>MemoNetwork Inzichten</h1><div class="muted">Live diagnostiek voor processen, netwerk, services en systeemmeldingen</div></div><div class="head-actions"><span class="badge">v4.5 RC</span><a class="button" href="/memo-network/system-info.cgi?view=insights">↻ Vernieuwen</a><a class="button" href="/right.cgi">← Dashboard</a></div></div>
 INSIGHTS_HEAD
 
-    print "<section class=\"panel\"><h2>Netwerkinterfaces</h2>";
+    print '<div class="stats">';
+    print '<div class="stat"><small>Server gestart</small><strong>' . html_escape($boot) . '</strong><span>Laatste boot</span></div>';
+    print '<div class="stat"><small>Systemd</small><strong class="' . (@failed ? 'failed' : 'ok') . '">' . scalar(@failed) . ' mislukt</strong><span>' . (@failed ? 'Aandacht vereist' : 'Geen mislukte units') . '</span></div>';
+    print '<div class="stat"><small>Netwerk</small><strong>' . $active_interfaces . ' actief</strong><span>' . scalar(@net) . ' interfaces gedetecteerd</span></div>';
+    print '<div class="stat"><small>Load average</small><strong>' . html_escape($load1 // '0') . '</strong><span>5 min ' . html_escape($load5 // '0') . ' · 15 min ' . html_escape($load15 // '0') . '</span></div>';
+    print '</div>';
+
+    print "<section class=\"panel\"><h2>Netwerkinterfaces</h2><div class=\"scroll\">";
     if (@net) {
         print "<table><thead><tr><th>Interface</th><th>Status</th><th>IPv4</th><th>Snelheid</th><th>Ontvangen</th><th>Verzonden</th></tr></thead><tbody>";
         for my $item (@net) {
@@ -232,25 +283,55 @@ INSIGHTS_HEAD
     } else {
         print "<div class=\"empty\">Geen netwerkinterfaces gevonden.</div>";
     }
-    print "</section>";
+    print "</div></section>";
 
-    print "<div class=\"grid\"><section class=\"panel\"><h2>Top CPU-processen</h2><table><thead><tr><th>PID</th><th>Proces</th><th>CPU</th><th>RAM</th></tr></thead><tbody>";
+    print '<div class="grid"><section class="panel"><h2>Mislukte systemd-units</h2>';
+    if (@failed) {
+        for my $row (@failed) {
+            print '<div class="logline failed">' . html_escape($row) . '</div>';
+        }
+    } else {
+        print '<div class="empty ok">Geen mislukte systemd-units.</div>';
+    }
+    print '</section><section class="panel"><h2>Aangemelde sessies</h2>';
+    if (@sessions) {
+        for my $row (@sessions) {
+            print '<div class="logline">' . html_escape($row) . '</div>';
+        }
+    } else {
+        print '<div class="empty">Geen interactieve sessies gevonden.</div>';
+    }
+    print '</section></div>';
+
+    print '<section class="panel"><h2>Luisterende netwerkpoorten</h2><div class="scroll">';
+    if (@sockets) {
+        print '<table><thead><tr><th>Protocol</th><th>Status</th><th>Lokaal adres</th></tr></thead><tbody>';
+        for my $socket (@sockets) {
+            print '<tr><td>' . html_escape($socket->{protocol}) . '</td><td>' . html_escape($socket->{state}) . '</td><td class="socket">' . html_escape($socket->{local}) . '</td></tr>';
+        }
+        print '</tbody></table>';
+    } else {
+        print '<div class="empty">Geen luisterende sockets gevonden of ss is niet beschikbaar.</div>';
+    }
+    print '</div></section>';
+
+    print "<div class=\"grid\"><section class=\"panel\"><h2>Top CPU-processen</h2><div class=\"scroll\"><table><thead><tr><th>PID</th><th>Proces</th><th>CPU</th><th>RAM</th></tr></thead><tbody>";
     for my $row (@cpu) {
         print '<tr><td>' . $row->{pid} . '</td><td><strong>' . html_escape($row->{command}) . '</strong></td><td>' . $row->{cpu} . '%</td><td>' . $row->{mem} . '%</td></tr>';
     }
-    print "</tbody></table></section><section class=\"panel\"><h2>Top geheugenprocessen</h2><table><thead><tr><th>PID</th><th>Proces</th><th>CPU</th><th>RAM</th></tr></thead><tbody>";
+    print "</tbody></table></div></section><section class=\"panel\"><h2>Top geheugenprocessen</h2><div class=\"scroll\"><table><thead><tr><th>PID</th><th>Proces</th><th>CPU</th><th>RAM</th></tr></thead><tbody>";
     for my $row (@mem) {
         print '<tr><td>' . $row->{pid} . '</td><td><strong>' . html_escape($row->{command}) . '</strong></td><td>' . $row->{cpu} . '%</td><td>' . $row->{mem} . '%</td></tr>';
     }
-    print "</tbody></table></section></div>";
+    print "</tbody></table></div></section></div>";
 
     print "<section class=\"panel\"><h2>Recente systeemwaarschuwingen</h2>";
     if (@warnings) {
         for my $warning (@warnings) {
-            print '<div class="warning">' . html_escape($warning) . '</div>';
+            print '<div class="logline">' . html_escape($warning) . '</div>';
         }
     } else {
-        print "<div class=\"empty\">Geen recente waarschuwingen gevonden.</div>";
+        print "<div class=\"empty ok\">Geen recente waarschuwingen gevonden.</div>";
     }
     print "</section></div></body></html>\n";
     exit 0;
