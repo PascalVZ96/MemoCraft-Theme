@@ -1,6 +1,6 @@
 (() => {
   const dashboardUrl = "/right.cgi";
-  const installedVersion = "4.5.0-rc1";
+  const installedVersion = "4.5.0-rc2";
   const releaseDate = "11-08-2026";
   const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
 
@@ -86,13 +86,29 @@
     const dashboard = currentContentDocument();
     if (!dashboard) return;
     const actions = dashboard.querySelector('.quick-actions');
-    if (!actions || actions.querySelector('[data-memo-insights="1"]')) return;
-    const link = dashboard.createElement('a');
-    link.className = 'quick-btn';
-    link.href = '/memo-network/system-info.cgi?view=insights';
-    link.dataset.memoInsights = '1';
-    link.textContent = 'Inzichten';
-    actions.appendChild(link);
+    if (actions && !actions.querySelector('[data-memo-insights="1"]')) {
+      const link = dashboard.createElement('a');
+      link.className = 'quick-btn';
+      link.href = '/memo-network/system-info.cgi?view=insights';
+      link.dataset.memoInsights = '1';
+      link.textContent = 'Inzichten';
+      actions.appendChild(link);
+    }
+
+    const badge = dashboard.querySelector('.brandline .ver');
+    if (badge) {
+      badge.textContent = 'Dashboard v4.5 RC';
+      badge.title = 'MemoNetwork 4.5 release candidate';
+    }
+
+    const meta = dashboard.querySelector('.topmeta');
+    if (meta && !meta.querySelector('[data-memo-rc="1"]')) {
+      const pill = dashboard.createElement('span');
+      pill.className = 'pill warn';
+      pill.dataset.memoRc = '1';
+      pill.textContent = 'RC2';
+      meta.appendChild(pill);
+    }
   };
 
   const setupVersionFooter = () => {
@@ -127,8 +143,8 @@
         if (!latest) throw new Error('Geen versie ontvangen');
         const comparison = compareVersions(installedVersion, latest);
         if (comparison === 0) {
-          status.textContent = `Laatste versie · Built ${releaseDate}`;
-          status.className = 'memo-version-status ok';
+          status.textContent = `Testversie · main v${latest}`;
+          status.className = 'memo-version-status dev';
         } else if (comparison > 0) {
           status.textContent = `Testversie · main v${latest}`;
           status.className = 'memo-version-status dev';
