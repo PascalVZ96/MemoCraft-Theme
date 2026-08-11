@@ -1,6 +1,6 @@
 (() => {
   const dashboardUrl = "/right.cgi";
-  const installedVersion = "4.6.0-rc2";
+  const installedVersion = "4.6.0-rc3";
   const releaseDate = "11-08-2026";
   const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
   const i18nUrl = "/memocraft-theme/memo-i18n.js";
@@ -33,12 +33,46 @@
     return 0;
   };
 
+  const detectWebminLanguage = () => {
+    const htmlLang = String(document.documentElement?.lang || '').trim().toLowerCase();
+    if (/^de(?:[-_]|$)/.test(htmlLang)) return 'de';
+    if (/^nl(?:[-_]|$)/.test(htmlLang)) return 'nl';
+    if (/^en(?:[-_]|$)/.test(htmlLang)) return 'en';
+
+    const text = String(document.body?.innerText || document.body?.textContent || '').toLowerCase();
+    const score = {de: 0, nl: 0, en: 0};
+    const add = (lang, words) => words.forEach((word) => { if (text.includes(word)) score[lang] += 1; });
+
+    add('de', ['abmelden', 'systeminformationen', 'module aktualisieren', 'werkzeuge', 'unbenutzte module', 'netzwerk', 'suche']);
+    add('nl', ['uitloggen', 'systeeminformatie', 'ververs modules', 'ongebruikte modules', 'netwerken', 'systeem', 'zoeken']);
+    add('en', ['logout', 'system information', 'refresh modules', 'unused modules', 'networking', 'tools', 'search']);
+
+    const ordered = Object.entries(score).sort((a, b) => b[1] - a[1]);
+    return ordered[0][1] > 0 && ordered[0][1] > ordered[1][1] ? ordered[0][0] : '';
+  };
+
+  const syncLanguageHint = () => {
+    const detected = detectWebminLanguage();
+    if (!detected) return '';
+    document.cookie = `memo_lang=${detected}; Path=/; SameSite=Lax`;
+    document.documentElement.dataset.memoWebminLang = detected;
+    return detected;
+  };
+
   const ensureI18n = () => {
+    const expectedLanguage = syncLanguageHint();
     if (window.MemoNetworkI18n) {
-      i18nLoaded = true;
-      window.MemoNetworkI18n.refresh?.();
-      return;
+      if (expectedLanguage && window.MemoNetworkI18n.language !== expectedLanguage) {
+        try { delete window.MemoNetworkI18n; } catch (_error) { window.MemoNetworkI18n = null; }
+        i18nLoaded = false;
+        i18nLastAttempt = 0;
+      } else {
+        i18nLoaded = true;
+        window.MemoNetworkI18n.refresh?.();
+        return;
+      }
     }
+
     const now = Date.now();
     if (i18nLoading || (i18nLastAttempt && now - i18nLastAttempt < 5000)) return;
     i18nLoading = true;
@@ -141,8 +175,8 @@
 
     const badge = dashboard.querySelector('.brandline .ver');
     if (badge) {
-      badge.textContent = 'Dashboard v4.6 RC2';
-      badge.title = 'MemoNetwork 4.6 release candidate 2';
+      badge.textContent = 'Dashboard v4.6 RC3';
+      badge.title = 'MemoNetwork 4.6 release candidate 3';
     }
 
     let rc = dashboard.querySelector('[data-memo-rc="1"]');
@@ -155,7 +189,10 @@
         meta.appendChild(rc);
       }
     }
-    if (rc) rc.textContent = 'RC2 · NL/DE/EN';
+    if (rc) {
+      const detected = syncLanguageHint();
+      rc.textContent = detected ? `RC3 · ${detected.toUpperCase()}` : 'RC3 · NL/DE/EN';
+    }
   };
 
   const setupVersionFooter = () => {
@@ -209,6 +246,7 @@
   };
 
   const updateActiveLink = () => {
+    syncLanguageHint();
     ensureI18n();
     setupBrand();
     setupVersionFooter();
