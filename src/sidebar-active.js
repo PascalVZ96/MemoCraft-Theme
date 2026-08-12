@@ -1,6 +1,6 @@
 (() => {
   const dashboardUrl = "/right.cgi";
-  const installedVersion = "5.0.0-alpha7";
+  const installedVersion = "5.0.0-alpha8";
   const releaseDate = "12-08-2026";
   const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
   const i18nUrl = "/memocraft-theme/memo-i18n.js";
@@ -232,11 +232,20 @@
         if (badge) badge.textContent = `v${installedVersion.replace('-', ' ')}`;
         const footer = doc.querySelector('.footer');
         if (footer) footer.textContent = `MemoNetwork v5 Control Center · ${installedVersion.split('-')[1] || 'preview'} preview`;
-        if (doc.querySelector('script[data-memo-v5-service-details="1"]')) return;
-        const script = doc.createElement('script');
-        script.src = `/memo-network/control-center-services.js?v=${encodeURIComponent(installedVersion)}&_=${Date.now()}`;
-        script.dataset.memoV5ServiceDetails = '1';
-        doc.head.appendChild(script);
+
+        if (!doc.querySelector('script[data-memo-v5-service-details="1"]')) {
+          const script = doc.createElement('script');
+          script.src = `/memo-network/control-center-services.js?v=${encodeURIComponent(installedVersion)}&_=${Date.now()}`;
+          script.dataset.memoV5ServiceDetails = '1';
+          doc.head.appendChild(script);
+        }
+
+        if (!doc.querySelector('script[data-memo-v5-diagnostics="1"]')) {
+          const script = doc.createElement('script');
+          script.src = `/memo-network/control-center-diagnostics.js?v=${encodeURIComponent(installedVersion)}&_=${Date.now()}`;
+          script.dataset.memoV5Diagnostics = '1';
+          doc.head.appendChild(script);
+        }
       }
     } catch (_error) {}
   };
