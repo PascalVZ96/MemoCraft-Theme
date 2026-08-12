@@ -211,19 +211,14 @@
         const doc = frame.document;
         if (!doc?.head) return;
 
-        if (doc.documentElement.dataset.memoAmpTopFix !== '1') {
-          doc.documentElement.dataset.memoAmpTopFix = '1';
+        if (doc.documentElement.dataset.memoAmpNativeFix !== '1') {
+          doc.documentElement.dataset.memoAmpNativeFix = '1';
           doc.addEventListener('click', (event) => {
             const link = event.target.closest?.('a[href^="https://amp.memocraft.nl"],a[data-memo-amp-link="1"]');
             if (!link) return;
-            event.preventDefault();
+            link.setAttribute('target', '_blank');
+            link.setAttribute('rel', 'noopener noreferrer');
             event.stopImmediatePropagation();
-            const popup = window.top.open('https://amp.memocraft.nl', '_blank');
-            if (popup) {
-              try { popup.opener = null; } catch (_error) {}
-            } else {
-              window.top.location.href = 'https://amp.memocraft.nl';
-            }
           }, true);
         }
 
