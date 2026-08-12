@@ -1,6 +1,6 @@
 (() => {
   const dashboardUrl = "/right.cgi";
-  const installedVersion = "5.0.0-alpha8";
+  const installedVersion = "5.0.0-alpha9";
   const releaseDate = "12-08-2026";
   const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
   const i18nUrl = "/memocraft-theme/memo-i18n.js";
@@ -244,6 +244,13 @@
           const script = doc.createElement('script');
           script.src = `/memo-network/control-center-diagnostics.js?v=${encodeURIComponent(installedVersion)}&_=${Date.now()}`;
           script.dataset.memoV5Diagnostics = '1';
+          doc.head.appendChild(script);
+        }
+
+        if (!doc.querySelector('script[data-memo-v5-infrastructure="1"]')) {
+          const script = doc.createElement('script');
+          script.src = `/memo-network/control-center-infrastructure.js?v=${encodeURIComponent(installedVersion)}&_=${Date.now()}`;
+          script.dataset.memoV5Infrastructure = '1';
           doc.head.appendChild(script);
         }
       }
