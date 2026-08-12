@@ -107,7 +107,7 @@
       });
       html += '</div>';
     }
-    return html + `<div class="memo-detail-actions"><a class="memo-action primary" href="https://amp.memocraft.nl" target="_blank" rel="noopener noreferrer">${t('openAmp')}</a></div>`;
+    return html + `<div class="memo-detail-actions"><a class="memo-action primary" href="https://amp.memocraft.nl" target="_top" data-memo-amp-link="1">${t('openAmp')}</a></div>`;
   };
 
   const renderMinio = (d) => {
@@ -131,12 +131,31 @@
     return html + `<div class="memo-detail-actions"><a class="memo-action" href="/net/index.cgi">${t('networkManage')}</a></div>`;
   };
 
+  const openAmpAtTop = (event) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    try {
+      window.top.location.href = 'https://amp.memocraft.nl';
+    } catch (_error) {
+      window.location.href = 'https://amp.memocraft.nl';
+    }
+  };
+
   const fixAmpLinks = () => {
     document.querySelectorAll('a[href^="https://amp.memocraft.nl"]').forEach(link => {
-      link.setAttribute('target', '_blank');
-      link.setAttribute('rel', 'noopener noreferrer');
+      link.setAttribute('target', '_top');
+      link.removeAttribute('rel');
+      link.dataset.memoAmpLink = '1';
     });
   };
+
+  document.addEventListener('click', event => {
+    const ampLink = event.target.closest('a[href^="https://amp.memocraft.nl"],a[data-memo-amp-link="1"]');
+    if (!ampLink) return;
+    openAmpAtTop(event);
+  }, true);
 
   const renderSelected = () => {
     if (!selected || !latest) return;
