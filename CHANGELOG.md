@@ -4,6 +4,18 @@
 
 De volgende grote MemoNetwork-release. Ontwikkeling vindt plaats op de aparte `v5` branch totdat de release stabiel genoeg is om naar `main` te gaan.
 
+### Alpha 4
+
+- De Webmin-pagina **Software pakketten Update** heeft een volledige MemoNetwork v5-opfrisbeurt gekregen.
+- Pakketlijsten, bevestigingsschermen, invoervelden en actieknoppen zijn rustiger en beter leesbaar gemaakt.
+- **Installeer Nu** toont direct duidelijke voortgang in plaats van een pagina die lijkt vast te lopen.
+- Tijdens de installatie blijft een statuskaart zichtbaar met live uitvoer uit Webmins pakketupdateproces.
+- Als APT/dpkg tijdelijk geen nieuwe regels toont, blijft zichtbaar dat de installatie nog bezig is.
+- Na afronding verschijnt een duidelijke successtatus met een knop terug naar de pakketupdates.
+- De bestaande Webmin-installatiewerking blijft intact; de nieuwe runtime verandert alleen presentatie en voortgangsfeedback.
+- Pakketupdate-interface en voortgangsteksten ondersteunen NL / DE / EN.
+- De versie-indicatie in het v5 Control Center wordt automatisch gelijkgetrokken met de geïnstalleerde alpha-versie.
+
 ### Alpha 3
 
 - Servicekaarten in het v5 Control Center zijn nu klikbaar.
