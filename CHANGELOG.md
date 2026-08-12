@@ -4,6 +4,17 @@
 
 De volgende grote MemoNetwork-release. Ontwikkeling vindt plaats op de aparte `v5` branch totdat de release stabiel genoeg is om naar `main` te gaan.
 
+### Alpha 7
+
+- Service-details in het v5 Control Center zijn uitgebreid met directe beheeracties.
+- Docker-containers kunnen vanuit het detailpaneel worden gestart, gestopt en herstart.
+- MinIO kan direct vanuit het Control Center worden beheerd wanneer MinIO als Docker-container draait.
+- Stop- en herstartacties vragen eerst om bevestiging.
+- Acties tonen direct een duidelijke bezig-, succes- of foutstatus zonder de pagina te verlaten.
+- Na een Docker-actie worden de live servicegegevens meteen opnieuw geladen.
+- AMP krijgt een directe knop naar het AMP-paneel en WireGuard een koppeling naar netwerkbeheer.
+- Beheeracties en meldingen ondersteunen Nederlands, Duits en Engels.
+
 ### Alpha 6
 
 - De pakketupdatepagina gebruikt nu een eigen MemoNetwork v5-header in plaats van Webmins oude gecentreerde legacy-header.
