@@ -4,6 +4,15 @@
 
 De volgende grote MemoNetwork-release. Ontwikkeling vindt plaats op de aparte `v5` branch totdat de release stabiel genoeg is om naar `main` te gaan.
 
+### Alpha 5
+
+- De pakketupdatepagina is opnieuw opgebouwd rond Webmins echte native classes in plaats van generieke tabelherkenning.
+- Oude witte `bgcolor`-spacers, image-corners en legacy tabopmaak worden nu gericht geneutraliseerd.
+- **Package Updates / Scheduled Upgrades / Package Repositories** blijven functioneel, maar krijgen een compacte donkere MemoNetwork-tabstijl.
+- Het zoek/filterblok, de pakketlijst en actieknoppen hebben nu elk een eigen gerichte stijl zonder Webmins layout-tabellen te vervormen.
+- De installatie-overlay en voortgangsstatus van Alpha 4 blijven behouden.
+- Pakketupdatepagina blijft NL / DE / EN ondersteunen.
+
 ### Alpha 4
 
 - De Webmin-pagina **Software pakketten Update** heeft een volledige MemoNetwork v5-opfrisbeurt gekregen.
