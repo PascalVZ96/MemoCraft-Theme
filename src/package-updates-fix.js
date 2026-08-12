@@ -79,57 +79,65 @@
   let pollTimer = null;
   const normalized = value => String(value || '').replace(/\s+/g,' ').trim().toLowerCase();
 
+  const cleanupLegacySeparators = root => {
+    if (!root) return;
+    const parents = new Set();
+    root.querySelectorAll('a.select_all,a.select_invert').forEach(link => { if (link.parentNode) parents.add(link.parentNode); });
+    parents.forEach(parent => {
+      [...parent.childNodes].forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE && String(node.nodeValue || '').trim() === '|') node.nodeValue = '';
+      });
+    });
+  };
+
   const setupChrome = () => {
     if (document.querySelector('.mn-pkg-hero')) return;
     const header = document.querySelector('table.header');
     const tabs = document.querySelector('table.ui_tabs');
     const tabsBox = document.querySelector('table.ui_tabs_box');
     if (!header || !tabs || !tabsBox) return;
-
     const moduleLink = header.querySelector('#headln2l a')?.getAttribute('href') || '/config.cgi?module=package-updates';
-    const shell = document.createElement('div');
-    shell.className = 'mn-pkg-shell';
-    const hero = document.createElement('section');
-    hero.className = 'mn-pkg-hero';
+    const shell = document.createElement('div'); shell.className = 'mn-pkg-shell';
+    const hero = document.createElement('section'); hero.className = 'mn-pkg-hero';
     hero.innerHTML = `<div><h1>${t.title}</h1><p>${t.subtitle}</p></div><a class="mn-pkg-settings" href="${moduleLink}">⚙ ${t.settings}</a>`;
-    header.parentNode.insertBefore(shell, header);
-    shell.appendChild(hero);
-
-    const tabbar = document.createElement('nav');
-    tabbar.className = 'mn-pkg-tabs';
-    const defs = [['pkgs',t.packageTab],['sched',t.scheduledTab],['repos',t.reposTab]];
-    defs.forEach(([name,label])=>{
-      const button=document.createElement('button');button.type='button';button.className='mn-pkg-tab';button.dataset.tab=name;button.textContent=label;
-      button.addEventListener('click',()=>{if(typeof window.select_tab==='function')window.select_tab('tab',name);setTimeout(updateTabState,0)});tabbar.appendChild(button);
+    header.parentNode.insertBefore(shell, header); shell.appendChild(hero);
+    const tabbar = document.createElement('nav'); tabbar.className = 'mn-pkg-tabs';
+    [['pkgs',t.packageTab],['sched',t.scheduledTab],['repos',t.reposTab]].forEach(([name,label]) => {
+      const button = document.createElement('button'); button.type='button'; button.className='mn-pkg-tab'; button.dataset.tab=name; button.textContent=label;
+      button.addEventListener('click',()=>{ if(typeof window.select_tab==='function') window.select_tab('tab',name); setTimeout(updateTabState,0); }); tabbar.appendChild(button);
     });
-    shell.appendChild(tabbar);
-    shell.appendChild(tabsBox);
-
-    const updateTabState = () => tabbar.querySelectorAll('.mn-pkg-tab').forEach(button=>button.classList.toggle('active',document.getElementById('div_'+button.dataset.tab)?.classList.contains('opener_shown')));
-    window.setInterval(updateTabState,500);updateTabState();
+    shell.appendChild(tabbar); shell.appendChild(tabsBox);
+    const updateTabState = () => tabbar.querySelectorAll('.mn-pkg-tab').forEach(button => button.classList.toggle('active',document.getElementById('div_'+button.dataset.tab)?.classList.contains('opener_shown')));
+    window.setInterval(updateTabState,500); updateTabState();
   };
 
   const setupPackageActions = () => {
     const form = document.querySelector('form[action="update.cgi"]');
     const table = form?.querySelector('table.ui_columns');
-    if (!form || !table || form.querySelector('.mn-pkg-actionbar')) return;
+    if (!form || !table) return;
+    cleanupLegacySeparators(form);
+    if (form.querySelector('.mn-pkg-actionbar')) return;
     const ok = form.querySelector('#ok_top') || form.querySelector('#ok');
     const refresh = form.querySelector('#refresh_top') || form.querySelector('#refresh');
     const selectAll = form.querySelector('a.select_all');
     const invert = form.querySelector('a.select_invert');
     const wrapper = table.closest('table.wrapper') || table;
-
-    let count = table.querySelectorAll('tbody tr[id^="row_"]').length;
-    const summary = document.createElement('div');summary.className='mn-pkg-summary';summary.innerHTML=`<span class="mn-pkg-count">${t.found(count)}</span>`;wrapper.parentNode.insertBefore(summary,wrapper);
-    const bar=document.createElement('div');bar.className='mn-pkg-actionbar';
+    const count = table.querySelectorAll('tbody tr[id^="row_"]').length;
+    const summary = document.createElement('div'); summary.className='mn-pkg-summary'; summary.innerHTML=`<span class="mn-pkg-count">${t.found(count)}</span>`; wrapper.parentNode.insertBefore(summary,wrapper);
+    const bar = document.createElement('div'); bar.className='mn-pkg-actionbar';
     bar.innerHTML=`<div class="mn-pkg-actions"><button class="mn-pkg-action primary" type="button" data-act="update">${t.selected}</button><button class="mn-pkg-action" type="button" data-act="refresh">${t.refresh}</button></div><div class="mn-pkg-select-actions"><button class="mn-pkg-linkaction" type="button" data-act="all">${t.selectAll}</button><button class="mn-pkg-linkaction" type="button" data-act="invert">${t.invert}</button></div>`;
     wrapper.parentNode.insertBefore(bar,wrapper);
     bar.querySelector('[data-act="update"]').addEventListener('click',()=>ok?.click());
     bar.querySelector('[data-act="refresh"]').addEventListener('click',()=>refresh?.click());
     bar.querySelector('[data-act="all"]').addEventListener('click',()=>selectAll?.click());
     bar.querySelector('[data-act="invert"]').addEventListener('click',()=>invert?.click());
-
-    const walker=document.createTreeWalker(form,NodeFilter.SHOW_TEXT);const remove=[];while(walker.nextNode()){const node=walker.currentNode;if(/\d+\s+(overeenkomende pakketten gevonden|matching packages found|pakete gefunden)/i.test(node.nodeValue||''))remove.push(node)}remove.forEach(node=>{node.nodeValue=''});
+    const walker = document.createTreeWalker(form,NodeFilter.SHOW_TEXT); const remove=[];
+    while(walker.nextNode()){
+      const node=walker.currentNode;
+      if(/\d+\s+(overeenkomende pakketten gevonden|matching packages found|pakete gefunden)/i.test(node.nodeValue||'')) remove.push(node);
+      if(String(node.nodeValue||'').trim()==='|') remove.push(node);
+    }
+    remove.forEach(node=>{node.nodeValue=''});
   };
 
   const fetchStatus = async () => { try { const r=await fetch('/memo-network/live-stats.cgi?_='+Date.now(),{cache:'no-store',credentials:'same-origin'}); return r.ok?await r.json():null; } catch(_){ return null; } };
@@ -147,8 +155,8 @@
   const watchInstall = () => {const started=Number(sessionStorage.getItem(storageKey)||0),recent=started&&Date.now()-started<30*60*1000,hasWebminProgress=!!document.querySelector('ul[data-package-updates]');if(!recent&&!hasWebminProgress)return;ensureStreamCard();collectOutput();const baseline=Number(sessionStorage.getItem(baselineKey));pollTimer=setInterval(async()=>{if(streamDone)return;const data=await fetchStatus();if(!data)return;const now=Number(data.updates_available||0);if(Number.isFinite(baseline)&&baseline>0&&now<baseline)markDone()},4000)};
 
   const boot = () => {
-    document.body.classList.add('mn-package-updates-v5');setupChrome();setupPackageActions();decorateConfirmation();watchInstall();fetchStatus().then(data=>{if(data)baselineUpdates=Number(data.updates_available||0)});
-    const observer=new MutationObserver(()=>{setupChrome();setupPackageActions();decorateConfirmation();if(streamCard)collectOutput()});observer.observe(document.documentElement,{childList:true,subtree:true});
+    document.body.classList.add('mn-package-updates-v5'); setupChrome(); setupPackageActions(); decorateConfirmation(); watchInstall(); fetchStatus().then(data=>{if(data)baselineUpdates=Number(data.updates_available||0)});
+    const observer=new MutationObserver(()=>{setupChrome();setupPackageActions();cleanupLegacySeparators(document);decorateConfirmation();if(streamCard)collectOutput()}); observer.observe(document.documentElement,{childList:true,subtree:true});
   };
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true}); else boot();
 })();
