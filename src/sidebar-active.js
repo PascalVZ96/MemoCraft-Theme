@@ -182,7 +182,7 @@
     if (actions && !actions.querySelector('[data-memo-v5="1"]')) {
       const link = dashboard.createElement('a');
       link.className = 'quick-btn';
-      link.href = '/memo-network/control-center.html';
+      link.href = `/memo-network/control-center.html?v=${encodeURIComponent(installedVersion)}`;
       link.dataset.memoV5 = '1';
       link.textContent = 'Control Center v5';
       link.style.borderColor = '#6d5ca8';
