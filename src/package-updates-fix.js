@@ -109,6 +109,18 @@
     window.setInterval(updateTabState,500);updateTabState();
   };
 
+  const cleanupLegacySeparators = () => {
+    const area = document.getElementById('div_pkgs');
+    if (!area) return;
+    const walker = document.createTreeWalker(area, NodeFilter.SHOW_TEXT);
+    const remove = [];
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      if (/^\s*\|\s*$/.test(node.nodeValue || '')) remove.push(node);
+    }
+    remove.forEach(node => node.remove());
+  };
+
   const setupPackageActions = () => {
     const form = document.querySelector('form[action="update.cgi"]');
     const table = form?.querySelector('table.ui_columns');
@@ -130,6 +142,7 @@
     bar.querySelector('[data-act="invert"]').addEventListener('click',()=>invert?.click());
 
     const walker=document.createTreeWalker(form,NodeFilter.SHOW_TEXT);const remove=[];while(walker.nextNode()){const node=walker.currentNode;if(/\d+\s+(overeenkomende pakketten gevonden|matching packages found|pakete gefunden)/i.test(node.nodeValue||''))remove.push(node)}remove.forEach(node=>{node.nodeValue=''});
+    cleanupLegacySeparators();
   };
 
   const fetchStatus = async () => { try { const r=await fetch('/memo-network/live-stats.cgi?_='+Date.now(),{cache:'no-store',credentials:'same-origin'}); return r.ok?await r.json():null; } catch(_){ return null; } };
@@ -147,8 +160,8 @@
   const watchInstall = () => {const started=Number(sessionStorage.getItem(storageKey)||0),recent=started&&Date.now()-started<30*60*1000,hasWebminProgress=!!document.querySelector('ul[data-package-updates]');if(!recent&&!hasWebminProgress)return;ensureStreamCard();collectOutput();const baseline=Number(sessionStorage.getItem(baselineKey));pollTimer=setInterval(async()=>{if(streamDone)return;const data=await fetchStatus();if(!data)return;const now=Number(data.updates_available||0);if(Number.isFinite(baseline)&&baseline>0&&now<baseline)markDone()},4000)};
 
   const boot = () => {
-    document.body.classList.add('mn-package-updates-v5');setupChrome();setupPackageActions();decorateConfirmation();watchInstall();fetchStatus().then(data=>{if(data)baselineUpdates=Number(data.updates_available||0)});
-    const observer=new MutationObserver(()=>{setupChrome();setupPackageActions();decorateConfirmation();if(streamCard)collectOutput()});observer.observe(document.documentElement,{childList:true,subtree:true});
+    document.body.classList.add('mn-package-updates-v5');setupChrome();setupPackageActions();cleanupLegacySeparators();decorateConfirmation();watchInstall();fetchStatus().then(data=>{if(data)baselineUpdates=Number(data.updates_available||0)});
+    const observer=new MutationObserver(()=>{setupChrome();setupPackageActions();cleanupLegacySeparators();decorateConfirmation();if(streamCard)collectOutput()});observer.observe(document.documentElement,{childList:true,subtree:true});
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
