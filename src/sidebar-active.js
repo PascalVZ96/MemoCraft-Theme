@@ -1,6 +1,6 @@
 (() => {
   const dashboardUrl = "/right.cgi";
-  const installedVersion = "5.0.0-alpha6";
+  const installedVersion = "5.0.0-alpha7";
   const releaseDate = "12-08-2026";
   const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
   const i18nUrl = "/memocraft-theme/memo-i18n.js";
