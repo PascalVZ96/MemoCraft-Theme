@@ -210,13 +210,36 @@
         if (path !== '/memo-network/control-center.html') continue;
         const doc = frame.document;
         if (!doc?.head) return;
+
+        if (doc.documentElement.dataset.memoAmpTopFix !== '1') {
+          doc.documentElement.dataset.memoAmpTopFix = '1';
+          doc.addEventListener('click', (event) => {
+            const link = event.target.closest?.('a[href^="https://amp.memocraft.nl"],a[data-memo-amp-link="1"]');
+            if (!link) return;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            const popup = window.top.open('https://amp.memocraft.nl', '_blank');
+            if (popup) {
+              try { popup.opener = null; } catch (_error) {}
+            } else {
+              window.top.location.href = 'https://amp.memocraft.nl';
+            }
+          }, true);
+        }
+
+        doc.querySelectorAll('a[href^="https://amp.memocraft.nl"]').forEach((link) => {
+          link.setAttribute('target', '_blank');
+          link.setAttribute('rel', 'noopener noreferrer');
+          link.dataset.memoAmpLink = '1';
+        });
+
         const badge = doc.querySelector('.pill.dev');
         if (badge) badge.textContent = `v${installedVersion.replace('-', ' ')}`;
         const footer = doc.querySelector('.footer');
         if (footer) footer.textContent = `MemoNetwork v5 Control Center · ${installedVersion.split('-')[1] || 'preview'} preview`;
         if (doc.querySelector('script[data-memo-v5-service-details="1"]')) return;
         const script = doc.createElement('script');
-        script.src = `/memo-network/control-center-services.js?v=${encodeURIComponent(installedVersion)}`;
+        script.src = `/memo-network/control-center-services.js?v=${encodeURIComponent(installedVersion)}&_=${Date.now()}`;
         script.dataset.memoV5ServiceDetails = '1';
         doc.head.appendChild(script);
       }
