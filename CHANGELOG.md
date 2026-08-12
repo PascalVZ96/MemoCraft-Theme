@@ -4,6 +4,17 @@
 
 De volgende grote MemoNetwork-release. Ontwikkeling vindt plaats op de aparte `v5` branch totdat de release stabiel genoeg is om naar `main` te gaan.
 
+### Alpha 3
+
+- Servicekaarten in het v5 Control Center zijn nu klikbaar.
+- Docker toont per container naam, status, image en poorten.
+- AMP toont per instance naam, module, paneelpoort en actieve status.
+- MinIO toont modus, container, status, poorten en container-ID.
+- WireGuard toont interface, peers, endpoint, allowed IPs, handshake-leeftijd en verkeer per peer.
+- Geselecteerde services krijgen een duidelijke highlight en een uitklapbaar live detailpaneel.
+- Service-details worden automatisch live bijgewerkt en ondersteunen toetsenbordbediening.
+- Service-detailteksten ondersteunen NL / DE / EN.
+
 ### Alpha 2
 
 - v5-overzicht blijft standaard compact en rustiger dan het v4-dashboard.
