@@ -107,7 +107,7 @@
       });
       html += '</div>';
     }
-    return html + `<div class="memo-detail-actions"><a class="memo-action primary" href="https://amp.memocraft.nl">${t('openAmp')}</a></div>`;
+    return html + `<div class="memo-detail-actions"><a class="memo-action primary" href="https://amp.memocraft.nl" target="_blank" rel="noopener noreferrer">${t('openAmp')}</a></div>`;
   };
 
   const renderMinio = (d) => {
@@ -131,12 +131,20 @@
     return html + `<div class="memo-detail-actions"><a class="memo-action" href="/net/index.cgi">${t('networkManage')}</a></div>`;
   };
 
+  const fixAmpLinks = () => {
+    document.querySelectorAll('a[href^="https://amp.memocraft.nl"]').forEach(link => {
+      link.setAttribute('target', '_blank');
+      link.setAttribute('rel', 'noopener noreferrer');
+    });
+  };
+
   const renderSelected = () => {
     if (!selected || !latest) return;
     panel.classList.add('open');
     panel.querySelector('#memo-detail-title').textContent = `${label(selected)} · Details`;
     const body = panel.querySelector('#memo-detail-body');
     body.innerHTML = selected === 'docker' ? renderDocker(latest) : selected === 'amp' ? renderAmp(latest) : selected === 'minio' ? renderMinio(latest) : renderWireguard(latest);
+    fixAmpLinks();
     grid.querySelectorAll('.service').forEach(card => card.classList.toggle('selected', keyFromCard(card) === selected));
   };
 
@@ -212,12 +220,17 @@
       latest = await response.json();
       enhanceCards();
       renderSelected();
+      fixAmpLinks();
     } catch (_error) {}
   };
 
-  const observer = new MutationObserver(enhanceCards);
-  observer.observe(grid, {childList:true, subtree:true});
+  const observer = new MutationObserver(() => {
+    enhanceCards();
+    fixAmpLinks();
+  });
+  observer.observe(document.documentElement, {childList:true, subtree:true});
   enhanceCards();
+  fixAmpLinks();
   refresh();
   setInterval(refresh, 2500);
 
