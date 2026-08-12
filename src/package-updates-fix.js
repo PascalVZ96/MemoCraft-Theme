@@ -59,7 +59,7 @@
     body.mn-package-updates-v5 input.ui_textbox,body.mn-package-updates-v5 input[type=text],body.mn-package-updates-v5 input[type=search],body.mn-package-updates-v5 select{min-height:37px!important;border:1px solid #36506e!important;border-radius:8px!important;background:#091626!important;color:#f8fbff!important;padding:7px 10px!important;box-shadow:none!important}
     .mn-pkg-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:13px 0 8px}.mn-pkg-count{display:inline-flex;align-items:center;gap:7px;color:#b7cae0;font-size:11px;font-weight:800}.mn-pkg-count:before{content:'';width:7px;height:7px;border-radius:50%;background:#38bdf8;box-shadow:0 0 8px rgba(56,189,248,.7)}
     .mn-pkg-actionbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 10px;padding:10px 11px;border:1px solid #294361;border-radius:11px;background:#0e1a29}.mn-pkg-actions,.mn-pkg-select-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.mn-pkg-action{min-height:35px;border:1px solid #365979;border-radius:8px;background:#122239;color:#c9ddf1;padding:7px 11px;font:800 11px/16px Inter,Arial,sans-serif;cursor:pointer}.mn-pkg-action:hover{border-color:#4b9cf7}.mn-pkg-action.primary{background:linear-gradient(180deg,#3484f4,#2563eb);border-color:#5aa2f8;color:#fff;box-shadow:0 4px 12px rgba(37,99,235,.18)}.mn-pkg-linkaction{border:0;background:transparent;color:#67c5ff;padding:6px 4px;font:700 11px Inter,Arial,sans-serif;cursor:pointer}
-    body.mn-package-updates-v5 #ok_top,body.mn-package-updates-v5 #refresh_top,body.mn-package-updates-v5 table.ui_form_end_buttons,body.mn-package-updates-v5 a.select_all,body.mn-package-updates-v5 a.select_invert{display:none!important}
+    body.mn-package-updates-v5 #ok_top,body.mn-package-updates-v5 #refresh_top,body.mn-package-updates-v5 #div_pkgs table.ui_form_end_buttons,body.mn-package-updates-v5 #div_pkgs a.select_all,body.mn-package-updates-v5 #div_pkgs a.select_invert{display:none!important}
     body.mn-package-updates-v5 table.ui_columns{width:100%!important;margin:0!important;border:1px solid #294361!important;border-radius:13px!important;border-collapse:separate!important;border-spacing:0!important;background:#101d2d!important;overflow:hidden!important;box-shadow:0 8px 24px rgba(0,0,0,.13)!important}
     body.mn-package-updates-v5 table.ui_columns thead td{background:#13243a!important;color:#8fc8f8!important;font-size:10px!important;font-weight:850!important;text-transform:uppercase!important;letter-spacing:.055em!important;padding:12px 13px!important;border:0!important;border-bottom:1px solid #2a415e!important}body.mn-package-updates-v5 table.ui_columns tbody td{background:#101d2d!important;color:#eef6ff!important;padding:13px!important;border:0!important;border-top:1px solid #223750!important;vertical-align:middle!important}body.mn-package-updates-v5 table.ui_columns tbody tr:first-child td{border-top:0!important}body.mn-package-updates-v5 table.ui_columns tbody tr.mainsel td,body.mn-package-updates-v5 table.ui_columns tbody tr.mainhighsel td{background:#102b38!important}body.mn-package-updates-v5 table.ui_columns tbody tr:hover td{background:#13243a!important}body.mn-package-updates-v5 table.ui_columns font[color='#00aa00'],body.mn-package-updates-v5 table.ui_columns font[color='#00AA00']{color:#86efac!important}body.mn-package-updates-v5 input.ui_checkbox{width:17px!important;height:17px!important;accent-color:#3b82f6!important}
     body.mn-package-updates-v5 input.ui_submit,body.mn-package-updates-v5 form input[type=submit],body.mn-package-updates-v5 form button{min-height:36px!important;border:1px solid #4f9cf8!important;border-radius:8px!important;background:linear-gradient(180deg,#3484f4,#2563eb)!important;color:#fff!important;font-weight:800!important;padding:7px 13px!important;box-shadow:0 4px 12px rgba(37,99,235,.18)!important;text-shadow:none!important;cursor:pointer!important}
@@ -79,65 +79,57 @@
   let pollTimer = null;
   const normalized = value => String(value || '').replace(/\s+/g,' ').trim().toLowerCase();
 
-  const cleanupLegacySeparators = root => {
-    if (!root) return;
-    const parents = new Set();
-    root.querySelectorAll('a.select_all,a.select_invert').forEach(link => { if (link.parentNode) parents.add(link.parentNode); });
-    parents.forEach(parent => {
-      [...parent.childNodes].forEach(node => {
-        if (node.nodeType === Node.TEXT_NODE && String(node.nodeValue || '').trim() === '|') node.nodeValue = '';
-      });
-    });
-  };
-
   const setupChrome = () => {
     if (document.querySelector('.mn-pkg-hero')) return;
     const header = document.querySelector('table.header');
     const tabs = document.querySelector('table.ui_tabs');
     const tabsBox = document.querySelector('table.ui_tabs_box');
     if (!header || !tabs || !tabsBox) return;
+
     const moduleLink = header.querySelector('#headln2l a')?.getAttribute('href') || '/config.cgi?module=package-updates';
-    const shell = document.createElement('div'); shell.className = 'mn-pkg-shell';
-    const hero = document.createElement('section'); hero.className = 'mn-pkg-hero';
+    const shell = document.createElement('div');
+    shell.className = 'mn-pkg-shell';
+    const hero = document.createElement('section');
+    hero.className = 'mn-pkg-hero';
     hero.innerHTML = `<div><h1>${t.title}</h1><p>${t.subtitle}</p></div><a class="mn-pkg-settings" href="${moduleLink}">⚙ ${t.settings}</a>`;
-    header.parentNode.insertBefore(shell, header); shell.appendChild(hero);
-    const tabbar = document.createElement('nav'); tabbar.className = 'mn-pkg-tabs';
-    [['pkgs',t.packageTab],['sched',t.scheduledTab],['repos',t.reposTab]].forEach(([name,label]) => {
-      const button = document.createElement('button'); button.type='button'; button.className='mn-pkg-tab'; button.dataset.tab=name; button.textContent=label;
-      button.addEventListener('click',()=>{ if(typeof window.select_tab==='function') window.select_tab('tab',name); setTimeout(updateTabState,0); }); tabbar.appendChild(button);
+    header.parentNode.insertBefore(shell, header);
+    shell.appendChild(hero);
+
+    const tabbar = document.createElement('nav');
+    tabbar.className = 'mn-pkg-tabs';
+    const defs = [['pkgs',t.packageTab],['sched',t.scheduledTab],['repos',t.reposTab]];
+    defs.forEach(([name,label])=>{
+      const button=document.createElement('button');button.type='button';button.className='mn-pkg-tab';button.dataset.tab=name;button.textContent=label;
+      button.addEventListener('click',()=>{if(typeof window.select_tab==='function')window.select_tab('tab',name);setTimeout(updateTabState,0)});tabbar.appendChild(button);
     });
-    shell.appendChild(tabbar); shell.appendChild(tabsBox);
-    const updateTabState = () => tabbar.querySelectorAll('.mn-pkg-tab').forEach(button => button.classList.toggle('active',document.getElementById('div_'+button.dataset.tab)?.classList.contains('opener_shown')));
-    window.setInterval(updateTabState,500); updateTabState();
+    shell.appendChild(tabbar);
+    shell.appendChild(tabsBox);
+
+    const updateTabState = () => tabbar.querySelectorAll('.mn-pkg-tab').forEach(button=>button.classList.toggle('active',document.getElementById('div_'+button.dataset.tab)?.classList.contains('opener_shown')));
+    window.setInterval(updateTabState,500);updateTabState();
   };
 
   const setupPackageActions = () => {
     const form = document.querySelector('form[action="update.cgi"]');
     const table = form?.querySelector('table.ui_columns');
-    if (!form || !table) return;
-    cleanupLegacySeparators(form);
-    if (form.querySelector('.mn-pkg-actionbar')) return;
+    if (!form || !table || form.querySelector('.mn-pkg-actionbar')) return;
     const ok = form.querySelector('#ok_top') || form.querySelector('#ok');
     const refresh = form.querySelector('#refresh_top') || form.querySelector('#refresh');
     const selectAll = form.querySelector('a.select_all');
     const invert = form.querySelector('a.select_invert');
     const wrapper = table.closest('table.wrapper') || table;
-    const count = table.querySelectorAll('tbody tr[id^="row_"]').length;
-    const summary = document.createElement('div'); summary.className='mn-pkg-summary'; summary.innerHTML=`<span class="mn-pkg-count">${t.found(count)}</span>`; wrapper.parentNode.insertBefore(summary,wrapper);
-    const bar = document.createElement('div'); bar.className='mn-pkg-actionbar';
+
+    let count = table.querySelectorAll('tbody tr[id^="row_"]').length;
+    const summary = document.createElement('div');summary.className='mn-pkg-summary';summary.innerHTML=`<span class="mn-pkg-count">${t.found(count)}</span>`;wrapper.parentNode.insertBefore(summary,wrapper);
+    const bar=document.createElement('div');bar.className='mn-pkg-actionbar';
     bar.innerHTML=`<div class="mn-pkg-actions"><button class="mn-pkg-action primary" type="button" data-act="update">${t.selected}</button><button class="mn-pkg-action" type="button" data-act="refresh">${t.refresh}</button></div><div class="mn-pkg-select-actions"><button class="mn-pkg-linkaction" type="button" data-act="all">${t.selectAll}</button><button class="mn-pkg-linkaction" type="button" data-act="invert">${t.invert}</button></div>`;
     wrapper.parentNode.insertBefore(bar,wrapper);
     bar.querySelector('[data-act="update"]').addEventListener('click',()=>ok?.click());
     bar.querySelector('[data-act="refresh"]').addEventListener('click',()=>refresh?.click());
     bar.querySelector('[data-act="all"]').addEventListener('click',()=>selectAll?.click());
     bar.querySelector('[data-act="invert"]').addEventListener('click',()=>invert?.click());
-    const walker = document.createTreeWalker(form,NodeFilter.SHOW_TEXT); const remove=[];
-    while(walker.nextNode()){
-      const node=walker.currentNode;
-      if(/\d+\s+(overeenkomende pakketten gevonden|matching packages found|pakete gefunden)/i.test(node.nodeValue||'')) remove.push(node);
-      if(String(node.nodeValue||'').trim()==='|') remove.push(node);
-    }
-    remove.forEach(node=>{node.nodeValue=''});
+
+    const walker=document.createTreeWalker(form,NodeFilter.SHOW_TEXT);const remove=[];while(walker.nextNode()){const node=walker.currentNode;if(/\d+\s+(overeenkomende pakketten gevonden|matching packages found|pakete gefunden)/i.test(node.nodeValue||''))remove.push(node)}remove.forEach(node=>{node.nodeValue=''});
   };
 
   const fetchStatus = async () => { try { const r=await fetch('/memo-network/live-stats.cgi?_='+Date.now(),{cache:'no-store',credentials:'same-origin'}); return r.ok?await r.json():null; } catch(_){ return null; } };
@@ -155,8 +147,8 @@
   const watchInstall = () => {const started=Number(sessionStorage.getItem(storageKey)||0),recent=started&&Date.now()-started<30*60*1000,hasWebminProgress=!!document.querySelector('ul[data-package-updates]');if(!recent&&!hasWebminProgress)return;ensureStreamCard();collectOutput();const baseline=Number(sessionStorage.getItem(baselineKey));pollTimer=setInterval(async()=>{if(streamDone)return;const data=await fetchStatus();if(!data)return;const now=Number(data.updates_available||0);if(Number.isFinite(baseline)&&baseline>0&&now<baseline)markDone()},4000)};
 
   const boot = () => {
-    document.body.classList.add('mn-package-updates-v5'); setupChrome(); setupPackageActions(); decorateConfirmation(); watchInstall(); fetchStatus().then(data=>{if(data)baselineUpdates=Number(data.updates_available||0)});
-    const observer=new MutationObserver(()=>{setupChrome();setupPackageActions();cleanupLegacySeparators(document);decorateConfirmation();if(streamCard)collectOutput()}); observer.observe(document.documentElement,{childList:true,subtree:true});
+    document.body.classList.add('mn-package-updates-v5');setupChrome();setupPackageActions();decorateConfirmation();watchInstall();fetchStatus().then(data=>{if(data)baselineUpdates=Number(data.updates_available||0)});
+    const observer=new MutationObserver(()=>{setupChrome();setupPackageActions();decorateConfirmation();if(streamCard)collectOutput()});observer.observe(document.documentElement,{childList:true,subtree:true});
   };
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true}); else boot();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
