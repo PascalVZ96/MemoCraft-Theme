@@ -4,6 +4,16 @@
 
 De volgende grote MemoNetwork-release. Ontwikkeling vindt plaats op de aparte `v5` branch totdat de release stabiel genoeg is om naar `main` te gaan.
 
+### Alpha 6
+
+- De pakketupdatepagina gebruikt nu een eigen MemoNetwork v5-header in plaats van Webmins oude gecentreerde legacy-header.
+- De oude image-based Webmin-tabs zijn vervangen door moderne functionele tabs voor pakketupdates, geplande updates en pakketbronnen.
+- Dubbele actieknoppen boven en onder de pakketlijst zijn verwijderd uit beeld en vervangen door één duidelijke actiebalk.
+- Aantal gevonden updates, selectie-acties en pakketbeheer staan nu logisch bij elkaar.
+- Het grote omkaderde Webmin-tabpaneel is verwijderd; filterblok en pakketlijst worden als afzonderlijke compacte kaarten weergegeven.
+- Webmins bestaande update- en tabfunctionaliteit blijft onderliggend behouden.
+- Installatie-overlay en live voortgangsstatus blijven onderdeel van de nieuwe interface.
+
 ### Alpha 5
 
 - De pakketupdatepagina is opnieuw opgebouwd rond Webmins echte native classes in plaats van generieke tabelherkenning.
