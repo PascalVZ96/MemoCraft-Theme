@@ -1,7 +1,7 @@
 (() => {
   const dashboardUrl = "/right.cgi";
-  const installedVersion = "5.0.0-alpha2";
-  const releaseDate = "11-08-2026";
+  const installedVersion = "5.0.0-alpha3";
+  const releaseDate = "12-08-2026";
   const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
   const i18nUrl = "/memocraft-theme/memo-i18n.js";
   let i18nLoading = false;
@@ -202,6 +202,22 @@
     dashboard.querySelector('[data-memo-rc="1"]')?.remove();
   };
 
+  const setupV5ControlCenter = () => {
+    try {
+      for (const frame of Array.from(parent.frames)) {
+        if (frame === window) continue;
+        const path = String(frame.location?.pathname || '');
+        if (path !== '/memo-network/control-center.html') continue;
+        const doc = frame.document;
+        if (!doc?.head || doc.querySelector('script[data-memo-v5-service-details="1"]')) return;
+        const script = doc.createElement('script');
+        script.src = `/memo-network/control-center-services.js?v=${encodeURIComponent(installedVersion)}`;
+        script.dataset.memoV5ServiceDetails = '1';
+        doc.head.appendChild(script);
+      }
+    } catch (_error) {}
+  };
+
   const setupVersionFooter = () => {
     if (document.getElementById('memo-version-footer')) return;
     const style = document.createElement('style');
@@ -258,6 +274,7 @@
     setupBrand();
     setupVersionFooter();
     setupDashboardLinks();
+    setupV5ControlCenter();
     if (i18nLoaded || window.MemoNetworkI18n) window.MemoNetworkI18n?.refresh?.();
     const current = normalize(currentContentUrl());
     if (!current) return;
