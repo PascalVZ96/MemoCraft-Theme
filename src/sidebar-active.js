@@ -1,6 +1,6 @@
 (() => {
   const dashboardUrl = "/right.cgi";
-  const installedVersion = "5.0.0-alpha3";
+  const installedVersion = "5.0.0-alpha4";
   const releaseDate = "12-08-2026";
   const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
   const i18nUrl = "/memocraft-theme/memo-i18n.js";
@@ -209,7 +209,12 @@
         const path = String(frame.location?.pathname || '');
         if (path !== '/memo-network/control-center.html') continue;
         const doc = frame.document;
-        if (!doc?.head || doc.querySelector('script[data-memo-v5-service-details="1"]')) return;
+        if (!doc?.head) return;
+        const badge = doc.querySelector('.pill.dev');
+        if (badge) badge.textContent = `v${installedVersion.replace('-', ' ')}`;
+        const footer = doc.querySelector('.footer');
+        if (footer) footer.textContent = `MemoNetwork v5 Control Center · ${installedVersion.split('-')[1] || 'preview'} preview`;
+        if (doc.querySelector('script[data-memo-v5-service-details="1"]')) return;
         const script = doc.createElement('script');
         script.src = `/memo-network/control-center-services.js?v=${encodeURIComponent(installedVersion)}`;
         script.dataset.memoV5ServiceDetails = '1';
