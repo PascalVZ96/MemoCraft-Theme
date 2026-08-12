@@ -2,61 +2,254 @@
   const path = String(window.location.pathname || '');
   if (!path.includes('/package-updates/')) return;
 
-  const dark = '#111a27';
-  const panel = '#162235';
-  const selected = '#173d2d';
-  const text = '#e5edf7';
-  const muted = '#b8c7da';
-  const blue = '#7dc4ff';
+  const cookie = String(document.cookie || '').match(/(?:^|;\s*)memo_lang=(nl|de|en)(?:;|$)/i);
+  const lang = cookie ? cookie[1].toLowerCase() : 'en';
+  const copy = {
+    nl: {
+      preparing: 'Update voorbereiden…',
+      preparingSub: 'De geselecteerde pakketten worden klaargezet voor installatie.',
+      installing: 'Pakketupdate wordt geïnstalleerd',
+      installingSub: 'Laat deze pagina open. APT/dpkg kan tussendoor even geen nieuwe uitvoer tonen, maar de installatie draait door.',
+      activity: 'Installatie-uitvoer',
+      waiting: 'Wachten op nieuwe uitvoer van het pakketbeheer…',
+      finished: 'Update afgerond',
+      finishedSub: 'Webmin heeft de installatie afgerond. Je kunt nu terug naar de pakketlijst.',
+      verified: 'Update afgerond en pakketstatus vernieuwd',
+      verifiedSub: 'Het aantal beschikbare updates is verminderd.',
+      back: 'Terug naar pakketupdates',
+      checking: 'Pakketstatus controleren…',
+      ready: 'Klaar om te installeren',
+      readySub: 'Controleer de pakketwijzigingen hieronder en start daarna de installatie.',
+      install: 'Installeren',
+      working: 'Bezig…',
+      updatePage: 'Software-updates',
+    },
+    de: {
+      preparing: 'Update wird vorbereitet…',
+      preparingSub: 'Die ausgewählten Pakete werden für die Installation vorbereitet.',
+      installing: 'Paketupdate wird installiert',
+      installingSub: 'Diese Seite geöffnet lassen. APT/dpkg kann zwischendurch kurz keine neue Ausgabe zeigen, die Installation läuft trotzdem weiter.',
+      activity: 'Installationsausgabe',
+      waiting: 'Warten auf neue Ausgabe der Paketverwaltung…',
+      finished: 'Update abgeschlossen',
+      finishedSub: 'Webmin hat die Installation abgeschlossen. Du kannst jetzt zur Paketliste zurückkehren.',
+      verified: 'Update abgeschlossen und Paketstatus aktualisiert',
+      verifiedSub: 'Die Anzahl verfügbarer Updates wurde reduziert.',
+      back: 'Zurück zu Paketupdates',
+      checking: 'Paketstatus wird geprüft…',
+      ready: 'Bereit zur Installation',
+      readySub: 'Prüfe die Paketänderungen unten und starte anschließend die Installation.',
+      install: 'Installieren',
+      working: 'Wird installiert…',
+      updatePage: 'Software-Updates',
+    },
+    en: {
+      preparing: 'Preparing update…',
+      preparingSub: 'The selected packages are being prepared for installation.',
+      installing: 'Package update is being installed',
+      installingSub: 'Keep this page open. APT/dpkg can be quiet for a while, but the installation will continue in the background.',
+      activity: 'Installation output',
+      waiting: 'Waiting for new package-manager output…',
+      finished: 'Update completed',
+      finishedSub: 'Webmin has completed the installation. You can now return to the package list.',
+      verified: 'Update completed and package status refreshed',
+      verifiedSub: 'The number of available updates has decreased.',
+      back: 'Back to package updates',
+      checking: 'Checking package status…',
+      ready: 'Ready to install',
+      readySub: 'Review the package changes below and then start the installation.',
+      install: 'Install',
+      working: 'Installing…',
+      updatePage: 'Software updates',
+    }
+  }[lang];
 
-  const rgb = value => {
-    const match = String(value || '').match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
-    return match ? match.slice(1, 4).map(Number) : null;
-  };
-  const isLight = value => { const c = rgb(value); return c && ((c[0]*299+c[1]*587+c[2]*114)/1000)>180; };
-  const isBrightGreen = value => { const c=rgb(value); return c&&c[1]>180&&c[1]>c[0]*1.15&&c[1]>c[2]*1.05; };
-  const force = (element, property, value) => element.style.setProperty(property,value,'important');
-  const repaint = () => {
-    document.documentElement.style.setProperty('color-scheme','dark','important');
-    force(document.body,'background','#0a111b'); force(document.body,'color',text);
-    document.querySelectorAll('table, tbody, thead, tfoot, tr, td, th, div, form').forEach(element => {
-      const background=getComputedStyle(element).backgroundColor;
-      if(isBrightGreen(background)){force(element,'background',selected);force(element,'background-color',selected);force(element,'color','#ecfdf5');}
-      else if(isLight(background)){const header=element.tagName==='TH'||element.closest('thead');force(element,'background',header?panel:dark);force(element,'background-color',header?panel:dark);force(element,'color',text);}
-    });
-    document.querySelectorAll('td, th, label, b, strong, span, font').forEach(element => {
-      const style=getComputedStyle(element); if(isLight(style.backgroundColor)||isLight(getComputedStyle(element.parentElement||element).backgroundColor))force(element,'color',text); else if(style.color==='rgb(238, 238, 238)'||style.color==='rgb(221, 221, 221)')force(element,'color',muted);
-    });
-    document.querySelectorAll('a').forEach(element=>force(element,'color',blue));
-    document.querySelectorAll('input[type="text"], input[type="search"], select, textarea').forEach(element=>{force(element,'background','#0b1523');force(element,'color','#f8fafc');force(element,'border-color','#3a4d68');});
-  };
-  repaint(); document.addEventListener('DOMContentLoaded',repaint,{once:true});
-  new MutationObserver(repaint).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['style','bgcolor','class']});
-})();
+  const style = document.createElement('style');
+  style.id = 'mn-package-updates-v5-style';
+  style.textContent = `
+    body.mn-package-updates-v5{background:#08121f!important;color:#f8fbff!important}
+    body.mn-package-updates-v5 h1{font-size:25px!important;font-weight:850!important;letter-spacing:-.02em!important;margin:10px 0 18px!important;color:#f8fbff!important}
+    body.mn-package-updates-v5 form{margin-block:12px!important}
+    body.mn-package-updates-v5 table{border-collapse:separate!important;border-spacing:0!important;border:1px solid #28415f!important;border-radius:15px!important;overflow:hidden!important;background:#101d2d!important;box-shadow:0 10px 28px rgba(0,0,0,.14)!important}
+    body.mn-package-updates-v5 th{background:#13243a!important;color:#8fc8f8!important;font-size:11px!important;font-weight:850!important;text-transform:uppercase!important;letter-spacing:.04em!important;padding:13px 14px!important;border-color:#2a415e!important}
+    body.mn-package-updates-v5 td{background:#101d2d!important;color:#f1f7ff!important;padding:13px 14px!important;border-color:#263d59!important;vertical-align:middle!important}
+    body.mn-package-updates-v5 tr:hover>td{background:#13243a!important}
+    body.mn-package-updates-v5 input[type=checkbox]{width:17px!important;height:17px!important;accent-color:#3b82f6!important}
+    body.mn-package-updates-v5 input[type=submit],body.mn-package-updates-v5 input[type=button],body.mn-package-updates-v5 button{min-height:38px!important;border:1px solid #60a5fa!important;border-radius:9px!important;background:linear-gradient(180deg,#3b82f6,#2563eb)!important;color:#fff!important;font-weight:850!important;padding:8px 15px!important;box-shadow:0 6px 18px rgba(37,99,235,.22)!important;text-shadow:none!important;cursor:pointer!important}
+    body.mn-package-updates-v5 input[type=submit]:hover,body.mn-package-updates-v5 input[type=button]:hover,body.mn-package-updates-v5 button:hover{background:linear-gradient(180deg,#60a5fa,#2563eb)!important;transform:translateY(-1px)}
+    body.mn-package-updates-v5 input[type=text],body.mn-package-updates-v5 input[type=search],body.mn-package-updates-v5 select{min-height:38px!important;border:1px solid #36506e!important;border-radius:9px!important;background:#0a1726!important;color:#f8fbff!important;padding:7px 10px!important}
+    body.mn-package-updates-v5 a{color:#67c5ff!important}
+    body.mn-package-updates-v5 ul[data-package-updates]{margin:10px 0 18px!important;padding:12px 16px 12px 34px!important;border:1px solid #28415f!important;border-radius:12px!important;background:#0c1929!important}
+    body.mn-package-updates-v5 ul[data-package-updates] li{padding:4px 0!important;color:#dbeafe!important}
+    .mn-pkg-ready{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:10px 0 16px;padding:15px 17px;border:1px solid #315d8a;border-radius:14px;background:linear-gradient(135deg,#10233a,#0c1929);box-shadow:0 10px 30px rgba(0,0,0,.16)}
+    .mn-pkg-ready strong{display:block;color:#fff;font-size:15px}.mn-pkg-ready span{display:block;margin-top:4px;color:#91a9c4;font-size:12px}
+    .mn-install-overlay{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:24px;background:rgba(3,9,17,.78);backdrop-filter:blur(4px)}
+    .mn-install-card{width:min(620px,94vw);border:1px solid #315d8a;border-radius:18px;background:linear-gradient(145deg,#14243a,#0b1726);padding:22px;box-shadow:0 28px 90px rgba(0,0,0,.48)}
+    .mn-install-head{display:flex;align-items:center;gap:14px}.mn-spinner{width:38px;height:38px;border-radius:50%;border:4px solid #203a58;border-top-color:#38bdf8;animation:mnspin .8s linear infinite;flex:0 0 auto}@keyframes mnspin{to{transform:rotate(360deg)}}
+    .mn-install-head strong{display:block;font-size:18px}.mn-install-head span{display:block;margin-top:4px;color:#93aac4;font-size:12px;line-height:1.45}
+    .mn-progress-track{height:7px;margin-top:18px;border-radius:99px;background:#07111d;overflow:hidden}.mn-progress-track i{display:block;width:35%;height:100%;border-radius:99px;background:linear-gradient(90deg,#2563eb,#38bdf8,#a78bfa);animation:mnbar 1.2s ease-in-out infinite alternate}@keyframes mnbar{from{transform:translateX(-40%)}to{transform:translateX(220%)}}
+    .mn-progress-note{margin-top:11px;color:#7f98b5;font-size:11px}
+    .mn-stream-card{position:sticky;top:8px;z-index:30;margin:10px 0 16px;padding:16px;border:1px solid #315d8a;border-radius:14px;background:linear-gradient(135deg,#10233a,#0b1726);box-shadow:0 14px 34px rgba(0,0,0,.2)}
+    .mn-stream-top{display:flex;align-items:center;gap:12px}.mn-stream-top .mn-spinner{width:28px;height:28px;border-width:3px}.mn-stream-title{font-weight:850;font-size:15px}.mn-stream-sub{margin-top:3px;color:#91a9c4;font-size:11px}.mn-stream-log{margin-top:12px;max-height:145px;overflow:auto;padding:10px 12px;border-radius:9px;background:#07111d;color:#bcd0e7;font:11px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap}.mn-stream-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.mn-stream-actions a{display:inline-flex;padding:8px 11px;border-radius:8px;background:#2563eb;color:white!important;border:1px solid #60a5fa;text-decoration:none!important;font-weight:800}.mn-stream-card.done{border-color:#247653}.mn-stream-card.done .mn-spinner{animation:none;border-color:#22c55e;background:#22c55e;position:relative}.mn-stream-card.done .mn-spinner:after{content:'✓';position:absolute;inset:0;display:grid;place-items:center;color:#062014;font-weight:900;font-size:16px}
+    @media(max-width:700px){.mn-pkg-ready{align-items:flex-start;flex-direction:column}.mn-install-card{padding:18px}}
+  `;
+  document.head.appendChild(style);
 
-(() => {
-  const API='/memo-network/live-stats.cgi?v=3.5&_=';
-  const $=id=>document.getElementById(id);
-  const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-  function install(){
-    const services=document.querySelector('.services'); const admin=document.querySelector('details.admin');
-    if(!services||!admin||$('mn-system-overview'))return false;
-    const style=document.createElement('style');
-    style.textContent=`.service.clickable{cursor:pointer;transition:transform .16s,border-color .16s,background .16s}.service.clickable:hover{transform:translateY(-2px);border-color:#3b82f6;background:linear-gradient(145deg,#1a2b43,#142033)}.service.clickable:after{content:'Details bekijken';position:absolute;right:16px;bottom:13px;color:#7dc4ff;font-size:11px}.mn-detail,.mn-system{border:1px solid var(--border);background:linear-gradient(145deg,var(--panel2),var(--panel));border-radius:16px;margin:14px 0;padding:18px}.mn-detail{display:none}.mn-detail.show{display:block}.mn-detail-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}.mn-detail-head h3,.mn-system h2{margin:0;font-size:17px}.mn-close{border:1px solid #3a4d68;background:#172337;color:#fff;border-radius:8px;padding:7px 11px;cursor:pointer}.mn-list{display:grid;gap:8px}.mn-row{display:grid;grid-template-columns:minmax(170px,1fr) 2fr auto;gap:12px;align-items:center;padding:11px 13px;background:#0e1928;border:1px solid #263a54;border-radius:10px}.mn-row strong{font-size:13px}.mn-row span{color:var(--muted);font-size:12px}.mn-state{font-weight:800}.mn-state.ok{color:#86efac}.mn-state.off{color:#fca5a5}.mn-system-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:14px}.mn-system-card{padding:14px;background:#0e1928;border:1px solid #263a54;border-radius:11px}.mn-system-card small{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.07em}.mn-system-card strong{display:block;margin-top:7px;font-size:14px;overflow-wrap:anywhere}.mn-system-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}.mn-system-actions a{padding:9px 12px;border-radius:9px;background:#162a46;border:1px solid #315d8a;color:#9bd0ff!important;text-decoration:none!important}@media(max-width:1000px){.mn-system-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:620px){.mn-system-grid{grid-template-columns:1fr}.mn-row{grid-template-columns:1fr}.mn-row .mn-state{justify-self:start}}`;
-    document.head.appendChild(style);
-    services.querySelectorAll('.service').forEach(card=>card.classList.add('clickable'));
-    const dockerCard=services.querySelector('.service:nth-child(1)'); const ampCard=services.querySelector('.service:nth-child(2)');
-    if(dockerCard)dockerCard.dataset.detail='docker'; if(ampCard)ampCard.dataset.detail='amp';
-    const detail=document.createElement('section'); detail.id='mn-service-detail'; detail.className='mn-detail'; detail.innerHTML='<div class="mn-detail-head"><h3 id="mn-detail-title">Service-details</h3><button class="mn-close" type="button">Sluiten</button></div><div class="mn-list" id="mn-detail-list"></div>';
-    services.insertAdjacentElement('afterend',detail); detail.querySelector('.mn-close').addEventListener('click',()=>detail.classList.remove('show'));
-    const system=document.createElement('section'); system.id='mn-system-overview'; system.className='mn-system';
-    system.innerHTML='<h2>Systeemoverzicht</h2><div class="mn-system-grid"><div class="mn-system-card"><small>Hostnaam</small><strong id="mn-hostname">--</strong></div><div class="mn-system-card"><small>Besturingssysteem</small><strong id="mn-os">--</strong></div><div class="mn-system-card"><small>Processor</small><strong id="mn-cpu-name">--</strong></div><div class="mn-system-card"><small>Kernel</small><strong id="mn-kernel">--</strong></div><div class="mn-system-card"><small>Temperatuur</small><strong id="mn-temperature">--</strong></div><div class="mn-system-card"><small>Processen</small><strong id="mn-processes">--</strong></div><div class="mn-system-card"><small>Systeemtijd</small><strong id="mn-time">--</strong></div><div class="mn-system-card"><small>Pakketstatus</small><strong id="mn-packages">--</strong></div></div><div class="mn-system-actions"><a href="/mount/index.cgi">Harddiskgebruik</a><a href="/net/index.cgi">Netwerkinterfaces</a><a href="/memo-network/processes.cgi">Actieve processen</a><a href="/webminlog/search.cgi">Recente Webmin-acties</a></div>';
-    admin.insertAdjacentElement('beforebegin',system);
-    let latest=null;
-    function showDetail(type){if(!latest)return;const data=latest[type]||{};const items=Array.isArray(data.items)?data.items:[];$('mn-detail-title').textContent=type==='docker'?'Docker-containers':'AMP-instances';$('mn-detail-list').innerHTML=items.length?items.map(item=>{const online=!!item.running;const middle=type==='docker'?esc(item.image||item.status||''):'AMP instance';return `<div class="mn-row"><strong>${esc(item.name)}</strong><span>${middle}</span><span class="mn-state ${online?'ok':'off'}">${online?'Actief':'Gestopt'}</span></div>`;}).join(''):'<div class="mn-row"><strong>Geen onderdelen gevonden</strong><span>De service heeft geen detailgegevens teruggegeven.</span><span></span></div>';detail.classList.add('show');detail.scrollIntoView({behavior:'smooth',block:'nearest'});}
-    services.addEventListener('click',event=>{const card=event.target.closest('.service[data-detail]');if(card)showDetail(card.dataset.detail);});
-    async function refreshExtra(){try{const response=await fetch(API+Date.now(),{credentials:'same-origin',cache:'no-store'});if(!response.ok)return;latest=await response.json();const s=latest.system||{};$('mn-hostname').textContent=s.hostname||'--';$('mn-os').textContent=s.os||'--';$('mn-cpu-name').textContent=s.cpu||'--';$('mn-kernel').textContent=s.kernel||'--';$('mn-temperature').textContent=s.temperature_c==null?'Niet beschikbaar':s.temperature_c+'°C';$('mn-processes').textContent=s.processes??'--';$('mn-time').textContent=new Date().toLocaleString('nl-NL');const updates=Number(latest.updates_available||0);$('mn-packages').textContent=updates?updates+' update'+(updates===1?'':'s')+' beschikbaar':'Alles bijgewerkt';}catch(_){}}
-    refreshExtra();setInterval(refreshExtra,5000);return true;
-  }
-  if(!install()){const observer=new MutationObserver(()=>{if(install())observer.disconnect();});observer.observe(document.documentElement,{childList:true,subtree:true});}
+  let baselineUpdates = null;
+  let installing = false;
+  const storageKey = 'mn_package_update_started';
+  const baselineKey = 'mn_package_update_baseline';
+
+  const fetchStatus = async () => {
+    try {
+      const r = await fetch('/memo-network/live-stats.cgi?_=' + Date.now(), {cache:'no-store', credentials:'same-origin'});
+      if (!r.ok) return null;
+      return await r.json();
+    } catch (_) { return null; }
+  };
+
+  fetchStatus().then(data => {
+    if (data) baselineUpdates = Number(data.updates_available || 0);
+  });
+
+  const ensureBody = callback => {
+    if (document.body) return callback();
+    const timer = setInterval(() => {
+      if (!document.body) return;
+      clearInterval(timer);
+      callback();
+    }, 40);
+  };
+
+  const showSubmitOverlay = () => {
+    if (document.querySelector('.mn-install-overlay')) return;
+    const overlay = document.createElement('div');
+    overlay.className = 'mn-install-overlay';
+    overlay.innerHTML = `<div class="mn-install-card"><div class="mn-install-head"><div class="mn-spinner"></div><div><strong>${copy.preparing}</strong><span>${copy.installingSub}</span></div></div><div class="mn-progress-track"><i></i></div><div class="mn-progress-note">${copy.checking}</div></div>`;
+    document.body.appendChild(overlay);
+  };
+
+  const decorateConfirmation = () => {
+    const forms = [...document.querySelectorAll('form')];
+    const confirmForm = forms.find(form => form.querySelector('input[type="submit"][name="confirm"],button[name="confirm"]'));
+    if (!confirmForm || confirmForm.dataset.mnV5Ready === '1') return;
+    confirmForm.dataset.mnV5Ready = '1';
+    confirmForm.classList.add('mn-confirm-form');
+
+    const ready = document.createElement('div');
+    ready.className = 'mn-pkg-ready';
+    ready.innerHTML = `<div><strong>${copy.ready}</strong><span>${copy.readySub}</span></div>`;
+    confirmForm.parentNode.insertBefore(ready, confirmForm);
+
+    const installButton = confirmForm.querySelector('input[type="submit"][name="confirm"],button[name="confirm"]');
+    if (installButton) {
+      installButton.style.minWidth = '150px';
+      installButton.style.fontSize = '13px';
+    }
+
+    confirmForm.addEventListener('submit', event => {
+      const submitter = event.submitter || document.activeElement;
+      if (submitter && submitter.name && submitter.name !== 'confirm') return;
+      installing = true;
+      sessionStorage.setItem(storageKey, String(Date.now()));
+      if (baselineUpdates != null) sessionStorage.setItem(baselineKey, String(baselineUpdates));
+      if (installButton) {
+        installButton.style.pointerEvents = 'none';
+        installButton.style.opacity = '.75';
+      }
+      showSubmitOverlay();
+    }, {capture:true});
+  };
+
+  let streamCard = null;
+  let streamLog = null;
+  let streamDone = false;
+  let pollTimer = null;
+
+  const ensureStreamCard = () => {
+    if (streamCard || !document.body) return streamCard;
+    streamCard = document.createElement('section');
+    streamCard.className = 'mn-stream-card';
+    streamCard.innerHTML = `<div class="mn-stream-top"><div class="mn-spinner"></div><div><div class="mn-stream-title">${copy.installing}</div><div class="mn-stream-sub">${copy.installingSub}</div></div></div><div class="mn-progress-track"><i></i></div><div class="mn-stream-log">${copy.waiting}</div><div class="mn-stream-actions" hidden><a href="/package-updates/">${copy.back}</a></div>`;
+    streamLog = streamCard.querySelector('.mn-stream-log');
+    const anchor = document.body.firstElementChild;
+    if (anchor) document.body.insertBefore(streamCard, anchor);
+    else document.body.appendChild(streamCard);
+    return streamCard;
+  };
+
+  const collectOutput = () => {
+    const lists = [...document.querySelectorAll('ul[data-package-updates]')];
+    const lines = [];
+    lists.forEach(list => {
+      list.querySelectorAll('li').forEach(li => {
+        const text = String(li.innerText || li.textContent || '').trim();
+        if (text) lines.push(text);
+      });
+    });
+    if (!lines.length) {
+      const text = String(document.body?.innerText || '').split('\n').map(x => x.trim()).filter(Boolean);
+      const filtered = text.filter(line => !line.includes('MemoNetwork Edition')).slice(-8);
+      if (filtered.length) lines.push(...filtered);
+    }
+    if (streamLog && lines.length) streamLog.textContent = lines.slice(-8).join('\n');
+  };
+
+  const markDone = (verified = false) => {
+    if (streamDone) return;
+    streamDone = true;
+    ensureStreamCard();
+    streamCard.classList.add('done');
+    streamCard.querySelector('.mn-stream-title').textContent = verified ? copy.verified : copy.finished;
+    streamCard.querySelector('.mn-stream-sub').textContent = verified ? copy.verifiedSub : copy.finishedSub;
+    const track = streamCard.querySelector('.mn-progress-track');
+    if (track) track.style.display = 'none';
+    const actions = streamCard.querySelector('.mn-stream-actions');
+    if (actions) actions.hidden = false;
+    sessionStorage.removeItem(storageKey);
+    sessionStorage.removeItem(baselineKey);
+    if (pollTimer) clearInterval(pollTimer);
+  };
+
+  const watchInstallOutput = () => {
+    const started = Number(sessionStorage.getItem(storageKey) || 0);
+    const hasProgress = !!document.querySelector('ul[data-package-updates]');
+    if (!started && !hasProgress) return;
+    ensureStreamCard();
+    collectOutput();
+
+    const observer = new MutationObserver(() => {
+      ensureStreamCard();
+      collectOutput();
+    });
+    observer.observe(document.documentElement, {childList:true, subtree:true, characterData:true});
+
+    const baseline = Number(sessionStorage.getItem(baselineKey));
+    pollTimer = setInterval(async () => {
+      if (streamDone) return;
+      const data = await fetchStatus();
+      if (!data) return;
+      const now = Number(data.updates_available || 0);
+      if (Number.isFinite(baseline) && baseline > 0 && now < baseline) markDone(true);
+    }, 5000);
+
+    window.addEventListener('load', () => {
+      collectOutput();
+      if (document.querySelector('ul[data-package-updates]')) markDone(false);
+    }, {once:true});
+  };
+
+  ensureBody(() => {
+    document.body.classList.add('mn-package-updates-v5');
+    decorateConfirmation();
+    watchInstallOutput();
+    const observer = new MutationObserver(() => {
+      decorateConfirmation();
+      if (!streamDone && (installing || document.querySelector('ul[data-package-updates]'))) {
+        ensureStreamCard();
+        collectOutput();
+      }
+    });
+    observer.observe(document.documentElement, {childList:true, subtree:true});
+  });
 })();
