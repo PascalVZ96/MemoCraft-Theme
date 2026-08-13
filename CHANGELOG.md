@@ -4,6 +4,40 @@
 
 De volgende grote MemoNetwork-release. Ontwikkeling vindt plaats op de aparte `v5` branch totdat de release stabiel genoeg is om naar `main` te gaan.
 
+### Alpha 10
+
+- In het v5-tabblad **Infrastructuur** is een volledig geïntegreerde internet-speedtest toegevoegd.
+- De speedtest draait alleen handmatig om onnodig bandbreedtegebruik te voorkomen.
+- Download, upload en ping worden duidelijk als aparte live meetwaarden getoond.
+- Testserver, provider, extern IP en tijdstip van de laatste meting worden bewaard en opnieuw weergegeven.
+- Resultaten worden server-side gecachet zodat de laatste meting zichtbaar blijft tot een nieuwe test wordt uitgevoerd.
+- De speedtest ondersteunt zowel `speedtest-cli` als de officiële Ookla `speedtest` CLI wanneer die aanwezig is.
+- Ontbreekt een speedtest-client, dan toont het Control Center direct het installatiecommando `sudo apt install speedtest-cli -y`.
+- Speedtests gebruiken een afzonderlijk beveiligd CGI-endpoint met POST-only uitvoering, MemoNetwork-requestheader, lock tegen dubbele tests en een timeout.
+- De interface toont tijdens de test een duidelijke voortgangsstatus en blokkeert dubbele starts.
+- Speedtest-interface en foutmeldingen ondersteunen Nederlands, Duits en Engels.
+
+### Alpha 9
+
+- Het tabblad **Infrastructuur** is vervangen door een volledige live v5-interface.
+- Systeemschijf en backup-HDD worden apart weergegeven met mountpoint, device, filesystem, capaciteit en gebruikspercentage.
+- De backup-mount wordt expliciet gecontroleerd en krijgt een duidelijke foutmelding wanneer `/mnt/backups` niet op een apart bestandssysteem staat.
+- Bestandssystemen vanaf 85% gebruik krijgen een opslagwaarschuwing.
+- Serveridentiteit, OS, kernel, processor, cores, uptime, processen en temperatuur zijn direct zichtbaar.
+- Docker, AMP, MinIO en WireGuard krijgen een compacte platformstatus.
+- Rebootstatus, beschikbare updates en actuele netwerkactiviteit zijn toegevoegd.
+- Infrastructuur ondersteunt live verversing en NL / DE / EN.
+
+### Alpha 8
+
+- Het tabblad **Diagnostiek** is omgebouwd van losse links naar een geïntegreerd live diagnostiekdashboard.
+- Netwerkinterfaces, IPv4-adressen, snelheid en verkeer zijn direct zichtbaar.
+- Mislukte systemd-units en aangemelde sessies zijn geïntegreerd.
+- Luisterende netwerkpoorten worden rechtstreeks in het Control Center weergegeven.
+- Top CPU- en geheugenprocessen zijn toegevoegd.
+- Recente systeemwaarschuwingen worden binnen v5 weergegeven.
+- Diagnostiek ondersteunt handmatige en automatische verversing en NL / DE / EN.
+
 ### Alpha 7
 
 - Service-details in het v5 Control Center zijn uitgebreid met directe beheeracties.
