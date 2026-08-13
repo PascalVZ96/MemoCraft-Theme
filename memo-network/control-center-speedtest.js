@@ -136,7 +136,9 @@
     }
   }
 
-  const observer = new MutationObserver(() => renderPanel());
+  const observer = new MutationObserver(() => {
+    if (!document.getElementById('memo-speedtest-panel')) renderPanel();
+  });
   observer.observe(view, {childList:true, subtree:true});
   renderPanel();
   loadStatus();
