@@ -112,8 +112,14 @@
     render();
   }
 
-  const observer=new MutationObserver(()=>{ensurePanel();ensureBanner();render();});
-  const shell=document.querySelector('.shell'); if(shell) observer.observe(shell,{childList:true,subtree:true});
+  const incidentView=document.getElementById('incidents');
+  if(incidentView){
+    const observer=new MutationObserver(()=>{
+      if(!document.getElementById('memo-maint-panel')) render();
+    });
+    observer.observe(incidentView,{childList:true});
+  }
+
   load();
   setInterval(load,60000);
   setInterval(()=>{if(state.data?.active){state.data.remaining_seconds=Math.max(0,Number(state.data.remaining_seconds||0)-30);render();}},30000);
