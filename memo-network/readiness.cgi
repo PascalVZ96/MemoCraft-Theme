@@ -132,11 +132,12 @@ my $ready_for_stable = ($fail == 0 && $warn == 0) ? JSON::PP::true : JSON::PP::f
 
 reply_json({
     ok => JSON::PP::true,
-    version => '5.0.0-rc1',
-    release_stage => 'rc',
+    version => '5.0.0',
+    release_stage => 'stable',
     generated_at => time,
     ready_for_rc => $ready_for_rc,
     ready_for_stable => $ready_for_stable,
+    stable_verified => $ready_for_stable,
     summary => {pass=>$pass, warn=>$warn, fail=>$fail, critical_fail=>$critical_fail, total=>scalar(@checks)},
     checks => \@checks,
 });
