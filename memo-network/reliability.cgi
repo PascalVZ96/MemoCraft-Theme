@@ -2,10 +2,12 @@
 use strict;
 use warnings;
 use JSON::PP;
+use File::Path qw(make_path);
 
 my $STATE_DIR = '/var/lib/memonetwork';
 my $EVENT_FILE = "$STATE_DIR/activity.json";
 my $OBS_FILE = "$STATE_DIR/activity-observer.json";
+my $REL_STATE_FILE = "$STATE_DIR/reliability-state.json";
 my %PERIODS = (
     '24h' => 86400,
     '7d'  => 7 * 86400,
@@ -45,6 +47,17 @@ sub read_json {
     return $@ ? $fallback : $data;
 }
 
+sub write_json {
+    my ($path, $data) = @_;
+    make_path($STATE_DIR, { mode => 0700 }) unless -d $STATE_DIR;
+    my $tmp = "$path.$$";
+    open my $fh, '>', $tmp or return 0;
+    chmod 0600, $tmp;
+    print {$fh} encode_json($data);
+    close $fh or return 0;
+    return rename($tmp, $path) ? 1 : 0;
+}
+
 sub event_time {
     my ($event) = @_;
     return 0 unless ref($event) eq 'HASH';
@@ -64,6 +77,22 @@ sub overlap_seconds {
         $sum += $right - $left if $right > $left;
     }
     return $sum;
+}
+
+sub observation_start {
+    my ($events, $now) = @_;
+    my $state = read_json($REL_STATE_FILE, {});
+    $state = {} unless ref($state) eq 'HASH';
+    my $first = 0 + ($state->{first_observed_at} || 0);
+    return $first if $first > 0 && $first <= $now;
+
+    my @times = sort { $a <=> $b } grep { $_ > 0 && $_ <= $now } map { event_time($_) } @$events;
+    $first = @times ? $times[0] : $now;
+    $state->{first_observed_at} = $first;
+    $state->{created_at} ||= $now;
+    $state->{updated_at} = $now;
+    write_json($REL_STATE_FILE, $state);
+    return $first;
 }
 
 sub maintenance_intervals {
@@ -195,7 +224,9 @@ sub incident_stats {
     for my $id (keys %pending) {
         $active += scalar @{$pending{$id}} if ref($pending{$id}) eq 'ARRAY';
     }
-    my $mttr = @durations ? int((eval(join('+', @durations)) || 0) / scalar(@durations)) : 0;
+    my $sum = 0;
+    $sum += $_ for @durations;
+    my $mttr = @durations ? int($sum / scalar(@durations)) : 0;
     my ($top_id, $top_count) = ('', 0);
     for my $id (keys %opened_counts) {
         if ($opened_counts{$id} > $top_count) {
@@ -228,30 +259,52 @@ $events = [] unless ref($events) eq 'ARRAY';
 my $observer = read_json($OBS_FILE, {});
 $observer = {} unless ref($observer) eq 'HASH';
 my $now = time;
-my $start = $now - $PERIODS{$period};
-my $maintenance = maintenance_intervals($events, $start, $now);
-my $maintenance_seconds = overlap_seconds($start, $now, $maintenance);
+my $requested_start = $now - $PERIODS{$period};
+my $first_observed = observation_start($events, $now);
+my $observed_start = $first_observed > $requested_start ? $first_observed : $requested_start;
+my $coverage_seconds = $now - $observed_start;
+$coverage_seconds = 0 if $coverage_seconds < 0;
+$coverage_seconds = $PERIODS{$period} if $coverage_seconds > $PERIODS{$period};
+my $coverage_percent = $PERIODS{$period} > 0 ? ($coverage_seconds / $PERIODS{$period}) * 100 : 0;
+$coverage_percent = 100 if $coverage_percent > 100;
+my $coverage_ready = $coverage_percent >= 95 ? 1 : 0;
 
-my @services = map { service_stats($_, $events, $observer, $start, $now, $maintenance) } @SERVICES;
+my $maintenance = maintenance_intervals($events, $observed_start, $now);
+my $maintenance_seconds = overlap_seconds($observed_start, $now, $maintenance);
+
+my @services = map { service_stats($_, $events, $observer, $observed_start, $now, $maintenance) } @SERVICES;
 my @known = grep { $_->{known} } @services;
-my $avg_uptime = @known ? (eval(join('+', map { 0 + ($_->{uptime_percent} || 0) } @known)) || 0) / scalar(@known) : 0;
-my $incident = incident_stats($events, $start, $now);
+my $avg_uptime = 0;
+if (@known) {
+    my $sum = 0;
+    $sum += 0 + ($_->{uptime_percent} || 0) for @known;
+    $avg_uptime = $sum / scalar(@known);
+}
+my $incident = incident_stats($events, $observed_start, $now);
 my $target = 99.0;
-my $target_met = @known && $avg_uptime >= $target ? JSON::PP::true : JSON::PP::false;
+my $target_met = $coverage_ready && @known && $avg_uptime >= $target ? JSON::PP::true : JSON::PP::false;
+my $target_status = !$coverage_ready ? 'collecting' : ($avg_uptime >= $target ? 'met' : 'not_met');
 
 json_reply({
     ok => JSON::PP::true,
     period => $period,
     period_seconds => $PERIODS{$period},
     generated_at => $now,
+    requested_start => $requested_start,
+    observation_started_at => $first_observed,
+    observed_start => $observed_start,
+    coverage_seconds => int($coverage_seconds),
+    coverage_percent => sprintf('%.1f', $coverage_percent) + 0,
+    coverage_ready => $coverage_ready ? JSON::PP::true : JSON::PP::false,
     maintenance_seconds => int($maintenance_seconds),
     maintenance_windows => scalar(@$maintenance),
     target_percent => $target,
     average_uptime_percent => @known ? sprintf('%.3f', $avg_uptime) + 0 : JSON::PP::null,
     target_met => $target_met,
+    target_status => $target_status,
     services => \@services,
     incidents => $incident,
-    event_count => scalar(grep { event_time($_) >= $start && event_time($_) <= $now } @$events),
+    event_count => scalar(grep { event_time($_) >= $observed_start && event_time($_) <= $now } @$events),
     source => 'activity-center',
     estimate => JSON::PP::true,
 });
