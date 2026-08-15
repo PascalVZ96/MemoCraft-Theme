@@ -92,8 +92,23 @@
     }catch(e){state.error=e?.message||String(e);}finally{state.busy=false;render();}
   }
 
-  function ensure(){ if(!infra())return; render(); }
-  const observer=new MutationObserver(()=>ensure()); observer.observe(view,{childList:true,subtree:true});
+  let ensureQueued=false;
+  function ensure(){
+    const root=infra();
+    if(!root || root.querySelector('#memo-backup-center')) return;
+    render();
+  }
+  function scheduleEnsure(){
+    if(ensureQueued) return;
+    ensureQueued=true;
+    requestAnimationFrame(()=>{ensureQueued=false;ensure();});
+  }
+  const observer=new MutationObserver(()=>{
+    const root=infra();
+    if(!root || root.querySelector('#memo-backup-center')) return;
+    scheduleEnsure();
+  });
+  observer.observe(view,{childList:true,subtree:true});
   ensure(); setTimeout(()=>load(false),500);
   setInterval(()=>{if(!state.busy&&view.classList.contains('active'))load(false);},60000);
   window.MemoNetworkV5Backups={refresh:()=>load(false),scan:()=>load(true)};
