@@ -4,6 +4,19 @@
 
 De volgende grote MemoNetwork-release. Ontwikkeling vindt plaats op de aparte `v5` branch totdat de release stabiel genoeg is om naar `main` te gaan.
 
+### Alpha 12
+
+- De internet-speedtest heeft nu een permanente prestatiegeschiedenis in plaats van alleen de laatste meting.
+- Tot 90 speedtests worden server-side bewaard; het Control Center toont de laatste 30 als download- en uploadgrafiek.
+- Gemiddelde download, gemiddelde upload, gemiddelde ping en beste downloadsnelheid worden automatisch berekend.
+- De laatste zes metingen worden als compacte tabel getoond met datum, download, upload, ping en bron van de meting.
+- Handmatige en automatische speedtests worden voortaan apart gemarkeerd in de geschiedenis.
+- De bestaande `memonetwork-speedtest.timer` wordt automatisch uitgelezen en toont status, schema en eerstvolgende geplande run in het Control Center.
+- De eerder ingestelde nachtelijke speedtest blijft volledig via systemd lopen; het dashboard maakt geen extra planning aan en start geen onverwachte tests.
+- Een bestaande laatste speedtest wordt automatisch als eerste geschiedenispunt gebruikt, zodat de grafiek zonder verlies van de huidige meting begint.
+- Testserverweergave is opgeschoond om foutieve `Â·`-tekens in oudere speedtestresultaten te corrigeren.
+- Geschiedenis, planning en nieuwe labels ondersteunen Nederlands, Duits en Engels.
+
 ### Alpha 11
 
 - Het tabblad **Diagnostiek** heeft nu een geïntegreerde netwerkcontrole voor route, gateway, internetbereikbaarheid, DNS, packet loss en latency.
