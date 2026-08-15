@@ -4,6 +4,20 @@
 
 De volgende grote MemoNetwork-release. Ontwikkeling vindt plaats op de aparte `v5` branch totdat de release stabiel genoeg is om naar `main` te gaan.
 
+### Alpha 16
+
+- Het tabblad **Infrastructuur** heeft nu een geïntegreerd **Backup Center** voor de backup-HDD en MinIO-opslag.
+- `/mnt/backups` wordt onafhankelijk gecontroleerd op bestaan, echte mount, brondevice, bestandssysteem, capaciteit, gebruikte ruimte en vrije ruimte.
+- MinIO wordt automatisch herkend wanneer het als Docker-container draait; containerstatus en de gekoppelde opslagbron worden direct weergegeven.
+- Een handmatige **Backupscan** zoekt naar de nieuwste backupbestanden zonder bij iedere dashboard-refresh de volledige backupschijf te doorlopen.
+- De scan bewaart maximaal de tien nieuwste gevonden bestanden en toont de vijf nieuwste compact in het Control Center.
+- De nieuwste backup krijgt een versheidsstatus: actueel tot 24 uur, aandacht tussen 24 en 72 uur en verouderd na 72 uur.
+- Tijdens een scan worden aantal gevonden bestanden en gescande datagrootte bijgehouden; een veiligheidslimiet van 15 seconden en maximaal één miljoen bestanden voorkomt onbeperkte belasting.
+- Een onvolledige scan wordt duidelijk als gedeeltelijk gemarkeerd in plaats van onterecht als volledig resultaat gepresenteerd.
+- De backupscan is POST-only met de MemoNetwork-requestheader, gebruikt een vaste backupmap en een lock tegen dubbele scans; er wordt geen vrij pad of shellcommando vanuit de browser geaccepteerd.
+- `build.sh` maakt voortaan alle MemoNetwork CGI- en Perl-backends uitvoerbaar tijdens het bouwen, zodat nieuwe beheerendpoints consistent worden verpakt.
+- Backup Center ondersteunt Nederlands, Duits en Engels.
+
 ### Alpha 15
 
 - Het tabblad **Diagnostiek** heeft nu een geïntegreerd **Security Center** voor automatische bescherming tegen duidelijke SSH-brute-forceaanvallen.
