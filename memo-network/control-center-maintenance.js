@@ -112,12 +112,12 @@
     render();
   }
 
-  const incidentView=document.getElementById('incidents');
-  if(incidentView){
+  const shell=document.querySelector('.shell');
+  if(shell){
     const observer=new MutationObserver(()=>{
-      if(!document.getElementById('memo-maint-panel')) render();
+      if(document.getElementById('incidents') && !document.getElementById('memo-maint-panel')) render();
     });
-    observer.observe(incidentView,{childList:true});
+    observer.observe(shell,{childList:true,subtree:true});
   }
 
   load();
