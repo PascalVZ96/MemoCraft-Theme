@@ -185,7 +185,6 @@ sub speedtest_cli_result {
         upload_mbps => sprintf('%.2f', $upload / 1_000_000) + 0,
         ping_ms => sprintf('%.2f', $ping) + 0,
         server => join(' / ', @server_parts),
-        server_id => text_value($server->{id}),
         provider => text_value($client->{isp}),
         external_ip => text_value($client->{ip}),
         backend => 'speedtest-cli',
@@ -211,7 +210,6 @@ sub ookla_result {
         upload_mbps => sprintf('%.2f', ($upload * 8) / 1_000_000) + 0,
         ping_ms => sprintf('%.2f', $ping) + 0,
         server => join(' / ', @server_parts),
-        server_id => text_value($server->{id}),
         provider => text_value($data->{isp}),
         external_ip => text_value($interface->{externalIp}),
         backend => 'ookla',
@@ -224,7 +222,7 @@ sub server_preference {
     return {
         id => $PREFERRED_SERVER_ID,
         label => $PREFERRED_SERVER_LABEL,
-        fallback => JSON::PP::true,
+        fallback => JSON::PP::false,
     };
 }
 
@@ -256,38 +254,24 @@ json_reply({
 open my $lock, '>', $LOCK_FILE or json_reply({ ok => JSON::PP::false, error => 'Speedtest-lock kon niet worden geopend' }, '500 Internal Server Error');
 json_reply({ ok => JSON::PP::false, error => 'Er draait al een speedtest' }, '409 Conflict') unless flock($lock, LOCK_EX | LOCK_NB);
 
-my @commands = $backend eq 'speedtest-cli'
-    ? (
-        [$binary, '--server', $PREFERRED_SERVER_ID, '--json', '--secure'],
-        [$binary, '--json', '--secure'],
-      )
-    : ([$binary, '--accept-license', '--accept-gdpr', '-f', 'json']);
+my @command = $backend eq 'speedtest-cli'
+    ? ($binary, '--server', $PREFERRED_SERVER_ID, '--json')
+    : ($binary, '--accept-license', '--accept-gdpr', '-f', 'json');
 
 my ($output, $exit, $pid) = ('', 1, undef);
 my $error = '';
-my $server_mode = $backend eq 'speedtest-cli' ? 'preferred' : 'automatic';
 {
     local $SIG{ALRM} = sub { die "Speedtest duurde langer dan 90 seconden\n" };
     eval {
         alarm 90;
-        for my $index (0 .. $#commands) {
-            my $command = $commands[$index];
-            $output = '';
-            $exit = 1;
-            $pid = open my $fh, '-|', @$command;
-            die "Speedtest kon niet worden gestart\n" unless defined $pid;
-            while (my $line = <$fh>) {
-                $output .= $line;
-                die "Speedtest-uitvoer is onverwacht groot\n" if length($output) > 1_048_576;
-            }
-            close $fh;
-            $exit = $? >> 8;
-            $pid = undef;
-            if ($exit == 0 && $output =~ /\S/) {
-                $server_mode = ($backend eq 'speedtest-cli' && $index > 0) ? 'fallback' : $server_mode;
-                last;
-            }
+        $pid = open my $fh, '-|', @command;
+        die "Speedtest kon niet worden gestart\n" unless defined $pid;
+        while (my $line = <$fh>) {
+            $output .= $line;
+            die "Speedtest-uitvoer is onverwacht groot\n" if length($output) > 1_048_576;
         }
+        close $fh;
+        $exit = $? >> 8;
         alarm 0;
     };
     if ($@) {
@@ -297,16 +281,29 @@ my $server_mode = $backend eq 'speedtest-cli' ? 'preferred' : 'automatic';
     }
 }
 
-$error = "Speedtest eindigde met foutcode $exit\n" if !$error && $exit != 0;
+if (!$error && $exit != 0) {
+    $error = $backend eq 'speedtest-cli'
+        ? "Vaste speedtestserver $PREFERRED_SERVER_ID kon niet worden gebruikt (foutcode $exit)\n"
+        : "Speedtest eindigde met foutcode $exit\n";
+}
 json_reply({ ok => JSON::PP::false, error => text_value($error) }, '500 Internal Server Error') if $error;
 
 my $raw = eval { decode_json($output) };
 json_reply({ ok => JSON::PP::false, error => 'Speedtest-resultaat kon niet worden gelezen' }, '500 Internal Server Error') if $@ || ref($raw) ne 'HASH';
 
+if ($backend eq 'speedtest-cli') {
+    my $server = ref($raw->{server}) eq 'HASH' ? $raw->{server} : {};
+    my $actual_server_id = text_value($server->{id});
+    json_reply({
+        ok => JSON::PP::false,
+        error => "Speedtest gebruikte onverwacht server $actual_server_id in plaats van vaste server $PREFERRED_SERVER_ID",
+    }, '500 Internal Server Error') unless $actual_server_id eq $PREFERRED_SERVER_ID;
+}
+
 my $source = ($ENV{'QUERY_STRING'} || '') =~ /(?:^|&)_=/ ? 'manual' : 'scheduled';
 my $result = eval { $backend eq 'speedtest-cli' ? speedtest_cli_result($raw, $source) : ookla_result($raw, $source) };
 json_reply({ ok => JSON::PP::false, error => text_value($@ || 'Ongeldig speedtest-resultaat') }, '500 Internal Server Error') if $@ || ref($result) ne 'HASH';
-$result->{server_mode} = $server_mode;
+$result->{server_mode} = $backend eq 'speedtest-cli' ? 'preferred' : 'automatic';
 $result->{preferred_server_id} = $PREFERRED_SERVER_ID if $backend eq 'speedtest-cli';
 
 write_cache($result);
