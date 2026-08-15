@@ -24,6 +24,7 @@ required=(
   memo-network/reliability.cgi
   memo-network/intelligence.cgi
   memo-network/readiness.cgi
+  memo-network/language.cgi
   memo-network/control-center-healthscore.js
   memo-network/control-center-intelligence.js
   memo-network/control-center-readiness.js
@@ -35,16 +36,20 @@ done
 
 tar -xzf "$ARCHIVE" -C "$TMP_DIR" -- \
   memocraft-theme/left.cgi \
-  memo-network/readiness.cgi
+  memo-network/readiness.cgi \
+  memo-network/language.cgi
 
-grep -Fq '5.0.1' "$TMP_DIR/memocraft-theme/left.cgi" || fail "Sidebar bevat niet versie 5.0.1"
+grep -Fq '5.0.2' "$TMP_DIR/memocraft-theme/left.cgi" || fail "Sidebar bevat niet versie 5.0.2"
 grep -Fq 'const dashboardUrl = "/memo-network/control-center.html";' "$TMP_DIR/memocraft-theme/left.cgi" || fail "Control Center is niet ingesteld als standaard startpagina"
 grep -Fq 'routeDefaultDashboard' "$TMP_DIR/memocraft-theme/left.cgi" || fail "Automatische Control Center-routering ontbreekt"
-grep -Fq "version => '5.0.1'" "$TMP_DIR/memo-network/readiness.cgi" || fail "Readiness backend bevat niet versie 5.0.1"
+grep -Fq 'stabilizeControlCenterChrome' "$TMP_DIR/memocraft-theme/left.cgi" || fail "Vaste Control Center navigatie ontbreekt"
+grep -Fq 'languageUrl = "/memo-network/language.cgi"' "$TMP_DIR/memocraft-theme/left.cgi" || fail "Webmin-taalsynchronisatie ontbreekt"
+grep -Fq "version => '5.0.2'" "$TMP_DIR/memo-network/readiness.cgi" || fail "Readiness backend bevat niet versie 5.0.2"
 grep -Fq "release_stage => 'stable'" "$TMP_DIR/memo-network/readiness.cgi" || fail "Readiness backend staat niet op stable"
 grep -Fq 'stable_verified' "$TMP_DIR/memo-network/readiness.cgi" || fail "Stable-verificatie ontbreekt"
+grep -Fq "my \$language = \$webmin_language || \$hint || 'en';" "$TMP_DIR/memo-network/language.cgi" || fail "WebminCore is niet leidend voor de taalkeuze"
 
-echo "v5.0.1 stable package check: OK"
-echo "Control Center is de standaard startpagina"
+echo "v5.0.2 stable package check: OK"
+echo "Control Center startpagina + vaste navigatie + taalfix gecontroleerd"
 echo "Bestanden gecontroleerd: ${#required[@]}"
 echo "Archive: $ARCHIVE"
