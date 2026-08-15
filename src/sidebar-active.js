@@ -1,12 +1,16 @@
 (() => {
   const dashboardUrl = "/memo-network/control-center.html";
-  const installedVersion = "5.0.1";
+  const installedVersion = "5.0.2";
   const releaseDate = "16-08-2026";
   const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
   const i18nUrl = "/memocraft-theme/memo-i18n.js";
+  const languageUrl = "/memo-network/language.cgi";
   let i18nLoading = false;
   let i18nLoaded = false;
   let i18nLastAttempt = 0;
+  let languageResolved = '';
+  let languageLoading = false;
+  let languageLastAttempt = 0;
 
   const normalize = (value) => {
     try {
@@ -33,48 +37,57 @@
     return 0;
   };
 
-  const detectWebminLanguage = () => {
-    const text = String(document.body?.innerText || document.body?.textContent || '').toLowerCase();
-    if (text.includes('abmelden') || text.includes('module aktualisieren') || text.includes('systeminformationen')) return 'de';
-    if (text.includes('uitloggen') || text.includes('ververs modules') || text.includes('systeeminformatie')) return 'nl';
-    if (text.includes('logout') || text.includes('refresh modules') || text.includes('system information')) return 'en';
-
-    const score = {de: 0, nl: 0, en: 0};
-    const add = (lang, words) => words.forEach((word) => { if (text.includes(word)) score[lang] += 1; });
-    add('de', ['abmelden', 'systeminformationen', 'module aktualisieren', 'werkzeuge', 'unbenutzte module', 'netzwerk', 'suche']);
-    add('nl', ['uitloggen', 'systeeminformatie', 'ververs modules', 'ongebruikte modules', 'netwerken', 'zoeken']);
-    add('en', ['logout', 'system information', 'refresh modules', 'unused modules', 'networking', 'tools', 'search']);
-
-    const ordered = Object.entries(score).sort((a, b) => b[1] - a[1]);
-    if (ordered[0][1] > 0 && ordered[0][1] > ordered[1][1]) return ordered[0][0];
-
-    const htmlLang = String(document.documentElement?.lang || '').trim().toLowerCase();
-    if (/^de(?:[-_]|$)/.test(htmlLang)) return 'de';
-    if (/^nl(?:[-_]|$)/.test(htmlLang)) return 'nl';
-    if (/^en(?:[-_]|$)/.test(htmlLang)) return 'en';
+  const normalizeLanguage = (value) => {
+    const lang = String(value || '').trim().toLowerCase();
+    if (lang.startsWith('nl')) return 'nl';
+    if (lang.startsWith('de')) return 'de';
+    if (lang.startsWith('en')) return 'en';
     return '';
   };
 
-  const syncLanguageHint = () => {
-    const detected = detectWebminLanguage();
-    if (!detected) return '';
-    document.cookie = `memo_lang=${detected}; Path=/; SameSite=Lax`;
-    document.documentElement.dataset.memoWebminLang = detected;
-    return detected;
+  const applyLanguage = (language) => {
+    const lang = normalizeLanguage(language);
+    if (!lang) return '';
+    languageResolved = lang;
+    document.cookie = `memo_lang=${lang}; Path=/; SameSite=Lax`;
+    document.documentElement.dataset.memoWebminLang = lang;
+    return lang;
+  };
+
+  const ensureWebminLanguage = () => {
+    if (languageResolved || languageLoading) return;
+    const now = Date.now();
+    if (languageLastAttempt && now - languageLastAttempt < 3000) return;
+    languageLoading = true;
+    languageLastAttempt = now;
+
+    fetch(`${languageUrl}?_=${now}`, {credentials:'same-origin', cache:'no-store'})
+      .then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+      })
+      .then((data) => {
+        if (!applyLanguage(data?.language)) throw new Error('Geen ondersteunde Webmin-taal ontvangen');
+      })
+      .catch(() => {
+        const browserLanguage = normalizeLanguage(navigator.language) || 'en';
+        applyLanguage(browserLanguage);
+      })
+      .finally(() => { languageLoading = false; });
   };
 
   const ensureI18n = () => {
-    const expectedLanguage = syncLanguageHint();
+    if (!languageResolved) return;
+
     if (window.MemoNetworkI18n) {
-      if (expectedLanguage && window.MemoNetworkI18n.language !== expectedLanguage) {
-        try { delete window.MemoNetworkI18n; } catch (_error) { window.MemoNetworkI18n = null; }
-        i18nLoaded = false;
-        i18nLastAttempt = 0;
-      } else {
+      const current = normalizeLanguage(window.MemoNetworkI18n.language);
+      if (current === languageResolved) {
         i18nLoaded = true;
         window.MemoNetworkI18n.refresh?.();
-        return;
+      } else {
+        i18nLoaded = false;
       }
+      return;
     }
 
     const now = Date.now();
@@ -94,8 +107,7 @@
         script.dataset.memoI18nInline = '1';
         script.textContent = `${code}\n//# sourceURL=/memocraft-theme/memo-i18n.js`;
         document.head.appendChild(script);
-        i18nLoaded = !!window.MemoNetworkI18n;
-        window.MemoNetworkI18n?.refresh?.();
+        i18nLoaded = false;
       })
       .catch((error) => {
         i18nLoaded = false;
@@ -126,6 +138,7 @@
   };
 
   const routeDefaultDashboard = () => {
+    if (!languageResolved) return false;
     try {
       for (const frame of Array.from(parent.frames)) {
         if (frame === window) continue;
@@ -205,13 +218,41 @@
     doc.head.appendChild(script);
   };
 
+  const stabilizeControlCenterChrome = (doc) => {
+    doc.querySelector('.pill.dev')?.remove();
+    doc.querySelector('a[data-i18n="oldDashboard"]')?.remove();
+
+    if (!doc.getElementById('memo-v5-stable-nav-order')) {
+      const style = doc.createElement('style');
+      style.id = 'memo-v5-stable-nav-order';
+      style.textContent = `
+        .nav button[data-view="overview"]{order:10}
+        .nav button[data-view="services"]{order:20}
+        .nav button[data-view="infrastructure"]{order:30}
+        .nav button[data-view="health"]{order:40}
+        .nav button[data-view="reliability"]{order:50}
+        .nav button[data-view="notifications"]{order:60}
+        .nav button[data-view="activity"]{order:70}
+        .nav button[data-view="incidents"]{order:80}
+        .nav button[data-view="readiness"]{order:90}
+        .nav button[data-view="diagnostics"]{order:100}
+      `;
+      doc.head.appendChild(style);
+    }
+  };
+
   const setupV5ControlCenter = () => {
+    if (!languageResolved) return;
     try {
       for (const frame of Array.from(parent.frames)) {
         if (frame === window) continue;
         if (String(frame.location?.pathname || '') !== '/memo-network/control-center.html') continue;
         const doc = frame.document;
         if (!doc?.head) return;
+
+        doc.documentElement.dataset.memoWebminLang = languageResolved;
+        doc.documentElement.lang = languageResolved;
+        stabilizeControlCenterChrome(doc);
 
         if (doc.documentElement.dataset.memoAmpNativeFix !== '1') {
           doc.documentElement.dataset.memoAmpNativeFix = '1';
@@ -229,8 +270,6 @@
           link.dataset.memoAmpLink = '1';
         });
 
-        const badge = doc.querySelector('.pill.dev');
-        if (badge) badge.remove();
         const footer = doc.querySelector('.footer');
         if (footer) footer.textContent = installedVersion.includes('-') ? `MemoNetwork v5 Control Center · ${installedVersion.split('-')[1]} preview` : 'MemoNetwork v5 Control Center · stable';
 
@@ -306,14 +345,18 @@
   };
 
   const updateActiveLink = () => {
-    syncLanguageHint();
+    ensureWebminLanguage();
     ensureI18n();
     setupBrand();
     setupVersionFooter();
+
+    if (!languageResolved) return;
     if (routeDefaultDashboard()) return;
+
     setupDashboardLinks();
     setupV5ControlCenter();
-    if (i18nLoaded || window.MemoNetworkI18n) window.MemoNetworkI18n?.refresh?.();
+    if (i18nLoaded) window.MemoNetworkI18n?.refresh?.();
+
     const current = normalize(currentContentUrl());
     if (!current) return;
 
