@@ -1,7 +1,7 @@
 (() => {
   const dashboardUrl = "/right.cgi";
-  const installedVersion = "5.0.0-alpha10";
-  const releaseDate = "13-08-2026";
+  const installedVersion = "5.0.0-alpha11";
+  const releaseDate = "15-08-2026";
   const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
   const i18nUrl = "/memocraft-theme/memo-i18n.js";
   let i18nLoading = false;
@@ -35,14 +35,12 @@
 
   const detectWebminLanguage = () => {
     const text = String(document.body?.innerText || document.body?.textContent || '').toLowerCase();
-
     if (text.includes('abmelden') || text.includes('module aktualisieren') || text.includes('systeminformationen')) return 'de';
     if (text.includes('uitloggen') || text.includes('ververs modules') || text.includes('systeeminformatie')) return 'nl';
     if (text.includes('logout') || text.includes('refresh modules') || text.includes('system information')) return 'en';
 
     const score = {de: 0, nl: 0, en: 0};
     const add = (lang, words) => words.forEach((word) => { if (text.includes(word)) score[lang] += 1; });
-
     add('de', ['abmelden', 'systeminformationen', 'module aktualisieren', 'werkzeuge', 'unbenutzte module', 'netzwerk', 'suche']);
     add('nl', ['uitloggen', 'systeeminformatie', 'ververs modules', 'ongebruikte modules', 'netwerken', 'zoeken']);
     add('en', ['logout', 'system information', 'refresh modules', 'unused modules', 'networking', 'tools', 'search']);
@@ -84,18 +82,14 @@
     i18nLoading = true;
     i18nLastAttempt = now;
 
-    fetch(`${i18nUrl}?v=${encodeURIComponent(installedVersion)}&_=${now}`, {
-      credentials: 'same-origin',
-      cache: 'no-store'
-    })
+    fetch(`${i18nUrl}?v=${encodeURIComponent(installedVersion)}&_=${now}`, {credentials:'same-origin', cache:'no-store'})
       .then((response) => {
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         return response.text();
       })
       .then((code) => {
         if (!code || !code.includes('MemoNetworkI18n')) throw new Error('Ongeldige i18n-runtime');
-        const old = document.querySelector('script[data-memo-i18n-inline="1"]');
-        old?.remove();
+        document.querySelector('script[data-memo-i18n-inline="1"]')?.remove();
         const script = document.createElement('script');
         script.dataset.memoI18nInline = '1';
         script.textContent = `${code}\n//# sourceURL=/memocraft-theme/memo-i18n.js`;
@@ -107,9 +101,7 @@
         i18nLoaded = false;
         console.warn('MemoNetwork i18n kon niet worden geladen:', error);
       })
-      .finally(() => {
-        i18nLoading = false;
-      });
+      .finally(() => { i18nLoading = false; });
   };
 
   const currentContentUrl = () => {
@@ -117,10 +109,10 @@
       for (const frame of Array.from(parent.frames)) {
         if (frame === window) continue;
         const href = frame.location.href;
-        if (href && href !== "about:blank") return href;
+        if (href && href !== 'about:blank') return href;
       }
     } catch (_error) {}
-    return "";
+    return '';
   };
 
   const currentContentDocument = () => {
@@ -168,7 +160,6 @@
   const setupDashboardLinks = () => {
     const dashboard = currentContentDocument();
     if (!dashboard) return;
-
     const actions = dashboard.querySelector('.quick-actions');
     if (actions && !actions.querySelector('[data-memo-insights="1"]')) {
       const link = dashboard.createElement('a');
@@ -178,7 +169,6 @@
       link.textContent = 'Inzichten';
       actions.appendChild(link);
     }
-
     if (actions && !actions.querySelector('[data-memo-v5="1"]')) {
       const link = dashboard.createElement('a');
       link.className = 'quick-btn';
@@ -189,25 +179,25 @@
       link.style.color = '#d8c8ff';
       actions.appendChild(link);
     }
-
-    const redundantHeaderItems = [
-      dashboard.querySelector('.brandline .ver'),
-      dashboard.getElementById('health-pill'),
-      dashboard.getElementById('host-pill')
-    ];
-    redundantHeaderItems.forEach((item) => {
+    [dashboard.querySelector('.brandline .ver'), dashboard.getElementById('health-pill'), dashboard.getElementById('host-pill')].forEach((item) => {
       if (item) item.style.setProperty('display', 'none', 'important');
     });
-
     dashboard.querySelector('[data-memo-rc="1"]')?.remove();
+  };
+
+  const addRuntime = (doc, marker, src) => {
+    if (doc.querySelector(`script[${marker}="1"]`)) return;
+    const script = doc.createElement('script');
+    script.src = `${src}?v=${encodeURIComponent(installedVersion)}&_=${Date.now()}`;
+    script.setAttribute(marker, '1');
+    doc.head.appendChild(script);
   };
 
   const setupV5ControlCenter = () => {
     try {
       for (const frame of Array.from(parent.frames)) {
         if (frame === window) continue;
-        const path = String(frame.location?.pathname || '');
-        if (path !== '/memo-network/control-center.html') continue;
+        if (String(frame.location?.pathname || '') !== '/memo-network/control-center.html') continue;
         const doc = frame.document;
         if (!doc?.head) return;
 
@@ -221,7 +211,6 @@
             event.stopImmediatePropagation();
           }, true);
         }
-
         doc.querySelectorAll('a[href^="https://amp.memocraft.nl"]').forEach((link) => {
           link.setAttribute('target', '_blank');
           link.setAttribute('rel', 'noopener noreferrer');
@@ -233,33 +222,11 @@
         const footer = doc.querySelector('.footer');
         if (footer) footer.textContent = `MemoNetwork v5 Control Center · ${installedVersion.split('-')[1] || 'preview'} preview`;
 
-        if (!doc.querySelector('script[data-memo-v5-service-details="1"]')) {
-          const script = doc.createElement('script');
-          script.src = `/memo-network/control-center-services.js?v=${encodeURIComponent(installedVersion)}&_=${Date.now()}`;
-          script.dataset.memoV5ServiceDetails = '1';
-          doc.head.appendChild(script);
-        }
-
-        if (!doc.querySelector('script[data-memo-v5-diagnostics="1"]')) {
-          const script = doc.createElement('script');
-          script.src = `/memo-network/control-center-diagnostics.js?v=${encodeURIComponent(installedVersion)}&_=${Date.now()}`;
-          script.dataset.memoV5Diagnostics = '1';
-          doc.head.appendChild(script);
-        }
-
-        if (!doc.querySelector('script[data-memo-v5-infrastructure="1"]')) {
-          const script = doc.createElement('script');
-          script.src = `/memo-network/control-center-infrastructure.js?v=${encodeURIComponent(installedVersion)}&_=${Date.now()}`;
-          script.dataset.memoV5Infrastructure = '1';
-          doc.head.appendChild(script);
-        }
-
-        if (!doc.querySelector('script[data-memo-v5-speedtest="1"]')) {
-          const script = doc.createElement('script');
-          script.src = `/memo-network/control-center-speedtest.js?v=${encodeURIComponent(installedVersion)}&_=${Date.now()}`;
-          script.dataset.memoV5Speedtest = '1';
-          doc.head.appendChild(script);
-        }
+        addRuntime(doc, 'data-memo-v5-service-details', '/memo-network/control-center-services.js');
+        addRuntime(doc, 'data-memo-v5-diagnostics', '/memo-network/control-center-diagnostics.js');
+        addRuntime(doc, 'data-memo-v5-infrastructure', '/memo-network/control-center-infrastructure.js');
+        addRuntime(doc, 'data-memo-v5-speedtest', '/memo-network/control-center-speedtest.js');
+        addRuntime(doc, 'data-memo-v5-network-check', '/memo-network/control-center-networkcheck.js');
       }
     } catch (_error) {}
   };
@@ -279,7 +246,6 @@
       #memo-version-footer .memo-version-status.error{color:#94a3b8}
     `;
     document.head.appendChild(style);
-
     const footer = document.createElement('div');
     footer.id = 'memo-version-footer';
     footer.innerHTML = `<div class="memo-edition">MemoNetwork Edition</div><div class="memo-version">v${installedVersion}</div><div class="memo-version-status" id="memo-version-status">Versie controleren… · Built ${releaseDate}</div>`;
