@@ -236,6 +236,7 @@ right.write_text(text, encoding="utf-8")
 PY
 
 chmod 755 "$LEFT_CGI" "$RIGHT_CGI" "$LIVE_STATS_CGI" "$MEMO_DASHBOARD_CGI" "$API_STATS_CGI" "$API_SYSTEM_CGI" "$API_PROCESSES_CGI" "$API_LANGUAGE_CGI"
+find "$API_DIR" -maxdepth 1 -type f \( -name '*.cgi' -o -name '*.pl' \) -exec chmod 755 {} +
 
 rm -rf "$DIST_DIR"
 mkdir -p "$DIST_DIR"
