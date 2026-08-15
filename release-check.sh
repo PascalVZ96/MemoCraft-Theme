@@ -37,11 +37,14 @@ tar -xzf "$ARCHIVE" -C "$TMP_DIR" -- \
   memocraft-theme/left.cgi \
   memo-network/readiness.cgi
 
-grep -Fq '5.0.0' "$TMP_DIR/memocraft-theme/left.cgi" || fail "Sidebar bevat niet versie 5.0.0"
-grep -Fq "version => '5.0.0'" "$TMP_DIR/memo-network/readiness.cgi" || fail "Readiness backend bevat niet versie 5.0.0"
+grep -Fq '5.0.1' "$TMP_DIR/memocraft-theme/left.cgi" || fail "Sidebar bevat niet versie 5.0.1"
+grep -Fq 'const dashboardUrl = "/memo-network/control-center.html";' "$TMP_DIR/memocraft-theme/left.cgi" || fail "Control Center is niet ingesteld als standaard startpagina"
+grep -Fq 'routeDefaultDashboard' "$TMP_DIR/memocraft-theme/left.cgi" || fail "Automatische Control Center-routering ontbreekt"
+grep -Fq "version => '5.0.1'" "$TMP_DIR/memo-network/readiness.cgi" || fail "Readiness backend bevat niet versie 5.0.1"
 grep -Fq "release_stage => 'stable'" "$TMP_DIR/memo-network/readiness.cgi" || fail "Readiness backend staat niet op stable"
 grep -Fq 'stable_verified' "$TMP_DIR/memo-network/readiness.cgi" || fail "Stable-verificatie ontbreekt"
 
-echo "v5.0.0 stable package check: OK"
+echo "v5.0.1 stable package check: OK"
+echo "Control Center is de standaard startpagina"
 echo "Bestanden gecontroleerd: ${#required[@]}"
 echo "Archive: $ARCHIVE"
