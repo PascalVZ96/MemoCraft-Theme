@@ -81,6 +81,20 @@ sub public_ipv4 {
     return 1;
 }
 
+sub run_quiet {
+    my (@cmd) = @_;
+    my $pid = fork();
+    return 0 unless defined $pid;
+    if ($pid == 0) {
+        open STDOUT, '>', '/dev/null';
+        open STDERR, '>', '/dev/null';
+        exec @cmd;
+        exit 127;
+    }
+    waitpid($pid, 0);
+    return (($? >> 8) == 0);
+}
+
 sub install_timer {
     return 0 unless -x '/bin/systemctl' || -x '/usr/bin/systemctl';
     return 0 unless -x $SCANNER;
@@ -117,17 +131,15 @@ EOF
     close $tf or return 0;
     chmod 0644, $TIMER_FILE;
     my $systemctl = -x '/bin/systemctl' ? '/bin/systemctl' : '/usr/bin/systemctl';
-    system($systemctl, 'daemon-reload');
-    return 0 if (($? >> 8) != 0);
-    system($systemctl, 'enable', '--now', 'memonetwork-defense.timer');
-    return (($? >> 8) == 0) ? 1 : 0;
+    return 0 unless run_quiet($systemctl, 'daemon-reload');
+    return run_quiet($systemctl, 'enable', '--now', 'memonetwork-defense.timer');
 }
 
 sub stop_timer {
+    return 1 unless -f $TIMER_FILE;
     my $systemctl = -x '/bin/systemctl' ? '/bin/systemctl' : -x '/usr/bin/systemctl' ? '/usr/bin/systemctl' : '';
     return 1 unless $systemctl;
-    system($systemctl, 'disable', '--now', 'memonetwork-defense.timer');
-    return (($? >> 8) == 0 || ($? >> 8) == 5) ? 1 : 0;
+    return run_quiet($systemctl, 'disable', '--now', 'memonetwork-defense.timer');
 }
 
 sub status_payload {
@@ -147,10 +159,8 @@ sub status_payload {
     my $systemctl = -x '/bin/systemctl' ? '/bin/systemctl' : -x '/usr/bin/systemctl' ? '/usr/bin/systemctl' : '';
     my ($active, $enabled) = (JSON::PP::false, JSON::PP::false);
     if ($systemctl) {
-        system($systemctl, 'is-active', '--quiet', 'memonetwork-defense.timer');
-        $active = (($? >> 8) == 0) ? JSON::PP::true : JSON::PP::false;
-        system($systemctl, 'is-enabled', '--quiet', 'memonetwork-defense.timer');
-        $enabled = (($? >> 8) == 0) ? JSON::PP::true : JSON::PP::false;
+        $active = run_quiet($systemctl, 'is-active', '--quiet', 'memonetwork-defense.timer') ? JSON::PP::true : JSON::PP::false;
+        $enabled = run_quiet($systemctl, 'is-enabled', '--quiet', 'memonetwork-defense.timer') ? JSON::PP::true : JSON::PP::false;
     }
 
     return {
@@ -203,24 +213,20 @@ if ($action eq 'mode') {
         or json_reply({ ok => JSON::PP::false, error => 'Beveiligingsinstellingen konden niet worden opgeslagen' }, '500 Internal Server Error');
     my $timer_ok = $mode eq 'off' ? stop_timer() : install_timer();
     json_reply({ ok => JSON::PP::false, error => 'Systemd-planning kon niet worden aangepast' }, '500 Internal Server Error') unless $timer_ok;
-    if ($mode ne 'off') {
-        system($SCANNER);
-    }
+    run_quiet($SCANNER) if $mode ne 'off';
     json_reply(status_payload());
 }
 
 if ($action eq 'scan') {
     json_reply({ ok => JSON::PP::false, error => 'Auto Defense scanner ontbreekt' }, '500 Internal Server Error') unless -x $SCANNER;
-    system($SCANNER);
-    json_reply({ ok => JSON::PP::false, error => 'Scan kon niet worden uitgevoerd' }, '500 Internal Server Error') unless (($? >> 8) == 0);
+    json_reply({ ok => JSON::PP::false, error => 'Scan kon niet worden uitgevoerd' }, '500 Internal Server Error') unless run_quiet($SCANNER);
     json_reply(status_payload());
 }
 
 if ($action eq 'unblock') {
     my $ip = query_value('ip');
     json_reply({ ok => JSON::PP::false, error => 'Ongeldig IP-adres' }, '400 Bad Request') unless valid_ipv4($ip);
-    system($SCANNER, '--unblock', $ip);
-    json_reply({ ok => JSON::PP::false, error => 'IP kon niet worden gedeblokkeerd' }, '500 Internal Server Error') unless (($? >> 8) == 0);
+    json_reply({ ok => JSON::PP::false, error => 'IP kon niet worden gedeblokkeerd' }, '500 Internal Server Error') unless run_quiet($SCANNER, '--unblock', $ip);
     json_reply(status_payload());
 }
 
