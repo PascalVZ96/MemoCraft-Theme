@@ -1,6 +1,6 @@
 (() => {
   const dashboardUrl = "/right.cgi";
-  const installedVersion = "5.0.0-alpha13";
+  const installedVersion = "5.0.0-alpha14";
   const releaseDate = "15-08-2026";
   const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
   const i18nUrl = "/memocraft-theme/memo-i18n.js";
@@ -225,6 +225,7 @@
         addRuntime(doc, 'data-memo-v5-service-details', '/memo-network/control-center-services.js');
         addRuntime(doc, 'data-memo-v5-container-monitor', '/memo-network/control-center-container-monitor.js');
         addRuntime(doc, 'data-memo-v5-diagnostics', '/memo-network/control-center-diagnostics.js');
+        addRuntime(doc, 'data-memo-v5-log-center', '/memo-network/control-center-logcenter.js');
         addRuntime(doc, 'data-memo-v5-infrastructure', '/memo-network/control-center-infrastructure.js');
         addRuntime(doc, 'data-memo-v5-speedtest', '/memo-network/control-center-speedtest.js');
         addRuntime(doc, 'data-memo-v5-network-check', '/memo-network/control-center-networkcheck.js');

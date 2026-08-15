@@ -4,6 +4,19 @@
 
 De volgende grote MemoNetwork-release. Ontwikkeling vindt plaats op de aparte `v5` branch totdat de release stabiel genoeg is om naar `main` te gaan.
 
+### Alpha 14
+
+- Het tabblad **Diagnostiek** heeft nu een geïntegreerd **Log Center** voor recente systemd-journalmeldingen.
+- Logregels kunnen direct worden gefilterd op laatste uur, 6 uur, 24 uur of sinds de huidige serverstart.
+- Niveaufilters voor alle meldingen, waarschuwingen, fouten en kritieke meldingen zijn toegevoegd.
+- Bron- en unitfilters worden automatisch opgebouwd uit de werkelijk gevonden journalbronnen.
+- Een lokale zoekfunctie doorzoekt bron, unit, PID en berichttekst zonder extra servercommando's uit te voeren.
+- Samenvattingskaarten tonen aantallen logregels, waarschuwingen, fouten en kritieke meldingen voor de gekozen periode.
+- Het Log Center toont maximaal 100 gefilterde regels tegelijk en de backend begrenst de journaluitvoer voor een voorspelbare belasting.
+- Automatisch verversen staat standaard aan en vernieuwt iedere 30 seconden zolang Diagnostiek geopend is; dit kan direct worden uitgezet.
+- De backend is volledig read-only en accepteert alleen een vaste allowlist van tijdsperiodes; er wordt geen vrije journalctl- of shellinvoer uitgevoerd.
+- Log Center ondersteunt Nederlands, Duits en Engels.
+
 ### Alpha 13
 
 - Het tabblad **Services** heeft nu een geïntegreerde Docker Container Monitor voor alle Docker-containers en Docker-gebaseerde MinIO-installaties.
