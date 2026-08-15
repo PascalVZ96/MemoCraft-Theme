@@ -4,6 +4,21 @@
 
 De volgende grote MemoNetwork-release. Ontwikkeling vindt plaats op de aparte `v5` branch totdat de release stabiel genoeg is om naar `main` te gaan.
 
+### Alpha 17
+
+- Het tabblad **Overzicht** heeft nu een geïntegreerd **Operations Center** dat systeem, services, backups, beveiliging, netwerk en internetprestaties centraal samenbrengt.
+- Zes compacte bronkaarten tonen direct of een onderdeel gezond, onbekend, aandachtspunt of kritiek is en springen met één klik naar het relevante beheeronderdeel.
+- Kritieke en waarschuwingsmeldingen worden automatisch geprioriteerd; het tabblad Overzicht krijgt een compacte badge met het actuele aantal belangrijke aandachtspunten.
+- Systeembewaking combineert CPU, RAM, schijfgebruik, temperatuur, rebootstatus en beschikbare pakketupdates zonder extra beheeracties uit te voeren.
+- Servicebewaking controleert Docker, AMP, MinIO en WireGuard en bundelt offline platformservices in één duidelijke melding.
+- Backupbewaking gebruikt de bestaande Backup Center-status voor mountcontrole, MinIO-status en versheid van de nieuwste gevonden backup.
+- Security Center-signalen zoals uitgeschakelde bescherming, een stilgevallen scanner, actieve blokkades, recente detecties en backendfouten verschijnen centraal in Overzicht.
+- De laatste netwerkcontrole wordt meegenomen met score, ouderdom en een waarschuwing wanneer de score onvoldoende is of de controle verouderd raakt.
+- Internetbewaking gebruikt de bestaande speedtestgeschiedenis en kan een sterke snelheidsdaling signaleren ten opzichte van de mediaan van recente betrouwbare metingen; hoge latency en verouderde metingen worden eveneens gemarkeerd.
+- Iedere statusbron heeft een afzonderlijke timeout, zodat één trage of niet-beschikbare backend het Control Center niet kan laten vastlopen; gedeeltelijke resultaten blijven zichtbaar.
+- Operations Center vernieuwt automatisch maximaal eenmaal per minuut en kan ook handmatig volledig worden ververst.
+- De nieuwe interface ondersteunt Nederlands, Duits en Engels en gebruikt uitsluitend bestaande read-only statusendpoints.
+
 ### Alpha 16
 
 - Het tabblad **Infrastructuur** heeft nu een geïntegreerd **Backup Center** voor de backup-HDD en MinIO-opslag.
