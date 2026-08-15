@@ -127,12 +127,16 @@ my $fail = scalar grep { ($_->{status} || '') eq 'fail' } @checks;
 my $warn = scalar grep { ($_->{status} || '') eq 'warn' } @checks;
 my $critical_fail = scalar grep { ($_->{critical} && ($_->{status} || '') eq 'fail') } @checks;
 my $pass = scalar grep { ($_->{status} || '') eq 'pass' } @checks;
+my $ready_for_rc = $critical_fail == 0 ? JSON::PP::true : JSON::PP::false;
+my $ready_for_stable = ($fail == 0 && $warn == 0) ? JSON::PP::true : JSON::PP::false;
 
 reply_json({
     ok => JSON::PP::true,
-    version => '5.0.0-beta1',
+    version => '5.0.0-rc1',
+    release_stage => 'rc',
     generated_at => time,
-    ready_for_rc => $critical_fail == 0 ? JSON::PP::true : JSON::PP::false,
+    ready_for_rc => $ready_for_rc,
+    ready_for_stable => $ready_for_stable,
     summary => {pass=>$pass, warn=>$warn, fail=>$fail, critical_fail=>$critical_fail, total=>scalar(@checks)},
     checks => \@checks,
 });
