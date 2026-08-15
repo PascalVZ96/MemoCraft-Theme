@@ -2,7 +2,7 @@
   const dashboardUrl = "/memo-network/control-center.html";
   const installedVersion = "5.0.1";
   const releaseDate = "16-08-2026";
-  const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/v5/version.json";
+  const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
   const i18nUrl = "/memocraft-theme/memo-i18n.js";
   let i18nLoading = false;
   let i18nLoaded = false;
@@ -230,7 +230,7 @@
         });
 
         const badge = doc.querySelector('.pill.dev');
-        if (badge) badge.textContent = `v${installedVersion.replace('-', ' ')}`;
+        if (badge) badge.remove();
         const footer = doc.querySelector('.footer');
         if (footer) footer.textContent = installedVersion.includes('-') ? `MemoNetwork v5 Control Center · ${installedVersion.split('-')[1]} preview` : 'MemoNetwork v5 Control Center · stable';
 
@@ -290,8 +290,8 @@
           status.textContent = `Laatste versie · Built ${releaseDate}`;
           status.className = 'memo-version-status ok';
         } else if (comparison > 0) {
-          status.textContent = `Testversie · v5 ${latest}`;
-          status.className = 'memo-version-status dev';
+          status.textContent = `Stable · Built ${releaseDate}`;
+          status.className = 'memo-version-status ok';
         } else {
           status.textContent = `Update beschikbaar: v${latest}`;
           status.className = 'memo-version-status update';
