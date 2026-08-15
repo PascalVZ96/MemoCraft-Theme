@@ -4,6 +4,21 @@
 
 De volgende grote MemoNetwork-release. Ontwikkeling vindt plaats op de aparte `v5` branch totdat de release stabiel genoeg is om naar `main` te gaan.
 
+### Alpha 15
+
+- Het tabblad **Diagnostiek** heeft nu een geïntegreerd **Security Center** voor automatische bescherming tegen duidelijke SSH-brute-forceaanvallen.
+- Er zijn drie modi: **Uit**, **Alleen detecteren** en **Automatisch blokkeren**.
+- De scanner telt alleen herkenbare mislukte SSH/PAM-aanmeldingen en grijpt pas in na 5 pogingen vanaf hetzelfde externe IPv4-adres binnen 10 minuten.
+- Lokale, private, carrier-grade NAT-, multicast- en gereserveerde IPv4-adressen worden nooit automatisch geblokkeerd.
+- Automatische blokkades gebruiken een eigen `memonetwork_defense` nftables-table en set met ingebouwde timeout, zodat bestaande UFW-regels niet worden gewijzigd.
+- Een automatische blokkade duurt standaard 60 minuten en verloopt daarna vanzelf in nftables.
+- Het Security Center toont actieve blokkades, detecties van de laatste 24 uur, scannerstatus, laatste scan en recente beveiligingsgebeurtenissen.
+- Actieve blokkades kunnen rechtstreeks vanuit het Control Center handmatig worden opgeheven.
+- Bij het inschakelen van automatische blokkering probeert MemoNetwork het huidige publieke beheer-IP automatisch aan de allowlist toe te voegen.
+- Detectie en automatische bescherming draaien via een eigen systemd-timer iedere 5 minuten; uitschakelen stopt die timer.
+- Beheeracties zijn POST-only met de bestaande MemoNetwork-requestheader; alle IP-adressen en modi worden streng gevalideerd en externe commando's worden zonder shell-interpolatie uitgevoerd.
+- Security Center ondersteunt Nederlands, Duits en Engels.
+
 ### Alpha 14
 
 - Het tabblad **Diagnostiek** heeft nu een geïntegreerd **Log Center** voor recente systemd-journalmeldingen.
