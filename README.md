@@ -2,7 +2,7 @@
 
 MemoNetwork is een zelfstandig Webmin-thema en serverbeheeromgeving met een eigen **Control Center** voor dagelijkse monitoring, infrastructuur, incidenten, backups, beveiliging en diagnostiek.
 
-**Huidige stabiele versie: v5.0.2**  
+**Huidige stabiele versie: v5.0.3**  
 Releasekanaal: **stable**  
 Getest op Ubuntu Server met Webmin.
 
@@ -10,7 +10,7 @@ Getest op Ubuntu Server met Webmin.
 
 Vanaf v5 is het **Control Center de standaard startpagina** van MemoNetwork. Het oude v4-dashboard blijft alleen als legacy/weergave beschikbaar.
 
-In v5.0.2 is de stable-interface verder opgeschoond: de legacy-dashboardknop is uit het Control Center verwijderd, de tabvolgorde staat visueel vast en de taal volgt Webmin zonder tijdelijke wisselingen tussen NL/DE/EN.
+In v5.0.3 opent Webmin het Control Center direct via een server-side redirect, zodat het oude dashboard niet meer kort zichtbaar is. Ontwikkellabels zoals `Alpha 22 · ...` worden in de stable-interface automatisch verwijderd. De vaste tabvolgorde en Webmin-taalsynchronisatie uit v5.0.2 blijven behouden.
 
 De hoofdonderdelen van het Control Center zijn:
 
@@ -174,7 +174,7 @@ dist/memocraft-theme.wbt.gz
 
 - `main` bevat de huidige stabiele MemoNetwork-release.
 - Grote nieuwe versies worden eerst op een aparte ontwikkelbranch gebouwd en getest.
-- Bugfixes voor een stabiele versie krijgen een patchversie, bijvoorbeeld `5.0.2`.
+- Bugfixes voor een stabiele versie krijgen een patchversie, bijvoorbeeld `5.0.3`.
 - Nieuwe grote functionaliteit wordt niet meer aan een afgeronde major toegevoegd zodra de volgende major in ontwikkeling gaat.
 
 ## Veiligheid
