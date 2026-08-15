@@ -149,11 +149,13 @@
   const observer = new MutationObserver(() => {
     if (loaded && !document.getElementById('memo-network-check-panel')) renderPanel();
   });
-  const diagRoot = root();
-  if (diagRoot) observer.observe(diagRoot, {childList:true});
+  observer.observe(view, {childList:true, subtree:true});
   renderPanel();
   loadStatus();
-  setInterval(() => { if (!running && view.classList.contains('active')) loadStatus(); }, 30000);
+  setInterval(() => {
+    if (!document.getElementById('memo-network-check-panel')) renderPanel();
+    if (!running && view.classList.contains('active')) loadStatus();
+  }, 30000);
 
   window.MemoNetworkV5NetworkCheck = {refresh: loadStatus, run: runCheck};
 })();
