@@ -19,7 +19,7 @@
   };
 
   const t = key => dict[lang]?.[key] || dict.en[key] || key;
-  const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const clean = value => String(value ?? '').replace(/Â·/g, '·');
   const fmt = (value, digits = 2) => Number(value || 0).toFixed(digits);
   const formatTime = epoch => {
