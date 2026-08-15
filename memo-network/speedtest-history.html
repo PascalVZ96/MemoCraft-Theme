@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MemoNetwork · Speedtest geschiedenis</title>
+  <style>
+    :root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#06111d;color:#edf6ff}
+    *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#07131f,#06111d);min-height:100vh}.wrap{max-width:1500px;margin:0 auto;padding:24px}.head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;padding:18px;border:1px solid #29415e;border-radius:16px;background:linear-gradient(145deg,#13233a,#0d1928)}.eyebrow{color:#78a4d3;font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.08em}.head h1{margin:4px 0 0;font-size:24px}.head p{margin:6px 0 0;color:#91abc7;font-size:12px}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{appearance:none;border:1px solid #315776;border-radius:10px;background:#10233a;color:#d9efff;padding:9px 12px;font-weight:800;text-decoration:none;cursor:pointer}.btn:hover{border-color:#60a5fa;background:#133052}.btn.danger{border-color:#7f3a49;background:#2a1520;color:#fecdd3}.btn.danger:hover{background:#3a1825}.btn:disabled{opacity:.55;cursor:wait}.status{display:none;margin-top:12px;padding:11px 13px;border:1px solid #29415e;border-radius:11px;background:#0b1726;color:#a8bed5;font-size:11px}.status.show{display:block}.status.ok{border-color:#247653;background:#0d281f;color:#86efac}.status.error{border-color:#7f3a49;background:#2a1520;color:#fecdd3}.summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:14px}.stat{padding:13px;border:1px solid #29415e;border-radius:13px;background:#0b1726}.stat small{display:block;color:#7895b6;font-size:9px;font-weight:850;text-transform:uppercase}.stat strong{display:block;margin-top:5px;font-size:17px}.panel{margin-top:14px;padding:15px;border:1px solid #263d59;border-radius:15px;background:linear-gradient(145deg,#122136,#0d1928)}.panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.panel h2{margin:0;font-size:16px}.panel p{margin:5px 0 0;color:#8ea6c2;font-size:11px}.count{padding:5px 9px;border:1px solid #315776;border-radius:999px;color:#9bdcff;font-size:9px;font-weight:800;white-space:nowrap}.chart{margin-top:12px;border:1px solid #20354e;border-radius:12px;background:#07121f;padding:9px}.chart svg{display:block;width:100%;height:auto;min-height:180px}.legend{display:flex;gap:14px;margin-top:7px;color:#8ea6c2;font-size:9px}.legend span:before{content:'';display:inline-block;width:10px;height:2px;margin-right:5px;vertical-align:middle}.legend .down:before{background:#38bdf8}.legend .up:before{background:#a78bfa}.table-wrap{margin-top:12px;overflow:auto;border:1px solid #20354e;border-radius:12px}.table{width:100%;border-collapse:collapse;min-width:930px}.table th,.table td{padding:10px 9px;border-top:1px solid #20354e;text-align:left;font-size:10px;white-space:nowrap}.table th{border-top:0;color:#7895b6;text-transform:uppercase;font-size:9px;letter-spacing:.04em;background:#091625;position:sticky;top:0}.table td:first-child{font-weight:750}.source{padding:3px 7px;border:1px solid #315776;border-radius:999px;color:#9bdcff;font-size:8px}.del{appearance:none;border:1px solid #6e3a48;border-radius:8px;background:#24151c;color:#fda4af;padding:6px 8px;font-size:9px;font-weight:800;cursor:pointer}.del:hover{background:#351923}.empty{padding:30px;text-align:center;color:#7895b6}.download{color:#7dd3fc}.upload{color:#c4b5fd}.ping{color:#86efac}@media(max-width:900px){.summary{grid-template-columns:repeat(2,1fr)}.head{flex-direction:column}}@media(max-width:560px){.wrap{padding:12px}.summary{grid-template-columns:1fr}.actions{width:100%}.actions .btn{flex:1;text-align:center}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="head">
+      <div><div class="eyebrow" id="eyebrow">MemoNetwork monitoring</div><h1 id="title">Speedtest geschiedenis</h1><p id="subtitle">Bekijk en beheer alle opgeslagen download-, upload- en pingmetingen.</p></div>
+      <div class="actions"><a class="btn" href="/memo-network/control-center.html" id="back">← Control Center</a><button class="btn" type="button" id="refresh">↻ Vernieuwen</button><button class="btn danger" type="button" id="clear">Alles verwijderen</button></div>
+    </header>
+    <div class="status" id="status"></div>
+    <section class="summary" id="summary"></section>
+    <section class="panel">
+      <div class="panel-head"><div><h2 id="chart-title">Prestatieverloop</h2><p id="chart-sub">De laatste 30 metingen in de grafiek; de tabel bevat de volledige opgeslagen geschiedenis.</p></div><span class="count" id="count">0 metingen</span></div>
+      <div class="chart" id="chart"></div>
+      <div class="table-wrap"><table class="table"><thead><tr><th id="h-date">Datum</th><th id="h-down">Download</th><th id="h-up">Upload</th><th id="h-ping">Ping</th><th id="h-server">Testserver</th><th id="h-source">Meting</th><th id="h-action">Actie</th></tr></thead><tbody id="rows"></tbody></table></div>
+    </section>
+  </main>
+<script>
+(() => {
+  const cookie = String(document.cookie || '').match(/(?:^|;\s*)memo_lang=(nl|de|en)(?:;|$)/i);
+  const lang = cookie ? cookie[1].toLowerCase() : 'nl';
+  const d = {
+    nl:{eyebrow:'MemoNetwork monitoring',title:'Speedtest geschiedenis',subtitle:'Bekijk en beheer alle opgeslagen download-, upload- en pingmetingen.',back:'← Control Center',refresh:'↻ Vernieuwen',clear:'Alles verwijderen',chart:'Prestatieverloop',chartSub:'De laatste 30 metingen in de grafiek; de tabel bevat de volledige opgeslagen geschiedenis.',date:'Datum',download:'Download',upload:'Upload',ping:'Ping',server:'Testserver',source:'Meting',action:'Actie',manual:'Handmatig',scheduled:'Automatisch',delete:'Verwijderen',tests:'metingen',avgDown:'Gem. download',avgUp:'Gem. upload',avgPing:'Gem. ping',best:'Beste download',stored:'Opgeslagen',empty:'Nog geen speedtestmetingen opgeslagen.',loading:'Geschiedenis laden…',deleted:'Meting verwijderd.',cleared:'Alle speedtestmetingen zijn verwijderd.',failed:'Actie mislukt',confirmDelete:'Deze speedtestmeting verwijderen?',confirmClear:'Alle opgeslagen speedtestmetingen verwijderen? Dit kan niet ongedaan worden gemaakt.'},
+    de:{eyebrow:'MemoNetwork Monitoring',title:'Speedtest-Verlauf',subtitle:'Alle gespeicherten Download-, Upload- und Ping-Messungen anzeigen und verwalten.',back:'← Control Center',refresh:'↻ Aktualisieren',clear:'Alle löschen',chart:'Leistungsverlauf',chartSub:'Die letzten 30 Messungen im Diagramm; die Tabelle enthält den vollständigen gespeicherten Verlauf.',date:'Datum',download:'Download',upload:'Upload',ping:'Ping',server:'Testserver',source:'Messung',action:'Aktion',manual:'Manuell',scheduled:'Automatisch',delete:'Löschen',tests:'Messungen',avgDown:'Ø Download',avgUp:'Ø Upload',avgPing:'Ø Ping',best:'Bester Download',stored:'Gespeichert',empty:'Noch keine Speedtest-Messungen gespeichert.',loading:'Verlauf wird geladen…',deleted:'Messung gelöscht.',cleared:'Alle Speedtest-Messungen wurden gelöscht.',failed:'Aktion fehlgeschlagen',confirmDelete:'Diese Speedtest-Messung löschen?',confirmClear:'Alle gespeicherten Speedtest-Messungen löschen? Dies kann nicht rückgängig gemacht werden.'},
+    en:{eyebrow:'MemoNetwork monitoring',title:'Speedtest history',subtitle:'View and manage all stored download, upload and ping measurements.',back:'← Control Center',refresh:'↻ Refresh',clear:'Delete all',chart:'Performance history',chartSub:'The latest 30 measurements are charted; the table contains the full stored history.',date:'Date',download:'Download',upload:'Upload',ping:'Ping',server:'Test server',source:'Measurement',action:'Action',manual:'Manual',scheduled:'Automatic',delete:'Delete',tests:'measurements',avgDown:'Avg. download',avgUp:'Avg. upload',avgPing:'Avg. ping',best:'Best download',stored:'Stored',empty:'No speedtest measurements stored yet.',loading:'Loading history…',deleted:'Measurement deleted.',cleared:'All speedtest measurements were deleted.',failed:'Action failed',confirmDelete:'Delete this speedtest measurement?',confirmClear:'Delete all stored speedtest measurements? This cannot be undone.'}
+  };
+  const t = k => d[lang]?.[k] || d.en[k] || k;
+  const esc = v => String(v ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const fmt = (v,n=2) => Number(v||0).toFixed(n);
+  const time = epoch => { const x = new Date(Number(epoch||0)*1000); return !epoch || Number.isNaN(x.getTime()) ? '—' : x.toLocaleString([], {dateStyle:'short',timeStyle:'medium'}); };
+  const source = v => v === 'scheduled' ? t('scheduled') : t('manual');
+  let history = [];
+  let busy = false;
+  const ids = {eyebrow:'eyebrow',title:'title',subtitle:'subtitle',back:'back',refresh:'refresh',clear:'clear',chart:'chart-title',chartSub:'chart-sub',date:'h-date',download:'h-down',upload:'h-up',ping:'h-ping',server:'h-server',source:'h-source',action:'h-action'};
+  Object.entries(ids).forEach(([key,id]) => { const el=document.getElementById(id); if(el) el.textContent=t(key); });
+  const status = (text, cls='') => { const el=document.getElementById('status'); el.textContent=text; el.className=`status show ${cls}`; };
+  const clearStatus = () => { document.getElementById('status').className='status'; };
+  const avg = (items,key) => items.length ? items.reduce((s,x)=>s+Number(x?.[key]||0),0)/items.length : 0;
+  const renderSummary = () => {
+    const items = history.filter(x=>Number(x?.download_mbps||0)>0&&Number(x?.upload_mbps||0)>0);
+    const best = items.length ? Math.max(...items.map(x=>Number(x.download_mbps||0))) : 0;
+    document.getElementById('summary').innerHTML = [
+      [t('avgDown'),items.length?`${fmt(avg(items,'download_mbps'))} Mbit/s`:'—','download'],
+      [t('avgUp'),items.length?`${fmt(avg(items,'upload_mbps'))} Mbit/s`:'—','upload'],
+      [t('avgPing'),items.length?`${fmt(avg(items,'ping_ms'),1)} ms`:'—','ping'],
+      [t('best'),items.length?`${fmt(best)} Mbit/s`:'—','download'],
+      [t('stored'),`${items.length} ${t('tests')}`,'']
+    ].map(([label,value,cls])=>`<div class="stat"><small>${esc(label)}</small><strong class="${cls}">${esc(value)}</strong></div>`).join('');
+    document.getElementById('count').textContent=`${items.length} ${t('tests')}`;
+  };
+  const renderChart = () => {
+    const items=history.filter(x=>Number(x?.download_mbps||0)>0&&Number(x?.upload_mbps||0)>0).slice(-30);
+    const host=document.getElementById('chart');
+    if(items.length<2){host.innerHTML=`<div class="empty">${esc(t('empty'))}</div>`;return;}
+    const W=920,H=230,L=42,R=16,T=18,B=32,IW=W-L-R,IH=H-T-B;
+    const max=Math.max(1,...items.flatMap(x=>[Number(x.download_mbps||0),Number(x.upload_mbps||0)]));
+    const x=i=>L+(i/(items.length-1))*IW, y=v=>T+IH-(Number(v||0)/max)*IH;
+    const pts=k=>items.map((it,i)=>`${x(i).toFixed(1)},${y(it[k]).toFixed(1)}`).join(' ');
+    const grid=[0,.25,.5,.75,1].map(f=>{const yy=T+IH-f*IH;return `<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" stroke="#20354e"/><text x="${L-6}" y="${yy+4}" fill="#647b96" font-size="10" text-anchor="end">${Math.round(max*f)}</text>`}).join('');
+    const first=new Date(Number(items[0].tested_at)*1000).toLocaleDateString([], {day:'2-digit',month:'2-digit'}), last=new Date(Number(items.at(-1).tested_at)*1000).toLocaleDateString([], {day:'2-digit',month:'2-digit'});
+    host.innerHTML=`<svg viewBox="0 0 ${W} ${H}">${grid}<polyline fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="${pts('download_mbps')}"/><polyline fill="none" stroke="#a78bfa" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="${pts('upload_mbps')}"/><text x="${L}" y="${H-8}" fill="#647b96" font-size="10">${esc(first)}</text><text x="${W-R}" y="${H-8}" fill="#647b96" font-size="10" text-anchor="end">${esc(last)}</text></svg><div class="legend"><span class="down">${esc(t('download'))}</span><span class="up">${esc(t('upload'))}</span></div>`;
+  };
+  const renderRows = () => {
+    const tbody=document.getElementById('rows');
+    const items=[...history].reverse();
+    if(!items.length){tbody.innerHTML=`<tr><td colspan="7" class="empty">${esc(t('empty'))}</td></tr>`;return;}
+    tbody.innerHTML=items.map(it=>`<tr><td>${esc(time(it.tested_at))}</td><td class="download">${esc(fmt(it.download_mbps))} Mbit/s</td><td class="upload">${esc(fmt(it.upload_mbps))} Mbit/s</td><td class="ping">${esc(fmt(it.ping_ms,1))} ms</td><td>${esc(it.server||'—')}</td><td><span class="source">${esc(source(it.source))}</span></td><td><button class="del" data-stamp="${esc(it.tested_at)}" type="button">${esc(t('delete'))}</button></td></tr>`).join('');
+  };
+  const render = () => { renderSummary(); renderChart(); renderRows(); document.getElementById('clear').disabled=!history.length||busy; };
+  const load = async () => {
+    if(busy)return; busy=true; status(t('loading')); document.getElementById('refresh').disabled=true;
+    try{const r=await fetch(`/memo-network/speedtest.cgi?_=${Date.now()}`,{cache:'no-store',credentials:'same-origin'});const data=await r.json().catch(()=>({}));if(!r.ok||!data.ok)throw new Error(data.error||`HTTP ${r.status}`);history=Array.isArray(data.history)?data.history:[];clearStatus();render();}
+    catch(e){status(`${t('failed')}: ${e?.message||e}`,'error');}
+    finally{busy=false;document.getElementById('refresh').disabled=false;render();}
+  };
+  const mutate = async (url, successText) => {
+    if(busy)return; busy=true; document.getElementById('clear').disabled=true;
+    try{const r=await fetch(url,{method:'POST',credentials:'same-origin',cache:'no-store',headers:{'X-Requested-With':'MemoNetwork'}});const data=await r.json().catch(()=>({}));if(!r.ok||!data.ok)throw new Error(data.error||`HTTP ${r.status}`);status(successText,'ok');history=Array.isArray(data.history)?data.history:history;render();}
+    catch(e){status(`${t('failed')}: ${e?.message||e}`,'error');}
+    finally{busy=false;render();}
+  };
+  document.getElementById('refresh').addEventListener('click',load);
+  document.getElementById('clear').addEventListener('click',()=>{if(confirm(t('confirmClear')))mutate(`/memo-network/speedtest-history.cgi?operation=clear&confirm=all&_=${Date.now()}`,t('cleared'));});
+  document.getElementById('rows').addEventListener('click',e=>{const b=e.target.closest('button[data-stamp]');if(!b||!confirm(t('confirmDelete')))return;mutate(`/memo-network/speedtest-history.cgi?operation=delete&tested_at=${encodeURIComponent(b.dataset.stamp)}&_=${Date.now()}`,t('deleted'));});
+  load();
+})();
+</script>
+</body>
+</html>
