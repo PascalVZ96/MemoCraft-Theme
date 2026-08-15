@@ -15,6 +15,8 @@ De volgende grote MemoNetwork-release. Ontwikkeling vindt plaats op de aparte `v
 - De eerder ingestelde nachtelijke speedtest blijft volledig via systemd lopen; het dashboard maakt geen extra planning aan en start geen onverwachte tests.
 - Een bestaande laatste speedtest wordt automatisch als eerste geschiedenispunt gebruikt, zodat de grafiek zonder verlies van de huidige meting begint.
 - Testserverweergave is opgeschoond om foutieve `Â·`-tekens in oudere speedtestresultaten te corrigeren.
+- Voor `speedtest-cli` gebruikt MemoNetwork nu standaard de geteste server **toob Ltd / London** met server-ID `26922`, zodat opeenvolgende metingen beter vergelijkbaar zijn.
+- Als de vaste speedtestserver niet beschikbaar is, valt MemoNetwork automatisch terug op de normale serverselectie in plaats van de meting volledig te laten mislukken.
 - Geschiedenis, planning en nieuwe labels ondersteunen Nederlands, Duits en Engels.
 
 ### Alpha 11
@@ -41,7 +43,7 @@ De volgende grote MemoNetwork-release. Ontwikkeling vindt plaats op de aparte `v
 - Ontbreekt een speedtest-client, dan toont het Control Center direct het installatiecommando `sudo apt install speedtest-cli -y`.
 - Speedtests gebruiken een afzonderlijk beveiligd CGI-endpoint met POST-only uitvoering, MemoNetwork-requestheader, lock tegen dubbele tests en een timeout.
 - De interface toont tijdens de test een duidelijke voortgangsstatus en blokkeert dubbele starts.
-- Speedtest-interface en foutmeldingen ondersteunen Nederlands, Duits en Engels.
+- Speedtest-interface en foutmeldingen ondersteunen NL / DE / EN.
 
 ### Alpha 9
 
