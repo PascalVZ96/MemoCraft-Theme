@@ -1,8 +1,8 @@
 (() => {
   const dashboardUrl = "/right.cgi";
-  const installedVersion = "5.0.0-rc1";
+  const installedVersion = "5.0.0";
   const releaseDate = "16-08-2026";
-  const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
+  const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/v5/version.json";
   const i18nUrl = "/memocraft-theme/memo-i18n.js";
   let i18nLoading = false;
   let i18nLoaded = false;
@@ -220,7 +220,7 @@
         const badge = doc.querySelector('.pill.dev');
         if (badge) badge.textContent = `v${installedVersion.replace('-', ' ')}`;
         const footer = doc.querySelector('.footer');
-        if (footer) footer.textContent = `MemoNetwork v5 Control Center · ${installedVersion.split('-')[1] || 'preview'} preview`;
+        if (footer) footer.textContent = installedVersion.includes('-') ? `MemoNetwork v5 Control Center · ${installedVersion.split('-')[1]} preview` : 'MemoNetwork v5 Control Center · stable';
 
         addRuntime(doc, 'data-memo-v5-operations', '/memo-network/control-center-operations.js');
         addRuntime(doc, 'data-memo-v5-incidents', '/memo-network/control-center-incidents.js');
@@ -278,7 +278,7 @@
           status.textContent = `Laatste versie · Built ${releaseDate}`;
           status.className = 'memo-version-status ok';
         } else if (comparison > 0) {
-          status.textContent = `Testversie · main v${latest}`;
+          status.textContent = `Testversie · v5 ${latest}`;
           status.className = 'memo-version-status dev';
         } else {
           status.textContent = `Update beschikbaar: v${latest}`;
