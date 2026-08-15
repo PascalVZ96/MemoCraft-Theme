@@ -4,19 +4,33 @@
 
 De volgende grote MemoNetwork-release. Ontwikkeling vindt plaats op de aparte `v5` branch totdat de release stabiel genoeg is om naar `main` te gaan.
 
+### Alpha 13
+
+- Het tabblad **Services** heeft nu een geïntegreerde Docker Container Monitor voor alle Docker-containers en Docker-gebaseerde MinIO-installaties.
+- Iedere container krijgt naast Starten, Stoppen en Herstarten een aparte **Monitor**-knop.
+- De monitor toont live CPU-gebruik, geheugenpercentage, geheugengebruik, netwerk-I/O, schijf-I/O, PID-aantal, herstarts en uptime.
+- Docker health-status, image, poorten, exitcode en korte container-ID zijn direct zichtbaar.
+- Tot 20 actieve processen binnen de container worden veilig read-only weergegeven.
+- De laatste 120 Docker-logregels worden geïntegreerd getoond met een lokale zoek/filterfunctie en een knop om logs te kopiëren.
+- Containergegevens worden standaard iedere vijf seconden automatisch ververst zolang de monitor geopend is; automatisch verversen kan direct worden uitgezet.
+- De nieuwe backend accepteert alleen geldige containernamen die daadwerkelijk in `docker ps -a` voorkomen en voert alle Docker-commando's als losse argumenten uit zonder shell-interpolatie.
+- De monitor is volledig read-only; bestaande start/stop/herstartacties blijven via het afzonderlijke beveiligde beheerendpoint lopen.
+- Container Monitor ondersteunt Nederlands, Duits en Engels.
+
 ### Alpha 12
 
 - De internet-speedtest heeft nu een permanente prestatiegeschiedenis in plaats van alleen de laatste meting.
-- Tot 90 speedtests worden server-side bewaard; het Control Center toont de laatste 30 als download- en uploadgrafiek.
+- Tot 90 speedtests worden server-side bewaard; het Control Center toont alleen de drie nieuwste metingen zodat Infrastructuur compact blijft.
+- Een aparte **Speedtest geschiedenis**-pagina bevat de volledige opgeslagen historie, een grotere grafiek en beheeropties.
+- Individuele slechte speedtestmetingen kunnen veilig worden verwijderd; ook de volledige geschiedenis kan na bevestiging worden geleegd.
 - Gemiddelde download, gemiddelde upload, gemiddelde ping en beste downloadsnelheid worden automatisch berekend.
-- De laatste zes metingen worden als compacte tabel getoond met datum, download, upload, ping en bron van de meting.
-- Handmatige en automatische speedtests worden voortaan apart gemarkeerd in de geschiedenis.
+- Handmatige en automatische speedtests worden apart gemarkeerd in de geschiedenis.
 - De bestaande `memonetwork-speedtest.timer` wordt automatisch uitgelezen en toont status, schema en eerstvolgende geplande run in het Control Center.
 - De eerder ingestelde nachtelijke speedtest blijft volledig via systemd lopen; het dashboard maakt geen extra planning aan en start geen onverwachte tests.
 - Een bestaande laatste speedtest wordt automatisch als eerste geschiedenispunt gebruikt, zodat de grafiek zonder verlies van de huidige meting begint.
 - Testserverweergave is opgeschoond om foutieve `Â·`-tekens in oudere speedtestresultaten te corrigeren.
-- Voor `speedtest-cli` gebruikt MemoNetwork nu standaard de geteste server **toob Ltd / London** met server-ID `26922`, zodat opeenvolgende metingen beter vergelijkbaar zijn.
-- Als de vaste speedtestserver niet beschikbaar is, valt MemoNetwork automatisch terug op de normale serverselectie in plaats van de meting volledig te laten mislukken.
+- Voor `speedtest-cli` gebruikt MemoNetwork de geteste server **toob Ltd / London** met server-ID `26922`, zodat opeenvolgende metingen betrouwbaar vergelijkbaar zijn.
+- De backend controleert dat de speedtest daadwerkelijk server `26922` gebruikte en slaat een meting anders niet op.
 - Geschiedenis, planning en nieuwe labels ondersteunen Nederlands, Duits en Engels.
 
 ### Alpha 11
