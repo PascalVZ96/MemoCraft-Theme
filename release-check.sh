@@ -18,6 +18,7 @@ required=(
   memocraft-theme/theme.info
   memocraft-theme/left.cgi
   memocraft-theme/right.cgi
+  memocraft-theme/memo-dashboard.cgi
   memo-network/module.info
   memo-network/live-stats.cgi
   memo-network/activity.cgi
@@ -36,20 +37,23 @@ done
 
 tar -xzf "$ARCHIVE" -C "$TMP_DIR" -- \
   memocraft-theme/left.cgi \
+  memocraft-theme/right.cgi \
   memo-network/readiness.cgi \
   memo-network/language.cgi
 
-grep -Fq '5.0.2' "$TMP_DIR/memocraft-theme/left.cgi" || fail "Sidebar bevat niet versie 5.0.2"
+grep -Fq '5.0.3' "$TMP_DIR/memocraft-theme/left.cgi" || fail "Sidebar bevat niet versie 5.0.3"
 grep -Fq 'const dashboardUrl = "/memo-network/control-center.html";' "$TMP_DIR/memocraft-theme/left.cgi" || fail "Control Center is niet ingesteld als standaard startpagina"
-grep -Fq 'routeDefaultDashboard' "$TMP_DIR/memocraft-theme/left.cgi" || fail "Automatische Control Center-routering ontbreekt"
 grep -Fq 'stabilizeControlCenterChrome' "$TMP_DIR/memocraft-theme/left.cgi" || fail "Vaste Control Center navigatie ontbreekt"
+grep -Fq 'memoStableLabelObserver' "$TMP_DIR/memocraft-theme/left.cgi" || fail "Stable cleanup voor Alpha-labels ontbreekt"
 grep -Fq 'languageUrl = "/memo-network/language.cgi"' "$TMP_DIR/memocraft-theme/left.cgi" || fail "Webmin-taalsynchronisatie ontbreekt"
-grep -Fq "version => '5.0.2'" "$TMP_DIR/memo-network/readiness.cgi" || fail "Readiness backend bevat niet versie 5.0.2"
+grep -Fq 'Status: 302 Found' "$TMP_DIR/memocraft-theme/right.cgi" || fail "right.cgi bevat geen server-side redirect"
+grep -Fq 'Location: /memo-network/control-center.html' "$TMP_DIR/memocraft-theme/right.cgi" || fail "right.cgi opent niet direct het Control Center"
+grep -Fq "version => '5.0.3'" "$TMP_DIR/memo-network/readiness.cgi" || fail "Readiness backend bevat niet versie 5.0.3"
 grep -Fq "release_stage => 'stable'" "$TMP_DIR/memo-network/readiness.cgi" || fail "Readiness backend staat niet op stable"
 grep -Fq 'stable_verified' "$TMP_DIR/memo-network/readiness.cgi" || fail "Stable-verificatie ontbreekt"
 grep -Fq "my \$language = \$webmin_language || \$hint || 'en';" "$TMP_DIR/memo-network/language.cgi" || fail "WebminCore is niet leidend voor de taalkeuze"
 
-echo "v5.0.2 stable package check: OK"
-echo "Control Center startpagina + vaste navigatie + taalfix gecontroleerd"
+echo "v5.0.3 stable package check: OK"
+echo "Direct Control Center + stable labels + vaste navigatie + taalfix gecontroleerd"
 echo "Bestanden gecontroleerd: ${#required[@]}"
 echo "Archive: $ARCHIVE"
