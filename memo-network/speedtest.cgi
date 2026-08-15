@@ -8,6 +8,8 @@ my $CACHE_FILE = '/var/tmp/memonetwork-speedtest-v5.json';
 my $HISTORY_FILE = '/var/tmp/memonetwork-speedtest-v5-history.json';
 my $LOCK_FILE = '/tmp/memonetwork-speedtest-v5.lock';
 my $MAX_HISTORY = 90;
+my $PREFERRED_SERVER_ID = '26922';
+my $PREFERRED_SERVER_LABEL = 'toob Ltd / London / United Kingdom';
 
 sub json_reply {
     my ($payload, $status) = @_;
@@ -183,6 +185,7 @@ sub speedtest_cli_result {
         upload_mbps => sprintf('%.2f', $upload / 1_000_000) + 0,
         ping_ms => sprintf('%.2f', $ping) + 0,
         server => join(' / ', @server_parts),
+        server_id => text_value($server->{id}),
         provider => text_value($client->{isp}),
         external_ip => text_value($client->{ip}),
         backend => 'speedtest-cli',
@@ -208,11 +211,20 @@ sub ookla_result {
         upload_mbps => sprintf('%.2f', ($upload * 8) / 1_000_000) + 0,
         ping_ms => sprintf('%.2f', $ping) + 0,
         server => join(' / ', @server_parts),
+        server_id => text_value($server->{id}),
         provider => text_value($data->{isp}),
         external_ip => text_value($interface->{externalIp}),
         backend => 'ookla',
         source => $source,
         tested_at => time,
+    };
+}
+
+sub server_preference {
+    return {
+        id => $PREFERRED_SERVER_ID,
+        label => $PREFERRED_SERVER_LABEL,
+        fallback => JSON::PP::true,
     };
 }
 
@@ -229,6 +241,7 @@ if ($method eq 'GET') {
         history => \@history,
         history_limit => $MAX_HISTORY,
         scheduler => scheduler_status(),
+        server_preference => server_preference(),
         install_command => 'sudo apt install speedtest-cli -y',
     });
 }
@@ -243,24 +256,38 @@ json_reply({
 open my $lock, '>', $LOCK_FILE or json_reply({ ok => JSON::PP::false, error => 'Speedtest-lock kon niet worden geopend' }, '500 Internal Server Error');
 json_reply({ ok => JSON::PP::false, error => 'Er draait al een speedtest' }, '409 Conflict') unless flock($lock, LOCK_EX | LOCK_NB);
 
-my @command = $backend eq 'speedtest-cli'
-    ? ($binary, '--json', '--secure')
-    : ($binary, '--accept-license', '--accept-gdpr', '-f', 'json');
+my @commands = $backend eq 'speedtest-cli'
+    ? (
+        [$binary, '--server', $PREFERRED_SERVER_ID, '--json', '--secure'],
+        [$binary, '--json', '--secure'],
+      )
+    : ([$binary, '--accept-license', '--accept-gdpr', '-f', 'json']);
 
 my ($output, $exit, $pid) = ('', 1, undef);
 my $error = '';
+my $server_mode = $backend eq 'speedtest-cli' ? 'preferred' : 'automatic';
 {
     local $SIG{ALRM} = sub { die "Speedtest duurde langer dan 90 seconden\n" };
     eval {
         alarm 90;
-        $pid = open my $fh, '-|', @command;
-        die "Speedtest kon niet worden gestart\n" unless defined $pid;
-        while (my $line = <$fh>) {
-            $output .= $line;
-            die "Speedtest-uitvoer is onverwacht groot\n" if length($output) > 1_048_576;
+        for my $index (0 .. $#commands) {
+            my $command = $commands[$index];
+            $output = '';
+            $exit = 1;
+            $pid = open my $fh, '-|', @$command;
+            die "Speedtest kon niet worden gestart\n" unless defined $pid;
+            while (my $line = <$fh>) {
+                $output .= $line;
+                die "Speedtest-uitvoer is onverwacht groot\n" if length($output) > 1_048_576;
+            }
+            close $fh;
+            $exit = $? >> 8;
+            $pid = undef;
+            if ($exit == 0 && $output =~ /\S/) {
+                $server_mode = ($backend eq 'speedtest-cli' && $index > 0) ? 'fallback' : $server_mode;
+                last;
+            }
         }
-        close $fh;
-        $exit = $? >> 8;
         alarm 0;
     };
     if ($@) {
@@ -279,6 +306,8 @@ json_reply({ ok => JSON::PP::false, error => 'Speedtest-resultaat kon niet worde
 my $source = ($ENV{'QUERY_STRING'} || '') =~ /(?:^|&)_=/ ? 'manual' : 'scheduled';
 my $result = eval { $backend eq 'speedtest-cli' ? speedtest_cli_result($raw, $source) : ookla_result($raw, $source) };
 json_reply({ ok => JSON::PP::false, error => text_value($@ || 'Ongeldig speedtest-resultaat') }, '500 Internal Server Error') if $@ || ref($result) ne 'HASH';
+$result->{server_mode} = $server_mode;
+$result->{preferred_server_id} = $PREFERRED_SERVER_ID if $backend eq 'speedtest-cli';
 
 write_cache($result);
 my @history = append_history($result);
@@ -290,4 +319,5 @@ json_reply({
     history => \@history,
     history_limit => $MAX_HISTORY,
     scheduler => scheduler_status(),
+    server_preference => server_preference(),
 });
