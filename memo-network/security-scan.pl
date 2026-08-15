@@ -62,9 +62,17 @@ sub public_ipv4 {
     return 1;
 }
 
-sub run_ok {
+sub run_quiet {
     my (@cmd) = @_;
-    system(@cmd);
+    my $pid = fork();
+    return 0 unless defined $pid;
+    if ($pid == 0) {
+        open STDOUT, '>', '/dev/null';
+        open STDERR, '>', '/dev/null';
+        exec @cmd;
+        exit 127;
+    }
+    waitpid($pid, 0);
     return (($? >> 8) == 0);
 }
 
@@ -75,14 +83,13 @@ sub nft_file {
     my ($fh, $path) = tempfile('memonetwork-defense-XXXX', DIR => '/tmp', UNLINK => 1);
     print {$fh} $content;
     close $fh;
-    return run_ok($nft, '-f', $path);
+    return run_quiet($nft, '-f', $path);
 }
 
 sub ensure_nft_table {
     my $nft = -x '/usr/sbin/nft' ? '/usr/sbin/nft' : -x '/usr/bin/nft' ? '/usr/bin/nft' : '';
     return 0 unless $nft;
-    system($nft, 'list', 'table', 'inet', 'memonetwork_defense');
-    return 1 if (($? >> 8) == 0);
+    return 1 if run_quiet($nft, 'list', 'table', 'inet', 'memonetwork_defense');
     my $rules = <<'NFT';
 table inet memonetwork_defense {
   set blocked4 {
@@ -109,8 +116,7 @@ sub unblock_ip {
     return 0 unless valid_ipv4($ip);
     my $nft = -x '/usr/sbin/nft' ? '/usr/sbin/nft' : -x '/usr/bin/nft' ? '/usr/bin/nft' : '';
     return 0 unless $nft;
-    system($nft, 'list', 'table', 'inet', 'memonetwork_defense');
-    return 1 if (($? >> 8) != 0);
+    return 1 unless run_quiet($nft, 'list', 'table', 'inet', 'memonetwork_defense');
     return nft_file("delete element inet memonetwork_defense blocked4 { $ip }\n");
 }
 
