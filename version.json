@@ -1,6 +1,6 @@
 {
-  "version": "5.0.0-beta1",
+  "version": "5.0.0-rc1",
   "edition": "MemoNetwork Edition",
-  "channel": "beta",
+  "channel": "release-candidate",
   "released": "16-08-2026"
 }
