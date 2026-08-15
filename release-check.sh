@@ -30,19 +30,18 @@ required=(
 )
 
 for file in "${required[@]}"; do
-  grep -Fxq "$file" "$TMP_LIST" || fail "RC-pakket mist: $file"
+  grep -Fxq "$file" "$TMP_LIST" || fail "Stable-pakket mist: $file"
 done
 
-# Extract only the files whose contents need validation. This avoids SIGPIPE
-# from `tar -xOf | grep -q` while `set -o pipefail` is active.
 tar -xzf "$ARCHIVE" -C "$TMP_DIR" -- \
   memocraft-theme/left.cgi \
   memo-network/readiness.cgi
 
-grep -Fq '5.0.0-rc1' "$TMP_DIR/memocraft-theme/left.cgi" || fail "Sidebar bevat niet versie 5.0.0-rc1"
-grep -Fq "version => '5.0.0-rc1'" "$TMP_DIR/memo-network/readiness.cgi" || fail "Readiness backend bevat niet versie 5.0.0-rc1"
-grep -Fq 'ready_for_stable' "$TMP_DIR/memo-network/readiness.cgi" || fail "Stable readiness-check ontbreekt"
+grep -Fq '5.0.0' "$TMP_DIR/memocraft-theme/left.cgi" || fail "Sidebar bevat niet versie 5.0.0"
+grep -Fq "version => '5.0.0'" "$TMP_DIR/memo-network/readiness.cgi" || fail "Readiness backend bevat niet versie 5.0.0"
+grep -Fq "release_stage => 'stable'" "$TMP_DIR/memo-network/readiness.cgi" || fail "Readiness backend staat niet op stable"
+grep -Fq 'stable_verified' "$TMP_DIR/memo-network/readiness.cgi" || fail "Stable-verificatie ontbreekt"
 
-echo "RC1 package check: OK"
+echo "v5.0.0 stable package check: OK"
 echo "Bestanden gecontroleerd: ${#required[@]}"
 echo "Archive: $ARCHIVE"
