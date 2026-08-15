@@ -1,160 +1,165 @@
 # MemoNetwork Webmin Theme
 
-MemoNetwork is een zelfstandig Webmin-thema met een eigen serverdashboard en MemoNetwork-beheerpagina's. Het thema is gebaseerd op Webmins Framed/Gray Theme-structuur, maar wordt als aparte theme package gebouwd zodat bestaande Webmin-thema's niet hoeven te worden aangepast.
+MemoNetwork is een zelfstandig Webmin-thema en serverbeheeromgeving met een eigen **Control Center** voor dagelijkse monitoring, infrastructuur, incidenten, backups, beveiliging en diagnostiek.
 
-**Huidige stabiele versie: v4.6.3**  
-Getest met Webmin 2.653 op Ubuntu Server.
+**Huidige stabiele versie: v5.0.1**  
+Releasekanaal: **stable**  
+Getest op Ubuntu Server met Webmin.
 
-## Belangrijkste functies
+## MemoNetwork 5
 
-### MemoNetwork Dashboard
+Vanaf v5 is het **Control Center de standaard startpagina** van MemoNetwork. Het oude v4-dashboard blijft alleen als legacy/weergave beschikbaar.
 
-Het dashboard toont live informatie over de server, waaronder:
+De hoofdonderdelen van het Control Center zijn:
 
-- CPU-belasting en load average;
-- RAM-gebruik;
-- netwerkverkeer met live grafieken;
-- uptime;
-- opslaggebruik per gemount bestandssysteem;
-- aparte bewaking van `/mnt/backups`;
-- server healthscore en API-reactietijd;
-- Ubuntu-, kernel-, processor- en procesinformatie;
-- beschikbare pakketupdates;
-- waarschuwing wanneer een reboot nodig is;
-- instelbare automatische refresh.
+- **Overzicht** — centrale status, healthscore en aandachtspunten;
+- **Services** — Docker, AMP, MinIO en WireGuard;
+- **Infrastructuur** — opslag, backup-HDD en servercomponenten;
+- **Gezondheid** — gewogen Health Score en score-opbouw;
+- **Betrouwbaarheid** — uptime-inschatting, meetdekking en SLO-status;
+- **Meldingen** — centraal Notification Center;
+- **Activiteit** — server-side gebeurtenissen en historie;
+- **Incidenten** — actieve en herstelde incidenten;
+- **Readiness** — installatie- en release-self-test;
+- **Diagnostiek** — technische controle- en analysefuncties.
 
-### Meertalig: NL / DE / EN
+## Monitoring en Operations Center
 
-Vanaf v4.6 volgt MemoNetwork automatisch de taal die de ingelogde gebruiker in Webmin heeft geselecteerd.
+Het Operations Center combineert de belangrijkste signalen uit:
 
-Ondersteunde talen:
+- systeemstatus;
+- services;
+- backups;
+- beveiliging;
+- netwerk;
+- internet/speedtest.
+
+Hierdoor is direct zichtbaar of er kritieke problemen of aandachtspunten zijn en uit welke bron die komen.
+
+## Health Score & Intelligence
+
+MemoNetwork v5 berekent een servergezondheidsscore op basis van beschikbare bronnen. De score houdt onder andere rekening met:
+
+- CPU-, RAM-, schijf- en temperatuurstatus;
+- Docker, AMP, MinIO en WireGuard;
+- backup-mount en backupversheid;
+- Auto Defense / securitystatus;
+- netwerkcontrole en internetsnelheid;
+- betrouwbaarheid en meetdekking.
+
+De Intelligence-laag bewaart scorehistorie, analyseert trends en maakt waarschuwingen zichtbaar zonder automatisch services of configuratie te wijzigen.
+
+## Incident Center
+
+Incidenten worden gecorreleerd uit meerdere bronnen en hebben een lifecycle van actief naar hersteld. Monitoringfouten of time-outs lossen een bestaand incident niet onterecht op.
+
+Maintenance Mode kan worden gebruikt voor gepland onderhoud. Monitoring blijft daarbij actief, maar onderhoud wordt duidelijk als geplande situatie weergegeven.
+
+## Activity Center
+
+Het Activity Center bewaart server-side gebeurtenissen zoals:
+
+- maintenance gestart/gestopt/verlopen;
+- incident geopend/hersteld;
+- service online/offline;
+- backupstatus;
+- netwerk- en speedtestmetingen;
+- securitygebeurtenissen;
+- handmatige notities.
+
+## Reliability Center
+
+Reliability toont voor 24 uur, 7 dagen en 30 dagen onder andere:
+
+- geschatte uptime;
+- meetdekking;
+- 99% SLO-status;
+- incidentaantallen;
+- MTTR;
+- uitgesloten onderhoudstijd.
+
+Het SLO wordt pas als daadwerkelijk beoordeelbaar weergegeven wanneer voldoende meetdekking beschikbaar is.
+
+## Backups
+
+MemoNetwork bewaakt `/mnt/backups` en controleert onder andere:
+
+- of de backup-HDD correct gemount is;
+- vrije en gebruikte ruimte;
+- MinIO-status;
+- MinIO storage mapping;
+- laatste backup/scan;
+- backupversheid.
+
+## Security
+
+Het Security Center integreert MemoNetwork Auto Defense en toont onder andere:
+
+- huidige beveiligingsmodus;
+- detecties;
+- blokkades;
+- timerstatus;
+- recente security-events;
+- backendfouten.
+
+## Netwerk en internet
+
+Het Control Center bevat netwerkcontrole en speedtest-historie, waaronder:
+
+- route/interface/gateway;
+- DNS-resolvers;
+- netwerkhealthscore;
+- download/upload;
+- ping;
+- vergelijking met recente metingen.
+
+## Meertalig
+
+MemoNetwork volgt automatisch de taal van de ingelogde Webmin-gebruiker.
+
+Ondersteund:
 
 - Nederlands (`NL`);
 - Duits (`DE`);
 - Engels (`EN`).
 
-De taal geldt voor het dashboard, dynamische statistieken, meldingen, service-details, opslaginformatie, systeeminformatie, Inzichten en de MemoNetwork-interface. Wisselen tussen Webmin-talen wordt automatisch overgenomen zonder een aparte MemoNetwork-taalinstelling.
-
-Vanaf v4.6.3 is de Duitse dashboardterminologie verder aangescherpt op natuurlijker beheer- en servergebruik.
-
-### Servicebewaking
-
-Het dashboard bewaakt:
-
-- Docker;
-- AMP;
-- MinIO;
-- WireGuard.
-
-Per service zijn aanvullende live details beschikbaar.
-
-### Docker-beheer
-
-Docker-containers worden rechtstreeks in het dashboard weergegeven met onder andere:
-
-- containernaam;
-- container-ID;
-- image;
-- status/state;
-- poorten;
-- actief/gestopt.
-
-Containers kunnen vanuit het MemoNetwork-dashboard worden gestart, gestopt en herstart.
-
-### AMP
-
-AMP-instances worden automatisch gedetecteerd. Waar beschikbaar toont MemoNetwork ook module- en poortinformatie. Vanuit het dashboard kan AMP direct worden geopend.
-
-### MinIO
-
-MinIO wordt zowel als lokaal proces als Docker-container herkend. Wanneer MinIO via Docker draait worden containerstatus, ID en poorten meegenomen in de live status.
-
-### WireGuard
-
-Voor `wg0` toont het dashboard onder andere:
-
-- aantal peers;
-- public key;
-- endpoint;
-- allowed IPs;
-- laatste handshake;
-- ontvangen en verzonden data;
-- persistent keepalive.
-
-### Meldingen
-
-MemoNetwork genereert waarschuwingen voor onder andere:
-
-- backup-HDD niet correct gemount;
-- reboot vereist;
-- beschikbare systeemupdates;
-- hoge CPU-belasting;
-- hoog RAM-gebruik;
-- bijna volle opslag;
-- verhoogde temperatuur;
-- Docker, AMP, MinIO of WireGuard offline.
-
-### Inzichten
-
-Vanaf v4.5 bevat MemoNetwork een aparte **Inzichten**-pagina met extra diagnostiek:
-
-- netwerkinterfaces en IPv4-adressen;
-- linkstatus en interfacesnelheid;
-- totale RX/TX-data per interface;
-- top CPU-processen;
-- top RAM-processen;
-- mislukte systemd-units;
-- actieve gebruikerssessies;
-- luisterende netwerkpoorten;
-- boot-tijd en load average;
-- recente waarschuwingen uit `journalctl`.
-
 ## Repository-structuur
 
 ```text
-memo-network/       MemoNetwork CGI/API-pagina's
-memocraft-theme/    Webmin-theme en dashboard
-src/                eigen CSS en JavaScript
+memo-network/       MemoNetwork Control Center, CGI/API's en runtimes
+memocraft-theme/    Webmin-theme en legacy dashboard
+src/                theme CSS en JavaScript
 build.sh            bouwt het installabele Webmin-pakket
+release-check.sh    controleert het stable installatiepakket
 version.json        huidige MemoNetwork-versie
 ```
 
-Tijdens `build.sh` worden de MemoNetwork-aanpassingen in de theme-bestanden verwerkt, wordt de dashboard-taalruntime direct in `right.cgi` ingebed en wordt het volledige Webmin-theme-pakket gebouwd.
-
-## Vereisten
-
-Voor lokaal bouwen:
-
-- Linux / Ubuntu;
-- Bash;
-- Python 3;
-- Git;
-- tar + gzip.
-
-Voor alle dashboardfuncties zijn de bijbehorende services uiteraard alleen beschikbaar wanneer ze op de server zijn geïnstalleerd, bijvoorbeeld Docker, AMP, MinIO en WireGuard.
-
-## Installeren of bijwerken vanaf GitHub
-
-Op de server:
+## Installeren of bijwerken
 
 ```bash
 cd ~/MemoCraft-Theme
 
+set -e
+
 git stash push -u -m "lokale wijzigingen voor update"
+git fetch
 git switch main
-git pull
+git pull --ff-only
 
 ./build.sh
+bash ./release-check.sh
+
 sudo tar -xzf dist/memocraft-theme.wbt.gz -C /usr/share/webmin/
 ```
 
-Ververs Webmin daarna volledig. Onderaan de zijbalk staat de geïnstalleerde **MemoNetwork Edition**-versie en wordt gecontroleerd of `main` een nieuwere versie bevat.
+Open Webmin daarna opnieuw en voer eventueel een harde refresh uit (`Ctrl+F5`).
 
 ## Alleen bouwen
 
 ```bash
-chmod +x build.sh
+chmod +x build.sh release-check.sh
 ./build.sh
+bash ./release-check.sh
 ```
 
 Het pakket wordt gemaakt als:
@@ -163,20 +168,19 @@ Het pakket wordt gemaakt als:
 dist/memocraft-theme.wbt.gz
 ```
 
-`build.sh` controleert onder andere of de vereiste MemoNetwork- en Webmin-bestanden aanwezig zijn voordat het pakket als gereed wordt gemeld.
+## Releasebeleid
 
-## Ontwikkelworkflow
-
-`main` is bedoeld als stabiele branch. Grotere releases worden eerst op een aparte versiebranch gebouwd en getest. Pas nadat de release op de server goed werkt, wordt die branch naar `main` doorgeschoven en wordt `version.json` op de definitieve releaseversie gezet.
-
-Dit maakt het mogelijk om grotere dashboardupdates te testen zonder de laatst werkende versie op `main` direct te vervangen.
+- `main` bevat de huidige stabiele MemoNetwork-release.
+- Grote nieuwe versies worden eerst op een aparte ontwikkelbranch gebouwd en getest.
+- Bugfixes voor een stabiele versie krijgen een patchversie, bijvoorbeeld `5.0.1`.
+- Nieuwe grote functionaliteit wordt niet meer aan een afgeronde major toegevoegd zodra de volgende major in ontwikkeling gaat.
 
 ## Veiligheid
 
-Beheeracties zoals reboot en Docker start/stop/restart lopen via MemoNetwork CGI-endpoints en accepteren alleen de daarvoor bedoelde dashboard-POST-aanvragen. Container-namen en acties worden aan de serverkant gevalideerd voordat een opdracht wordt uitgevoerd.
+Beheeracties lopen via gecontroleerde MemoNetwork CGI-endpoints. Acties en invoer worden server-side gevalideerd. Monitoring-, Intelligence-, Readiness- en Reliability-functies zijn primair observerend en voeren niet zelfstandig destructieve reparaties uit.
 
-Omdat het dashboard beheerrechten kan uitvoeren, hoort Webmin alleen via een vertrouwde HTTPS-verbinding bereikbaar te zijn en moet toegang tot Webmin goed worden afgeschermd.
+Omdat Webmin beheerrechten heeft, hoort het alleen via een vertrouwde HTTPS-verbinding bereikbaar te zijn en goed te worden afgeschermd.
 
 ## Naamgeving
 
-De repository heet historisch **MemoCraft-Theme**, maar de actieve branding en het dashboard heten **MemoNetwork** / **MemoNetwork Edition**.
+De repository heet historisch **MemoCraft-Theme**, maar de actieve branding en interface heten **MemoNetwork** / **MemoNetwork Edition**.
