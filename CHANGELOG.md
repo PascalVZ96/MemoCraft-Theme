@@ -4,6 +4,19 @@
 
 De volgende grote MemoNetwork-release. Ontwikkeling vindt plaats op de aparte `v5` branch totdat de release stabiel genoeg is om naar `main` te gaan.
 
+### Alpha 11
+
+- Het tabblad **Diagnostiek** heeft nu een geïntegreerde netwerkcontrole voor route, gateway, internetbereikbaarheid, DNS, packet loss en latency.
+- De netwerkcontrole toont een compacte netwerkscore van 0–100 en markeert direct of aandacht nodig is.
+- Standaardinterface, gateway, bron-IP en actieve nameservers worden automatisch gedetecteerd.
+- Internetbereikbaarheid wordt gemeten met een vast diagnostisch doel; DNS-resolutie gebruikt eveneens een vast doel en accepteert geen vrije hostinvoer.
+- Gateway- en internetmetingen tonen latency en packet loss afzonderlijk.
+- De laatste netwerkcontrole wordt server-side bewaard en blijft zichtbaar na opnieuw openen van Webmin.
+- De controle start alleen handmatig en gebruikt een POST-only MemoNetwork-endpoint met requestheader, lock tegen dubbele controles en timeout.
+- Het nieuwe netwerkpaneel wordt automatisch opnieuw ingevoegd wanneer het bestaande live Diagnostiek-scherm ververst.
+- Netwerkdiagnostiek ondersteunt Nederlands, Duits en Engels.
+- De v5-runtime-loader is opgeschoond zodat Services, Diagnostiek, Infrastructuur, Speedtest en Netwerkcontrole via één consistente loader worden geladen.
+
 ### Alpha 10
 
 - In het v5-tabblad **Infrastructuur** is een volledig geïntegreerde internet-speedtest toegevoegd.
