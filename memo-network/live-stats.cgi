@@ -288,12 +288,23 @@ my ($idle2, $total2) = cpu_sample();
 my ($rx2, $tx2) = network_sample();
 
 my $delta = $total2 - $total1;
-my $cpu = $delta > 0 ? 100 * (1 - (($idle2 - $idle1) / $delta)) : 0;
-$cpu = 0 if $cpu < 0;
-$cpu = 100 if $cpu > 100;
+my $cpu_instant = $delta > 0 ? 100 * (1 - (($idle2 - $idle1) / $delta)) : 0;
+$cpu_instant = 0 if $cpu_instant < 0;
+$cpu_instant = 100 if $cpu_instant > 100;
 
 my ($ram_used, $ram_total) = memory_stats();
 my ($load1, $load5, $load15) = load_stats();
+my $cpu_cores = cpu_cores();
+my $cpu_sustained = $cpu_cores > 0 ? ($load5 / $cpu_cores) * 100 : $cpu_instant;
+$cpu_sustained = 0 if $cpu_sustained < 0;
+$cpu_sustained = 100 if $cpu_sustained > 100;
+my $cpu = $cpu_instant;
+my $cpu_spike_filtered = 0;
+if ($cpu_instant >= 90 && $cpu_sustained < 90) {
+    $cpu = $cpu_sustained;
+    $cpu_spike_filtered = 1;
+}
+
 my ($docker_running, $docker_total, $docker_items, $minio_container) = docker_stats();
 my ($amp_running, $amp_total, $amp_items) = amp_stats();
 my $wg = wireguard_stats();
@@ -340,7 +351,7 @@ my @alerts;
 add_alert(\@alerts, 'critical', 'backup_mount', 'Backup HDD niet gemount', '/mnt/backups staat niet op een apart bestandssysteem. Backups kunnen op de systeemschijf terechtkomen.', '/mount/index.cgi', 'Schijven controleren') unless defined $backup_disk;
 add_alert(\@alerts, 'warning', 'reboot', 'Herstart vereist', 'Ubuntu meldt dat een herstart nodig is om wijzigingen volledig toe te passen.', '/init/index.cgi', 'Herstartbeheer') if $reboot_required;
 add_alert(\@alerts, 'info', 'updates', "$updates pakketupdate" . ($updates == 1 ? '' : 's') . ' beschikbaar', 'Er zijn systeem- of beveiligingsupdates beschikbaar.', '/package-updates/index.cgi', 'Updates openen') if $updates > 0;
-add_alert(\@alerts, 'critical', 'cpu', 'CPU-belasting zeer hoog', sprintf('De actuele CPU-belasting is %.1f%%.', $cpu), '/memo-network/processes.cgi', 'Processen bekijken') if $cpu >= 90;
+add_alert(\@alerts, 'critical', 'cpu', 'CPU-belasting zeer hoog', sprintf('De aanhoudende CPU-belasting is %.1f%% (moment %.1f%%).', $cpu, $cpu_instant), '/memo-network/processes.cgi', 'Processen bekijken') if $cpu >= 90;
 add_alert(\@alerts, 'warning', 'ram', 'Geheugengebruik hoog', sprintf('Het geheugengebruik is %.1f%%.', $ram_percent), '/memo-network/system-info.cgi', 'Systeeminfo') if $ram_percent >= 90;
 add_alert(\@alerts, 'warning', 'disk', 'Opslag bijna vol', sprintf('Een bestandssysteem is %.1f%% gevuld.', $highest_disk), '/mount/index.cgi', 'Schijven bekijken') if $highest_disk >= 90;
 add_alert(\@alerts, 'warning', 'temperature', 'Temperatuur verhoogd', "De gemeten temperatuur is ${temp}°C.", '/memo-network/system-info.cgi', 'Systeeminfo') if defined($temp) && $temp >= 80;
@@ -350,8 +361,11 @@ add_alert(\@alerts, 'warning', 'minio_offline', 'MinIO offline', 'De S3-opslagse
 add_alert(\@alerts, 'warning', 'wireguard_offline', 'WireGuard offline', 'De wg0-interface is niet beschikbaar.', '/net/index.cgi', 'Netwerk bekijken') unless $wireguard_online;
 
 my $payload = {
-    api_version => 4.1,
+    api_version => 4.2,
     cpu_percent => sprintf('%.1f', $cpu) + 0,
+    cpu_instant_percent => sprintf('%.1f', $cpu_instant) + 0,
+    cpu_sustained_percent => sprintf('%.1f', $cpu_sustained) + 0,
+    cpu_spike_filtered => $cpu_spike_filtered ? JSON::PP::true : JSON::PP::false,
     ram_used_gib => sprintf('%.2f', $ram_used / 1048576) + 0,
     ram_total_gib => sprintf('%.2f', $ram_total / 1048576) + 0,
     network_rx_kib_s => sprintf('%.1f', $rx) + 0,
@@ -367,7 +381,7 @@ my $payload = {
         os => os_name(),
         kernel => slurp_first('/proc/sys/kernel/osrelease'),
         cpu => cpu_name(),
-        cpu_cores => cpu_cores(),
+        cpu_cores => $cpu_cores,
         uptime_seconds => $uptime_seconds,
         processes => $processes,
         temperature_c => defined($temp) ? $temp : JSON::PP::null,
