@@ -1,1 +1,0 @@
-network-check.cgi must remain executable in packaged builds.
