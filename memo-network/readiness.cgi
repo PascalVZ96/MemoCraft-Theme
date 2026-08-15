@@ -132,7 +132,7 @@ my $ready_for_stable = ($fail == 0 && $warn == 0) ? JSON::PP::true : JSON::PP::f
 
 reply_json({
     ok => JSON::PP::true,
-    version => '5.0.1',
+    version => '5.0.2',
     release_stage => 'stable',
     generated_at => time,
     ready_for_rc => $ready_for_rc,
