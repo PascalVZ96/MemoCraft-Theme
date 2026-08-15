@@ -1,6 +1,6 @@
 (() => {
   const dashboardUrl = "/memo-network/control-center.html";
-  const installedVersion = "5.0.2";
+  const installedVersion = "5.0.3";
   const releaseDate = "16-08-2026";
   const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
   const i18nUrl = "/memocraft-theme/memo-i18n.js";
@@ -221,6 +221,24 @@
   const stabilizeControlCenterChrome = (doc) => {
     doc.querySelector('.pill.dev')?.remove();
     doc.querySelector('a[data-i18n="oldDashboard"]')?.remove();
+
+    const cleanDevelopmentLabels = () => {
+      doc.querySelectorAll('small').forEach((label) => {
+        const current = String(label.textContent || '');
+        const cleaned = current.replace(/^(\s*)Alpha\s+\d+\s*·\s*/i, '$1');
+        if (cleaned !== current) label.textContent = cleaned;
+      });
+    };
+    cleanDevelopmentLabels();
+
+    if (doc.body && doc.documentElement.dataset.memoStableLabelObserver !== '1') {
+      doc.documentElement.dataset.memoStableLabelObserver = '1';
+      const Observer = doc.defaultView?.MutationObserver;
+      if (Observer) {
+        const observer = new Observer(() => cleanDevelopmentLabels());
+        observer.observe(doc.body, {subtree:true, childList:true, characterData:true});
+      }
+    }
 
     if (!doc.getElementById('memo-v5-stable-nav-order')) {
       const style = doc.createElement('style');
