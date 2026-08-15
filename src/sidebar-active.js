@@ -1,6 +1,6 @@
 (() => {
-  const dashboardUrl = "/right.cgi";
-  const installedVersion = "5.0.0";
+  const dashboardUrl = "/memo-network/control-center.html";
+  const installedVersion = "5.0.1";
   const releaseDate = "16-08-2026";
   const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/v5/version.json";
   const i18nUrl = "/memocraft-theme/memo-i18n.js";
@@ -125,6 +125,18 @@
     return null;
   };
 
+  const routeDefaultDashboard = () => {
+    try {
+      for (const frame of Array.from(parent.frames)) {
+        if (frame === window) continue;
+        if (String(frame.location?.pathname || '') !== '/right.cgi') continue;
+        frame.location.replace(`${dashboardUrl}?v=${encodeURIComponent(installedVersion)}`);
+        return true;
+      }
+    } catch (_error) {}
+    return false;
+  };
+
   const openDashboard = (event) => {
     if (event) event.preventDefault();
     try {
@@ -143,7 +155,7 @@
     brand.setAttribute('target', 'right');
     brand.setAttribute('role', 'link');
     brand.setAttribute('tabindex', '0');
-    brand.setAttribute('aria-label', 'Ga naar MemoNetwork Dashboard');
+    brand.setAttribute('aria-label', 'Ga naar MemoNetwork Control Center');
     brand.addEventListener('click', openDashboard);
     brand.addEventListener('keydown', (event) => {
       if (event.key === 'Enter' || event.key === ' ') {
@@ -172,9 +184,9 @@
     if (actions && !actions.querySelector('[data-memo-v5="1"]')) {
       const link = dashboard.createElement('a');
       link.className = 'quick-btn';
-      link.href = `/memo-network/control-center.html?v=${encodeURIComponent(installedVersion)}`;
+      link.href = dashboardUrl;
       link.dataset.memoV5 = '1';
-      link.textContent = 'Control Center v5';
+      link.textContent = 'Control Center';
       link.style.borderColor = '#6d5ca8';
       link.style.color = '#d8c8ff';
       actions.appendChild(link);
@@ -298,6 +310,7 @@
     ensureI18n();
     setupBrand();
     setupVersionFooter();
+    if (routeDefaultDashboard()) return;
     setupDashboardLinks();
     setupV5ControlCenter();
     if (i18nLoaded || window.MemoNetworkI18n) window.MemoNetworkI18n?.refresh?.();
