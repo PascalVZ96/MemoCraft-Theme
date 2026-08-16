@@ -26,6 +26,7 @@ required=(
   memo-network/intelligence.cgi
   memo-network/readiness.cgi
   memo-network/language.cgi
+  memo-network/legacy-dashboard.cgi
   memo-network/control-center-healthscore.js
   memo-network/control-center-intelligence.js
   memo-network/control-center-readiness.js
@@ -39,7 +40,8 @@ tar -xzf "$ARCHIVE" -C "$TMP_DIR" -- \
   memocraft-theme/left.cgi \
   memocraft-theme/right.cgi \
   memo-network/readiness.cgi \
-  memo-network/language.cgi
+  memo-network/language.cgi \
+  memo-network/legacy-dashboard.cgi
 
 grep -Fq '5.0.3' "$TMP_DIR/memocraft-theme/left.cgi" || fail "Sidebar bevat niet versie 5.0.3"
 grep -Fq 'const dashboardUrl = "/memo-network/control-center.html";' "$TMP_DIR/memocraft-theme/left.cgi" || fail "Control Center is niet ingesteld als standaard startpagina"
@@ -52,8 +54,13 @@ grep -Fq "version => '5.0.3'" "$TMP_DIR/memo-network/readiness.cgi" || fail "Rea
 grep -Fq "release_stage => 'stable'" "$TMP_DIR/memo-network/readiness.cgi" || fail "Readiness backend staat niet op stable"
 grep -Fq 'stable_verified' "$TMP_DIR/memo-network/readiness.cgi" || fail "Stable-verificatie ontbreekt"
 grep -Fq "my \$language = \$webmin_language || \$hint || 'en';" "$TMP_DIR/memo-network/language.cgi" || fail "WebminCore is niet leidend voor de taalkeuze"
+grep -Fq "my \$source = '/usr/share/webmin/memocraft-theme/memo-dashboard.cgi';" "$TMP_DIR/memo-network/legacy-dashboard.cgi" || fail "Legacy-dashboard leest niet uit de bewaarde v4-bron"
+grep -Fq '/memo-network/live-stats.cgi' "$TMP_DIR/memo-network/legacy-dashboard.cgi" || fail "Legacy-dashboard gebruikt niet de actuele live-stats API"
+if grep -Fq "exec '/usr/bin/perl'" "$TMP_DIR/memo-network/legacy-dashboard.cgi"; then
+  fail "Legacy-dashboard gebruikt nog de onveilige exec-wrapper"
+fi
 
 echo "v5.0.3 stable package check: OK"
-echo "Direct Control Center + stable labels + vaste navigatie + taalfix gecontroleerd"
+echo "Direct Control Center + stable labels + taalfix + veilige legacy-route gecontroleerd"
 echo "Bestanden gecontroleerd: ${#required[@]}"
 echo "Archive: $ARCHIVE"
