@@ -43,6 +43,7 @@ check(\@checks,
 my @cgi = qw(
     live-stats.cgi backup-health.cgi security.cgi network-check.cgi speedtest.cgi
     reliability.cgi maintenance.cgi activity.cgi intelligence.cgi readiness.cgi
+    legacy-dashboard.cgi
 );
 my @missing_cgi;
 my @not_exec;
