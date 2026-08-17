@@ -2,7 +2,7 @@
   const dashboardUrl = "/memo-network/control-center.html";
   const installedVersion = "5.0.3";
   const releaseDate = "16-08-2026";
-  const versionUrl = "https://raw.githubusercontent.com/PascalVZ96/MemoCraft-Theme/main/version.json";
+  const versionUrl = "/memo-network/version-check.cgi";
   const i18nUrl = "/memocraft-theme/memo-i18n.js";
   const languageUrl = "/memo-network/language.cgi";
   let i18nLoading = false;
