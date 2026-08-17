@@ -127,6 +127,33 @@ sub run_capture {
     return ($output, $? >> 8);
 }
 
+sub run_speedtest_command {
+    my (@command) = @_;
+    my ($output, $exit, $pid) = ('', 1, undef);
+    my $error = '';
+    {
+        local $SIG{ALRM} = sub { die "Speedtest duurde langer dan 90 seconden\n" };
+        eval {
+            alarm 90;
+            $pid = open my $fh, '-|', @command;
+            die "Speedtest kon niet worden gestart\n" unless defined $pid;
+            while (my $line = <$fh>) {
+                $output .= $line;
+                die "Speedtest-uitvoer is onverwacht groot\n" if length($output) > 1_048_576;
+            }
+            close $fh;
+            $exit = $? >> 8;
+            alarm 0;
+        };
+        if ($@) {
+            $error = $@;
+            alarm 0;
+            kill 'TERM', $pid if defined($pid) && $pid > 0;
+        }
+    }
+    return ($output, $exit, $error);
+}
+
 sub scheduler_status {
     my $systemctl = -x '/usr/bin/systemctl' ? '/usr/bin/systemctl' : -x '/bin/systemctl' ? '/bin/systemctl' : '';
     my @unit_paths = (
@@ -222,7 +249,7 @@ sub server_preference {
     return {
         id => $PREFERRED_SERVER_ID,
         label => $PREFERRED_SERVER_LABEL,
-        fallback => JSON::PP::false,
+        fallback => JSON::PP::true,
     };
 }
 
@@ -258,40 +285,26 @@ my @command = $backend eq 'speedtest-cli'
     ? ($binary, '--server', $PREFERRED_SERVER_ID, '--json')
     : ($binary, '--accept-license', '--accept-gdpr', '-f', 'json');
 
-my ($output, $exit, $pid) = ('', 1, undef);
-my $error = '';
-{
-    local $SIG{ALRM} = sub { die "Speedtest duurde langer dan 90 seconden\n" };
-    eval {
-        alarm 90;
-        $pid = open my $fh, '-|', @command;
-        die "Speedtest kon niet worden gestart\n" unless defined $pid;
-        while (my $line = <$fh>) {
-            $output .= $line;
-            die "Speedtest-uitvoer is onverwacht groot\n" if length($output) > 1_048_576;
-        }
-        close $fh;
-        $exit = $? >> 8;
-        alarm 0;
-    };
-    if ($@) {
-        $error = $@;
-        alarm 0;
-        kill 'TERM', $pid if defined($pid) && $pid > 0;
+my ($output, $exit, $error) = run_speedtest_command(@command);
+my $used_fallback = JSON::PP::false;
+
+if ($backend eq 'speedtest-cli' && ($error || $exit != 0)) {
+    $used_fallback = JSON::PP::true;
+    ($output, $exit, $error) = run_speedtest_command($binary, '--json');
+    if (!$error && $exit != 0) {
+        $error = "Vaste speedtestserver $PREFERRED_SERVER_ID was niet beschikbaar en automatische fallback mislukte (foutcode $exit)\n";
     }
 }
-
-if (!$error && $exit != 0) {
-    $error = $backend eq 'speedtest-cli'
-        ? "Vaste speedtestserver $PREFERRED_SERVER_ID kon niet worden gebruikt (foutcode $exit)\n"
-        : "Speedtest eindigde met foutcode $exit\n";
+elsif (!$error && $exit != 0) {
+    $error = "Speedtest eindigde met foutcode $exit\n";
 }
+
 json_reply({ ok => JSON::PP::false, error => text_value($error) }, '500 Internal Server Error') if $error;
 
 my $raw = eval { decode_json($output) };
 json_reply({ ok => JSON::PP::false, error => 'Speedtest-resultaat kon niet worden gelezen' }, '500 Internal Server Error') if $@ || ref($raw) ne 'HASH';
 
-if ($backend eq 'speedtest-cli') {
+if ($backend eq 'speedtest-cli' && !$used_fallback) {
     my $server = ref($raw->{server}) eq 'HASH' ? $raw->{server} : {};
     my $actual_server_id = text_value($server->{id});
     json_reply({
@@ -303,8 +316,16 @@ if ($backend eq 'speedtest-cli') {
 my $source = ($ENV{'QUERY_STRING'} || '') =~ /(?:^|&)_=/ ? 'manual' : 'scheduled';
 my $result = eval { $backend eq 'speedtest-cli' ? speedtest_cli_result($raw, $source) : ookla_result($raw, $source) };
 json_reply({ ok => JSON::PP::false, error => text_value($@ || 'Ongeldig speedtest-resultaat') }, '500 Internal Server Error') if $@ || ref($result) ne 'HASH';
-$result->{server_mode} = $backend eq 'speedtest-cli' ? 'preferred' : 'automatic';
-$result->{preferred_server_id} = $PREFERRED_SERVER_ID if $backend eq 'speedtest-cli';
+
+if ($backend eq 'speedtest-cli') {
+    my $server = ref($raw->{server}) eq 'HASH' ? $raw->{server} : {};
+    $result->{server_mode} = $used_fallback ? 'automatic-fallback' : 'preferred';
+    $result->{preferred_server_id} = $PREFERRED_SERVER_ID;
+    $result->{selected_server_id} = text_value($server->{id});
+    $result->{fallback_used} = $used_fallback;
+} else {
+    $result->{server_mode} = 'automatic';
+}
 
 write_cache($result);
 my @history = append_history($result);
